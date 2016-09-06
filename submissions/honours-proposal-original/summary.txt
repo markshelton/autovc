@@ -1,0 +1,5 @@
+Title:	A Supervised Approach to Predicting the Acquisition of Startups in the Private Markets
+Name:	Mark Shelton
+Student No:	21151978
+Supervisors:	Professor Melinda Hodkiewicz	Dr Tim French
+Summary: High-growth technology companies (startups) are staying in the private markets longer to retain their flexibility. This trend has two key implications: the balance of value creation is shifting to the private markets, and Mergers and Acquisitions (M&A) are becoming more common liquidity events. M&A prediction is a desirable but challenging task in the private markets where there is a lack of publicly-available financial information. We aim to produce a supervised learning model that will accurately predict the acquisition of startups in the private markets. We will build on a study by Xiang and colleagues (2012) that used features from CrunchBase profiles and TechCrunch news articles to predict startup acquisition. We will extend that study by introducing new features and classification techniques. This study will improve our understanding of the determinants of startup acquisition which is valuable to startup founders, investors and potential acquirers.

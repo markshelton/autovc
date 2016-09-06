@@ -1,0 +1,137 @@
+\documentclass[12pt, a4paper]{article}
+\setlength{\oddsidemargin}{0.5cm}
+\setlength{\evensidemargin}{0.5cm}
+\setlength{\topmargin}{-1.6cm}
+\setlength{\leftmargin}{0.5cm}
+\setlength{\rightmargin}{0.5cm}
+\setlength{\textheight}{24.00cm}
+\setlength{\textwidth}{15.00cm}
+\parindent 0pt
+\parskip 5pt
+\pagestyle{plain}
+
+\usepackage{booktabs}
+
+\title{Research Proposal: Predicting Startup Outcomes}
+\author{W.M.R. Shelton}
+\date{29 August 2016}
+
+\newcommand{\namelistlabel}[1]{\mbox{#1}\hfil}
+\newenvironment{namelist}[1]{%1
+\begin{list}{}
+    {
+        \let\makelabel\namelistlabel
+        \settowidth{\labelwidth}{#1}
+        \setlength{\leftmargin}{1.1\labelwidth}
+    }
+  }{%1
+\end{list}}
+
+\begin{document}
+\maketitle
+
+\begin{namelist}{xxxxxxxxxxxx}
+\item[{\bf Title:}]
+	Research Proposal: Predicting Startup Outcomes
+\item[{\bf Author:}]
+	W.M.R. Shelton
+\item[{\bf Supervisors:}]
+	Professor Melinda Hodkiewicz, Dr Tim French
+\item[{\bf Degree:}]
+	BPhil(Hons) (24 point project)
+\end{namelist}
+
+\section*{Background}
+%In this section you should give some background to your research area. What is the problem you are tackling, and why is it worthwhile solving? Who has already done some work in this area, and what have they achieved?
+
+High-growth technology companies (startups) are turning away from the public markets. Amazon went public in 1997, just two years after its first round of institutional financing, at a market cap of \$440M. Contrast that with Uber, which remains private six years on and recently raised \$3.5B at a massive \$59B valuation. Time to Initial Public Offering (IPO) for Venture Capital (VC)-backed startups has more than doubled over the past 20 years while VC-backed startups pursuing an IPO has plummeted \cite{nvca2016}.
+
+One explanation for why startups are staying private for longer is the accelerating nature of global business. Startups, particularly those backed by VC firms, are expected to scale fast and require frequent rounds of fundraising coupled with centralized, quick decision making. Such flexibility is not afforded to public companies, due to strict reporting and compliance requirements \cite{wies2015}.
+
+Why does this waiting game matter? Principally, because it shifts value creation to the private markets. To put things in perspective, Microsoft’s market cap grew 500-fold following its IPO, but for Facebook to do the same now its valuation would have to exceed the global equity market. VC funding for late-stage startups is approaching all-time highs as investors are entering the private markets to seek higher returns \cite{nvca2016}.
+
+Merger and Acquisitions (M\&As) have surpassed IPOs as the most common liquidity event for startup founders and investors. In 2015, five times as many US-based VC-backed startups were acquired compared to those that went public through an IPO \cite{nvca2016}. Accordingly, startup founders and investors may be interested in predicting which startups are likely to be acquired and by whom. However, M\&A prediction is a challenging task in the private markets where there is a lack of publicly-available information.
+
+M\&A prediction techniques have been proposed in the literature but often share a few weaknesses for the application of startups in the private markets. A trade-off occurs: previous work on the private markets has used relatively small data sets \cite{wei2008, aliyrkko2005}, whereas work with reasonably large data sets has been in the domain of the public markets (CITATIONS NEEDED).
+
+Xiang and colleagues \cite{xiang2012} addressed some of these challenges by mining CrunchBase profiles and TechCrunch news articles to predict the acquisition of private startups. Their dataset was larger than previous studies: 38,617 TechCrunch news articles mentioning 5,075 companies, and a total of 59,631 CrunchBase profiles. Their approach achieved a True Positive rate of between 60-79.8\% and a False Positive rate of between 0-8.3\%.
+
+There are limitations to Xiang and colleagues' study \cite{xiang2012}: the CrunchBase dataset they studied was sparse and relatively small in 2012, only a few common binary classification techniques were tested, and their approach didn't consider IPOs or bankruptcies as potential outcomes. In addition, it is unclear how robust their classifiers are through time. The study could be extended by applying the topic modelling approach to other text corpora such as patent filings, or by attempting a social network link prediction model.
+
+\section*{Aim}
+%Now state explicitly the hypothesis you aim to test. Make references to the items listed in the Reference section that back up your arguments for why this is a reasonable hypothesis to test, for example the work of Knuth~\cite{knuth}. Explain what you expect will be accomplished by undertaking this particular project.  Moreover, is it likely to have any other applications?
+
+This study will produce a supervised learning model for predicting the acquisition of startups in the private markets. Our aim is to replicate and extend the previous study by Xiang and colleagues (2012) \cite{xiang2012}, adding a number of new features and classification techniques.
+
+\begin{description}
+\item{Hypothesis 1} Xiang et al. (2012) results can be replicated
+\item{Hypothesis 2} New binary classification techniques can improve results
+\item{Hypothesis 3} Additional factual features improve results
+\item{Hypothesis 4} Multiclass classification improves results
+\item{Hypothesis 5}
+\item{Hypothesis 6}
+\end{description}
+
+If successful, this study has the potential to significantly improve our understanding of the determinants of startup outcomes in the private markets. The system devised by this study also has the potential to de-risk venture capital and encourage greater investment in early-stage startups.
+
+\section*{Method}
+%In this section you should outline how you intend to go about accomplishing the aims you have set in the previous section. Try to break your grand aims down into small, achievable tasks.
+
+\begin{enumerate}
+
+\item Replicate study by Xiang et al. (2012)
+
+
+
+\item Extend binary classification techniques
+\item Extend factual features
+\item Extend to multiclass classification
+\item Extend to longitudinal study
+\item Extend topic model processing techniques
+\item Extend topic and network features
+
+\end{enumerate}
+
+\subsection*{Timeline}
+%Try to estimate how long you will spend on each task, and draw up a timetable for each sub-task.
+
+Please see below (Figure \ref{tab:timeline}) for a schematic of the proposed methodology.
+
+\begin{table}[!hbp]
+  \centering
+    \begin{tabular}{l|c|r}
+    \toprule
+    \textbf{Date} & \textbf{Sem:Wk} & \textbf{Task} \\
+    \midrule
+    Fri 19 August & {2:03} & Draft proposal due \\
+    29 Aug - 02 Sep & {2:05} & Proposal defence to research group \\
+    Fri 30 September & {2:SB} & Draft literature review due \\
+    Fri 28 October & {2:12} & Revised proposal due \\
+    Fri 28 October & {2:12} & Literature review due \\
+    Fri 28 April & {1:08} & Draft dissertation due \\
+    Fri 12 May & {1:10} & Seminar title and abstract due \\
+    Mon 29 May & {1:13} & Final dissertation due \\
+    Fri 02 June & {1:13} & Poster due \\
+    29 May - 02 June & {1:13} & Seminar \\
+    Mon 26 June & {1:17} & Corrected dissertation due \\
+    \bottomrule
+    \end{tabular}%
+  \label{tab:timeline}%
+\end{table}%
+
+\subsection*{Software and Hardware Requirements}
+%Outline what your specific requirements will be with regard to software and hardware, but note that any special requests might need to be approved by your supervisor and the Head of Department.
+
+This project will be developed primarily in Python using scikit-learn, a free open-source machine learning library. MySQL may be used to prepare datasets for processing. The system will be hosted on a public compute cloud, likely Amazon Web Services. A free academic license for CrunchBase has been requested.
+
+\begin{thebibliography}{9}
+\bibitem{nvca2016} {\em National Venture Capital Association (NVCA) Yearbook}. Thompson Reuters, 2016.
+\bibitem{wies2015} Wies, Simone, and Christine Moorman. {"Going public: how stock market listing changes firm innovation behavior."} {\em Journal of Marketing Research} 52.5 (2015): 694-709.
+\bibitem{xiang2012} Xiang, Guang, et al. {"A Supervised Approach to Predict Company Acquisition with Factual and Topic Features Using Profiles and News Articles on TechCrunch."} {\em ICWSM}. 2012.
+\bibitem{wei2008} Wei, Chih-Ping, Yu-Syun Jiang, and Chin-Sheng Yang. {"Patent analysis for supporting merger and acquisition (m&a) prediction: A data mining approach."} {\em Workshop on E-Business}. Springer Berlin Heidelberg, 2008.
+\bibitem{aliyrkko2005}
+\end{thebibliography}
+
+
+\end{document}
+
