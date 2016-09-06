@@ -1,0 +1,40 @@
+Header:
+
+Topic: Honours Update 1
+Date/Time: Monday 3:30PM - 4:15PM , 05 September 2016
+Location: Tim French's Office, CSSE, UWA
+
+Attendees:
+-Prof Melinda Hodkiewicz
+-Dr Tim French
+-Mark Shelton
+
+Attachments:
+-Research Proposal (submitted)
+-Research Summary (submitted)
+-Annotated Bibliography (WIP)
+-2012-Xiang paper (reference)
+-2016-Beckwith paper (reference)
+
+Body:
+
+Updates:
+-Submitted research proposal & summary
+-Started writing annotated bibliography
+-Requested API & snapshot access from CrunchBase
+-Requested info & corpus from authors of 2012-Xiang
+
+Questions:
+-What did we think of the research proposal rationale/topic?
+-How do we think the literature review should be structured?
+-Are the method and timeline realistic? Should we focus more?
+-How do we test the reliability of our classifiers?
+-Do we need another co-supervisor? CSSE / Comms / Biz / Stats?
+-Shall we host our software on AWS or on-premises?
+-How shall we share information? Google Drive / DropBox? 
+-Shall we cc/bcc in co-supervisors to emails?
+
+Actions:
+-Continue developing annotated bibiliography
+-Create structure for literature review
+-If data available, start exploring / wrangling
