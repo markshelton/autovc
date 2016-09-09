@@ -1,0 +1,5 @@
+2013-Dec-xx_mysql.tar.gz - https://data.crunchbase.com/docs/2013-snapshot
+2014-May-xx_csv.zip - http://www0.cs.ucl.ac.uk/staff/w.zhang/cb.html
+2013-Oct-xx_csv.zip - https://github.com/datahoarder/crunchbase-october-2013
+2015-Dec-04_csv.zip - https://github.com/notpeter/crunchbase-data
+2016-Sep-09_csv.tar.gz - https://data.crunchbase.com/docs/daily-csv-export
