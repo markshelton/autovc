@@ -1,0 +1,109 @@
+2016-Sep-11_xls
+
+* funded-companies - 111,745
+
+company_name
+domain
+country_code
+state_code
+region
+city
+status
+short_description
+category_list
+category_group_list
+ employee_count
+funding_rounds
+ funding_total_usd
+founded_on
+first_funding_on
+last_funding_on
+closed_on
+email
+phone
+cb_url
+twitter_url
+facebook_url
+uuid
+
+* rounds - 142,929
+
+company_name
+country_code
+state_code
+region
+city
+company_category_list
+funding_round_type
+funding_round_code
+announced_on
+ raised_amount_usd
+ raised_amount
+raised_amount_currency_code
+post_money_valuation_usd
+post_money_valuation
+post_money_currency_code
+investor_count
+investor_names
+cb_url
+company_uuid
+funding_round_uuid
+funding_round_uuid
+
+* investors - 47,612
+
+investor_name
+domain
+country_code
+state_code
+region
+city
+investor_type
+ investment_count
+founded_on
+closed_on
+cb_url
+twitter_url
+facebook_url
+uuid
+
+* acquisitions - 27,900
+
+acquiree_name
+acquiree_country_code
+state_code
+acquiree_region
+acquiree_city
+acquirer_name
+acquirer_country_code
+acquirer_state_code
+acquirer_region
+acquirer_city
+acquired_on
+ price_usd
+ price
+price_currency_code
+acquiree_cb_url
+acquirer_cb_url
+acquiree_uuid
+acquirer_uuid
+acquisition_uuid
+
+* ipos - 7,001
+
+name
+country_code
+company_state_code
+region
+city
+stock_exchange_symbol
+stock_symbol
+went_public_on
+ price_usd
+ price
+price_currency_code
+ cb_url
+ ipo_uuid
+uuid
+
+
