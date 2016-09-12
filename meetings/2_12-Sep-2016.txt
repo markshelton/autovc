@@ -1,0 +1,34 @@
+Header:
+
+Topic: Honours Update 2
+Date/Time: Monday 3:30PM - 4:15PM , 12 September 2016
+Location: Tim French's Office, CSSE, UWA
+
+Attendees:
+-Prof Melinda Hodkiewicz
+-Dr Tim French
+-Mark Shelton
+
+Attachments:
+-plan_to_replicate-2012_xiang.xlsx (retrieving attr. from 2016 data)
+-quick_analysis.xlsx (comparison of data sources)
+-additions_analysis.xlsx (growth / changes to CB database over time)
+
+Body:
+
+Updates:
+-Received API, CSV, Excel & snapshot access (2013-Dec-xx) from CrunchBase
+-Retrieved multiple other sources (2013-Oct-xx, 2014-May-xx, 2015-Dec-04)
+-Converted CB Snapshot (2013-Dec-xx) to CSV files from SQL dump
+-Started exploring data
+
+Questions:
+-Check-in: Slack, GitHub usage working? Using Anaconda (Python) for dev
+-Start by just replicating 2012-xiang?
+-Crawling / Retrieval strategy
+    -Should I collect just enough data to perform my analyses?
+    -How important is timing?
+    -Best way to store intermediate data? SQL / Pickle / CSV?
+
+Actions:
+-Replicate non-textual part of 2012-xiang study
