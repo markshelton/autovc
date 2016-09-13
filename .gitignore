@@ -17,6 +17,21 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# Compiled source #
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Logs and databases #
+*.log
+*.sql
+*.sqlite
+*.csv
+*.db
+
 # =========================
 # Operating System Files
 # =========================
@@ -41,3 +56,4 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
