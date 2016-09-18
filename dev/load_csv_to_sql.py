@@ -1,22 +1,20 @@
-#load_csv_to_sql.py
+#!/Anaconda3/env/honours python
 
-import tarfile
-import os
+"""load_csv_to_sql"""
+
 import csv
+import os
 import sqlite3
+import tarfile
 
-import log
-
-TARGET_TYPE = ".csv"
+from log import Log
 
 ARCHIVE_FILE = "../data/raw/2016-Sep-09_csv.tar.gz"
-CSV_ENCODING = "latin1"
-INDEX_KEY = "uuid"
-
 EXTRACT_DIR = ARCHIVE_FILE.split(".tar")[0]
 DATABASE_FILE = EXTRACT_DIR.split("_")[0] + "_sqlite.db"
-
-log = log.setup_logging('load_csv_to_sql')
+CSV_ENCODING = "latin1"
+INDEX_KEY = "uuid"
+TARGET_TYPE = ".csv"
 
 def extract_archive(achive_file, extract_dir):
     log.info("%s | Started extraction process", achive_file)
@@ -75,5 +73,10 @@ def load_files(extract_dir, database_file, csv_encoding, index_key):
             log.error("%s | Import failed", file,exc_info=1)
     log.info("%s | Completed import process", database_file)
 
-extract_archive(ARCHIVE_FILE, EXTRACT_DIR)
-load_files(EXTRACT_DIR, DATABASE_FILE, CSV_ENCODING, INDEX_KEY)
+def main():
+    log = Log(__file__).logger
+    extract_archive(ARCHIVE_FILE, EXTRACT_DIR)
+    load_files(EXTRACT_DIR, DATABASE_FILE, CSV_ENCODING, INDEX_KEY)
+
+if __name__ == '__main__':
+    main()

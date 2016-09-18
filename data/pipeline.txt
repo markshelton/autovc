@@ -1,0 +1,8 @@
+1. Check size and shape of the data
+    -# Features
+    -# Labels
+    -# Records
+2. Process missing values
+    - Remove records
+    - Insert average
+    - Insert prediction

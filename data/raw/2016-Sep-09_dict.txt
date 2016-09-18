@@ -203,37 +203,37 @@ description
 
 * organizations.csv - 470,783
 
-company_name
-primary_role
-domain
-homepage_url
-country_code
-state_code
-region
-city
-zipcode
-address
-status
-short_description
-category_list
-category_group_list
-funding_rounds
-funding_total_usd
-founded_on
-first_funding_on
-last_funding_on
-closed_on
-employee_count
-email
-phone
-facebook_url
-cb_url
-logo_url
-profile_image_url
-twitter_url
-uuid
-created_at
-updated_at
+company_name - string
+~primary_role - string
+domain - string
+homepage_url - string
+~country_code - string
+~state_code - string
+~region - string
+~city - string
+~zipcode - string
+address - string
+~status - string
+short_description - string
+category_list - string (multi-valued)
+category_group_list - string (multi-valued)
+~funding_rounds - integer
+~funding_total_usd - integer
+~founded_on - date (yyyy-mm-dd)
+~first_funding_on - date (yyyy-mm-dd)
+~last_funding_on - date (yyyy-mm-dd)
+~closed_on - date (yyyy-mm-dd)
+~employee_count - string
+email - string
+phone - string
+facebook_url - string
+cb_url - string
+logo_url - string
+profile_image_url - string
+twitter_url - string
+uuid - string
+created_at - datetime (yyyy-mm-dd hh-mm-ss.ms)
+updated_at - datetime (yyyy-mm-dd hh-mm-ss.ms)
 
 * people.csv - 545,451
 

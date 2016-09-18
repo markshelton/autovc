@@ -1,18 +1,24 @@
+#!/Anaconda3/env/honours python
+
+"""log"""
+
 import logging
 
-def setup_logging(name):
-    logging.basicConfig(
-        filename=name + ".log",
-        filemode='w',
-        level=logging.DEBUG,
-        format='%(asctime)s | %(levelname)s | %(message)s',
-        datefmt='%m-%d %H:%M:%S')
+class Log:
 
-    console = logging.StreamHandler()
-    formatter = logging.Formatter("%(levelname)s | %(message)s")
-    console.setFormatter(formatter)
+    def __init__(self, script_file):
+        file_name = script_file.split(".")[0] + ".log"
+        logging.basicConfig(
+            filemode='w+',
+            filename=file_name,
+            level=logging.DEBUG,
+            format='%(asctime)s | %(levelname)s | %(message)s',
+            datefmt='%m-%d %H:%M:%S')
 
-    logger = logging.getLogger(name)
-    console.setLevel(logging.INFO)
-    logger.addHandler(console)
-    return logger
+        console = logging.StreamHandler()
+        formatter = logging.Formatter("%(levelname)s | %(message)s")
+        console.setFormatter(formatter)
+
+        self.logger = logging.getLogger(file_name)
+        console.setLevel(logging.INFO)
+        self.logger.addHandler(console)
