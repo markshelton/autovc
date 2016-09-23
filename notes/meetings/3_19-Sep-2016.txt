@@ -1,0 +1,9 @@
+Exploratory analysis
+-Features summary
+-Bucketing features
+-Booleanizing features
+-Feature inter-correlation
+
+-Run PCA
+-Class imbalance
+-

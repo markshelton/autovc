@@ -15,7 +15,6 @@ from sklearn.preprocessing import LabelEncoder
 
 #local modules
 
-
 class DataCollector(object):
 
     def __init__(self, database_file, attributes, log=None):

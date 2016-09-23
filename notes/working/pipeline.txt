@@ -1,0 +1,16 @@
+*dbLoader
+1. ConfigLoader (config.txt --> archive.zip)
+2. ArchiveExtractor (archive.zip --> files.csv)
+3. dbBuilder (files.csv --> database.db)
+    A. CreateDatabase
+        i. CreateTables
+            a. CreateAttributes
+            b. InferDataTypes
+    B. LoadData
+
+*mlPipeline
+1. ConfigLoader (config.txt --> database.db)
+2. dfBuilder (database.db --> data.df)
+3. DataCleaner (data.df --> (features.df, labels.df))
+4. LearningEngine ((features.df, labels.df) --> results.log)
+5. ResultsPlotter (results.log --> results.png)
