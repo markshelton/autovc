@@ -2,81 +2,73 @@
 
 """dbLoader"""
 
-import csv
+#standard modules
 import os
-import sqlite3
 import tarfile
+import logging
 
+#third-party modules
 from odo import odo
 
-from log import Log
+#local modules
+import logManager
+from configManager import configManager
 
-LOG = Log(__file__).logger
+#constants
 
-#file operations
-ARCHIVE_FILE = "../data/raw/2016-Sep-09_csv.tar.gz"
-EXTRACT_DIR = "../data/processed/2016-Sep-09_csv/"
-DATABASE_FILE = "../data/2016-Sep-09_sqlite2.db"
+#logger
+log = logging.getLogger(__name__)
 
-#reading files
-TARGET_TYPE = ".csv"
-CSV_ENCODING = "latin1"
+#program
+class dbLoader(configManager):
 
-#table operations
-INDEX_KEY = "uuid"
+    def __init__(self):
+        self.load_config()
+        self.extract_archive(
+            self.archive_file,
+            self.extract_dir,
+            self.target_type
+        )
+        self.load_files(
+            self.extract_dir,
+            self.database_file
+        )
 
-#metaprogramming
-LOG_LEVEL = "info"
+    def load_config(self):
+        super(dbLoader, self).__init__()
 
-class dbLoader(object):
-
-    def __init__(self, archive_file, extract_dir, database_file, csv_encoding, index_key, log):
-        self.archive_file = archive_file
-        self.extract_dir = extract_dir
-        self.database_file = database_file
-        self.csv_encoding = csv_encoding
-        self.index_key = index_key
-        self.log = log
-        self.extract_archive(self.archive_file, self.extract_dir, self.log)
-        self.load_files(self.extract_dir, self.database_file, self.csv_encoding, self.index_key, self.log)
-
-    def load_config(self, config_file):
-        with open(config_file) as config:
-            pass
-
-    def extract_archive(self, achive_file, extract_dir, log):
+    def extract_archive(self, achive_file, extract_dir, target_type):
         log.info("%s | Started extraction process", achive_file)
         with tarfile.open(achive_file) as archive:
             for name in archive.getnames():
-                if name.endswith(TARGET_TYPE):
+                if name.endswith(target_type):
                     if os.path.exists(os.path.join(extract_dir, name)):
                         log.debug("%s | Already extracted", name)
                     else:
                         log.debug("%s | Extraction started", name)
                         try:
                             archive.extract(name, path=extract_dir)
-                            log.debug("%s | Extraction successful", name)
+                            log.debug("%s | Extraction successful",name)
                         except:
                             log.error("%s | Extraction failed", name)
         log.info("%s | Completed extraction process", achive_file)
 
-    def load_files(self, extract_dir, database_file, csv_encoding, index_key, log):
+    def load_files(self, extract_dir, database_file):
         log.info("%s | Started import process", database_file)
         for file in os.listdir(extract_dir):
             try:
                 log.debug("%s | Import started", file)
-                database_uri = ("sqlite:///"+database_file
-                            +"::"+file.split(".")[0])
+                db_uri = ("sqlite:///"+database_file+"::"+file.split(".")[0])
                 csv_file = extract_dir + file
-                odo(csv_file, database_uri)
+                odo(csv_file, db_uri)
                 log.debug("%s | Import successful", file)
             except:
                 log.error("%s | Import failed", file)
         log.info("%s | Completed import process", database_file)
 
+#testing
 def main():
-    db = dbLoader(ARCHIVE_FILE,EXTRACT_DIR, DATABASE_FILE, CSV_ENCODING, INDEX_KEY, LOG)
-
+    db = dbLoader()
 
 if __name__ == '__main__':
     main()

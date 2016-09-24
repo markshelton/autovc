@@ -1,6 +1,0 @@
-ARCHIVE_FILE = "../data/raw/2016-Sep-09_csv.tar.gz"
-EXTRACT_DIR = ARCHIVE_FILE.split(".tar")[0]
-DATABASE_FILE = EXTRACT_DIR.split("_")[0] + "_sqlite.db"
-CSV_ENCODING = "latin1"
-INDEX_KEY = "uuid"
-TARGET_TYPE = ".csv"
