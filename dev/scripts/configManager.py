@@ -67,7 +67,7 @@ class configManager(object):
 
     def log_config(self):
         for entry in self.__dict__.items():
-            log.debug(entry)
+            log.info(entry)
 
 #testing
 def main():

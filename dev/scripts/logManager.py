@@ -28,4 +28,3 @@ log = logging.getLogger(__name__)
 if warn: log.warn("Default log config failed")
 else: log.info("Default log config loaded")
 log.info("Logger created")
-
