@@ -1,0 +1,32 @@
+File: events.csv
+Error: Messed up in SQL DB
+Trace: No error raised
+Solution:
+
+File: jobs.csv
+Error: Not in SQL DB
+Trace:
+    "pandas\tslib.pyx",
+    line 2235, in pandas.tslib.array_to_datetime
+    pandas.tslib.OutOfBoundsDatetime:
+    Out of bounds nanosecond timestamp: 1-08-16 00:00:00
+    AttributeError: ("'float' object has no attribute 'view'", 'occurred at index started_on')
+Solution:
+
+File: organization_descriptions.csv:
+Error: Not in SQL DB
+Trace:
+    "pandas\parser.pyx",
+    line 868, in pandas.parser.TextReader._tokenize_rows
+    pandas.io.common.CParserError: Error tokenizing data.
+    C error: Expected 20 fields in line 4, saw 106
+Solution:
+
+File: people_descriptions.csv:
+Error: Empty in SQL DB
+Trace:
+    "C:\Anaconda3\envs\honours\lib\site-packages\odo\backends\sql_csv.py",
+    line 47, in __init__
+    self.skiprows = int(skiprows or self.header)
+    TypeError: int() argument must be a string, a bytes-like object or a number, not 'NoneType'
+Solution:

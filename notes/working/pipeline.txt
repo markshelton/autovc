@@ -1,16 +1,22 @@
+
 *dbLoader
-1. ConfigLoader (config.txt --> archive.zip)
-2. ArchiveExtractor (archive.zip --> files.csv)
-3. dbBuilder (files.csv --> database.db)
-    A. CreateDatabase
-        i. CreateTables
-            a. CreateAttributes
-            b. InferDataTypes
-    B. LoadData
+1. ClearFiles
+2. ExtractArchive (archive.zip --> f1.csv, ... , fn.csv)
+3. LoadFiles (f1.csv, ... fn.csv --> database.db)
+
+*apiCrawler
+1. LoadNodesList ()
+2. CrawlNodes ()
+    A. ReadLiveNode (record.json --> data.df)
+    B. ReadDBRecord (database.db --> data.df)
+    C. UpdateDBRecord (database.db --> database.db)
 
 *mlPipeline
-1. ConfigLoader (config.txt --> database.db)
-2. dfBuilder (database.db --> data.df)
-3. DataCleaner (data.df --> (features.df, labels.df))
-4. LearningEngine ((features.df, labels.df) --> results.log)
-5. ResultsPlotter (results.log --> results.png)
+1. dfBuilder (database.db --> data.df)
+2. DataCleaner (data.df --> (features.df, labels.df))
+3. LearningEngine ((features.df, labels.df) --> results.log)
+4. ResultsPlotter (results.log --> results.png)
+
+Helpers:
+1. LogManager (logger.yaml --> info.log, error.log, stdout)
+2. ConfigManager (default.conf --> cm.__attr__)

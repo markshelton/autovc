@@ -32,6 +32,9 @@ $RECYCLE.BIN/
 *.csv
 *.db
 
+# Config files #
+*.conf
+
 # =========================
 # Operating System Files
 # =========================

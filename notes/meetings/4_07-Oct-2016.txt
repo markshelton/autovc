@@ -1,0 +1,52 @@
+Header:
+
+Topic: Honours Update 4
+Date/Time: Friday 10:00AM - 10:30AM , 07 October 2016
+Location: Tim French's Office, CSSE, UWA
+
+Attendees:
+-Prof Melinda Hodkiewicz
+-Dr Tim French
+-Mark Shelton
+
+Attachments:
+-None
+
+Body:
+
+Updates:
+-Created configManager - loads config files recursively into config objects
+-Created dbLoader - loads CB CSV dumps into SQLite database
+-Created logManager - logs to info.log, error.log, stdout
+
+Deadlines:
+- 23 September (+14d) --> 05 November: Replicated previous study
+- 30 September (+7d) --> 14 October: Draft literature review
+- 21 October (-7d): Crawler finished
+- 28 October (-21d): Revised proposal due (assessable)
+- 28 October (-21d): Literature review due (assessable)
+- 02 December (-55d): Completed main experiments
+
+Questions:
+
+1. Problem definition
+2. Rationale
+3. Data management / sources
+4. Feature / model selection
+5. Machine learning techniques
+
+1. Problem domain
+    - Broad
+    - Specific
+2. Solution techniques
+    - Broad
+    - Specific
+
+Actions:
+-Exploratory analysis
+   -Features summary
+   -Bucketing features
+   -Booleanizing features
+   -Feature inter-correlation
+-Run PCA
+   -Class imbalance

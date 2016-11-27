@@ -7,15 +7,18 @@ import os
 import tarfile
 import logging
 import shutil
+import csv
 
 #third-party modules
-from odo import odo
+import odo
+import pandas as pd
 
 #local modules
 import logManager
 from configManager import configManager
 
 #constants
+TARGET_TYPE = ".csv"
 
 #logger
 log = logging.getLogger(__name__)
@@ -41,14 +44,14 @@ def clear_files(*paths):
         clear_file(path)
     log.info("Completed clear process")
 
-def extract_archive(achive_dir, extract_dir, target_type):
+def extract_archive(achive_dir, extract_dir):
 
     def extract_file(archive, archive_file, extract_dir):
         if os.path.exists(os.path.join(extract_dir, archive_file)):
             log.info("%s | Already extracted", archive_file)
         else:
-            log.info("%s | Extraction started", archive_file)
             try:
+                log.info("%s | Extraction started", archive_file)
                 archive.extract(archive_file, path=extract_dir)
                 log.info("%s | Extraction successful", archive_file)
             except:
@@ -57,22 +60,29 @@ def extract_archive(achive_dir, extract_dir, target_type):
     log.info("%s | Started extraction process", achive_dir)
     with tarfile.open(achive_dir) as archive:
         for archive_file in archive.getnames():
-            if archive_file.endswith(target_type):
+            if archive_file.endswith(TARGET_TYPE):
                 extract_file(archive, archive_file, extract_dir)
     log.info("%s | Completed extraction process", achive_dir)
 
 def load_files(extract_dir, database_file):
 
-    def load_file(source_file, database_file):
-        source_file = os.path.basename(source_file)
-        log.info("%s | Import started", source_file)
+    def load_file(abs_source_file, database_file):
+        source_file = os.path.basename(abs_source_file)
+        source_name = source_file.split(".")[0]
+        db_uri = ("sqlite:///"+ database_file +"::"+ source_name)
         try:
-            db_uri = ("sqlite:///"+ database_file
-                    +"::"+ source_file.split(".")[0])
-            odo(abs_source_file, db_uri)
+            log.info("%s | Import started", source_file)
+            odo.odo(abs_source_file, db_uri, engine="c")
             log.info("%s | Import successful", source_file)
         except:
-            log.error("%s | Import failed", source_file, exc_info=True)
+            try:
+                log.debug("%s | Alternative import started", source_file)
+                t = odo.resource(abs_source_file)
+                ds = odo.discover(t, engine="c")
+                odo.odo(abs_source_file, db_uri, dshape=ds, engine="c")
+                log.info("%s | Import successful", source_file)
+            except:
+                log.error("%s | Import failed", source_file, exc_info=True)
 
     log.info("%s | Started import process", database_file)
     for base_name in os.listdir(extract_dir):
@@ -82,8 +92,8 @@ def load_files(extract_dir, database_file):
 
 def main():
     cm = load_config()
-    clear_files(cm.extract_dir, cm.database_file)
-    extract_archive(cm.archive_file, cm.extract_dir, cm.target_type)
+    clear_files(cm.database_file, cm.extract_dir)
+    extract_archive(cm.archive_file, cm.extract_dir)
     load_files(cm.extract_dir, cm.database_file)
 
 if __name__ == "__main__":

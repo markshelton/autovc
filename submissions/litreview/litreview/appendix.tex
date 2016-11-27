@@ -1,0 +1,120 @@
+We develop a conceptual framework relating startup potential and investor confidence to startup investment. We will operationalise this conceptual framework into features that can be incorporated into our machine learning model. To do this, we review features that have been tested in previous studies related to startup investment or performance. In the following sections, we describe each of these features and outline conceptual and empirical evidence that justify their inclusion in our conceptual framework. Figure~\ref{fig:appendix:features:framework} depicts how these features can be incoprorated into our conceptual framework.
+
+\begin{figure}[!htbp]
+\centering
+\input{../diagrams/figures/framework_details}
+\caption{Proposed conceptual framework for startup investment. This extended version of the framework includes features identified by empirical studies of startup investment. We adapt the framework proposed by Ahlers et al.~\cite{ahlers2015}, originally based on work by Baum and Silverman~\cite{baum2004}.}
+\label{fig:appendix:features:framework}
+\end{figure}
+
+\section{Venture Quality}
+
+\subsection{Human Capital}
+
+Human capital is critical to early-stage startups that have limited resources and are changing constantly. Startups are composed of founders, non-executive directors (NED) that may be investors or advisers, and staff. Each of these parties makes a contribution to the human capital of the startup. The human capital of these parties can generally be categorised three ways: education, prior experience, and  synergies as a team.
+
+\begin{description}
+
+\item[Founders' Capabilities]
+
+Founders play multiple roles in early-stage startups, driving many aspects of the business growth and development. Accordingly, the human capital of founders has been shown to affect startup investment success. In particular, education of founders is a key signal. The number of degrees attained by founders is predictive of success \cite{beckwith2016,gimmon2010}, as is whether a founder has obtained an MBA \cite{beckwith2016}. In addition, past entrepreneurial experience seems to be a predictive factor \cite{gimmon2010} though there is some evidence to dispute this \cite{shan2014}. Finally, the number of founders seems to be correlated to startup success \cite{beckwith2016}, though the underlying relationship may be more nuanced, and could be related to the distribution of team skillset.
+
+\item[Non-Executive Directors' Capabilities]
+
+The boards of startups are smaller and have a higher concentration of ownership than those of well-established companies \cite{ingley2007}. Startups lack corporate skills such as finance, human resources, information technology and legal expertise. Especially if founders are relatively inexperienced, they may look to the board to provide these skills. As a result, there is more overlap between governance and operational roles and directors may have greater influence on company performance through greater involvement in decision making \cite{ingley2007}. Startups with more experienced directors are more successful at raising funds \cite{baum2004}.
+
+\item[Staff Capabilities]
+
+Founders play a key role in the very early stages of a startup and also in setting the culture for the organisation, but as the organisation grows more importance is given to the influence of employees. Measures like the number of current employees are broad representations of the startup's human capital and are correlated with subsequent startup investment \cite{beckwith2016,an2015,conti2013}. Detailed analyses of staff human capital are not present in the literature but may be possible using data collected from sources like AngelList and LinkedIn.
+
+\end{description}
+
+\subsection{Social Capital}
+
+Entrepeneurship revolves around opportunity discovery and realisation \cite{shane2000}. Opportunity discovery is only possible through the medium of social networks, so social capital is important. Social networks exist in many forms and contribute in different ways to social capital. These networks can be categorised in terms of the strength of their relationships: weak ties (e.g. social media) and strong ties (e.g. strategic alliances).
+
+\begin{description}
+
+\item[Social Influence]
+
+Startups use social media to communicate with other parties including their customers, potential customers, the media, potential employees, and potential investors. Social media activity can be proxy for a startup's social influence. Startups use different social media platforms for different purposes. Presence and engagement (e.g. number of followers, number of likes, number of posts) on Facebook and Twitter are predictive of startup investment success \cite{cheng2016,beckwith2016}. These platforms are likely to capture customer or potential customer interactions, which is an indicator of market adoption. In addition, the number of followers on AngelList predicts startup investment success \cite{an2015}, probably because it captures potential employees and investors' interest.
+
+\item[Strategic Alliances]
+
+Strategic alliances with other companies or institutions have the potential to alter the opportunities that startups can access. Biotechnology startups that have links to industry partners are able to IPO more quickly and at higher market valuations \cite{stuart1999}. Startups with more downstream (e.g. manufacturing), but not upstream (e.g. research and development), alliances obtain significantly more venture capital financing than startups with fewer such alliances \cite{baum2004}.
+
+\end{description}
+
+\subsection{Structural Capital}
+
+Structural capital is the supportive intangible assets, infrastructure, and systems that enable a startup to function. Intellectual property and their proxy, patents, are a key component of structural capital for newly-formed startups. Structural capital also includes processes and systems but these are less fully-formed in startups than more stable companies.
+
+\begin{description}
+
+\item[Patent Filings]
+
+Many startups develop innovative technologies to help them capture a new market or better capture an existing market. Entrepreneurs protect their ideas through patent filings. Patents are an indicator of the technological capability of the startup. Patents and patent filings affect the survival and investment success of biotechnolgoy startups \cite{baum2004,hoenen2014}. However, there may not be as strong a relationship for non-biotechnology startups (e.g. software) \cite{gimmon2010,ahlers2015} This might be because factors like speed-to-market dominate the protective properties of patent filings in the quicker-moving high-technology sector.
+
+\end{description}
+
+\section{Investment Confidence}
+
+\subsection{Third Party Validation}
+
+By their nature, startups are optimsitic about the effectiveness of new technologies and business models. Founders are also highly invested in their startups and therefore it is reasonable for investors to doubt their claims. Third party validation from credible sources like other investors, the media, and the government, may be factored into investors' decision-making process \cite{hsu2008,hochberg2007}.
+
+\begin{description}
+
+\item[Investment Record]
+
+Intuitively, a track record of demand for investment is likely to be a strong signal of future likelihood of future investment. Average funding per round, number of investors per round, number of previous financing rounds and total prior funding raised all predict future likelihood of investment \cite{ahlers2015,beckwith2016,croce2016,hoenen2014,conti2013}.
+
+\item[Investor Reputation]
+
+Funding from reputable investors sends a clear signal to potential investors that a startup is likely to be of high quality. Investors may believe they require less due diligence because it has been performed by another investor. Startups that receive their initial funding round from a prominent investor are more likely to survive and receive higher valuations in initial public offerings \cite{hochberg2007}. Followers on AngelList and previous co-investors predict the likelihood of an investor's portfolio startups raising additional rounds successfully \cite{an2015,werth2013}.
+
+\item[Media Coverage]
+
+Media coverage provides legitimacy and credibility to startups. Media attention for startups affects the perceived valuation of well-informed experts like venture capitalists \cite{petkova2013}. This also translates to increased investment success \cite{beckwith2016}. There are a few possible explanations for this. First, media coverage signals public interest which might positively influence other stakeholders like customers, employees, etc. Second, new information become widely available which reduces perceived information assymetry.
+
+\item[Awards and Grants]
+
+Governments and other startup ecosystem supporters often run competitions, grant processes and awards to recognise and celebrate startups. Not only do awards and grants raise the profile of startups but they also indicate third-party validation. Interestingly, there is some evidence that government grants are positively associated with startup investment but awards may have a negative effect \cite{ahlers2015}. Perhaps this suggests that higher quality startups focus on more critical activities (e.g. raising funds, filing for patents).
+
+\end{description}
+
+\subsection{Historical Performance}
+
+Startup performance is challenging to measure because there are no standardised reporting formats and the availability of data varies wildly. Capturing the multidimensionality of startup performance requires the use of multiple measures \cite{wiklund2005}, however, most studies are only able to utilise simplistic performance metrics like survival time \cite{raz2007, song2012, gloor2013}.
+
+\begin{description}
+
+\item[Financial Performance]
+
+Despite being intuitive, there is little evidence of a relationship between startup financial performance and future investment success. This is because it tends to be difficult to access valid, accurate and complete financial performance measures (e.g. profit, revenue). This information is considered by startups as private and confidential and unlike public companies, private companies are not required to make financial disclosures. Proprietary databases can provide some data on private companies but commercial licenses are expensive and have poor coverage of early-stage companies \cite{artemchik2015}.
+
+\item[Non-Financial Performance]
+
+With a paucity of financial information available, researchers have looked for other measures of startup performance. Survival time is the most commonly studied startup performance metric despite the coarseness of the measure \cite{song2012,an2015,gimmon2010}. There are a few possible explanations for this. One explanation is that startups have such a high failure rate and long time to profitability that many won't ever report any other meaningful performance metrics \cite{sahlman2010}.
+
+\end{description}
+
+\subsection{Contextual Cues}
+
+Startups do not exist in isolation but are rather a product of their context. Investors must consider the performance of a startup's competitors, their local economy and the broader economy when evaluating the reasonableness of signals of startup potential.
+
+\begin{description}
+
+\item[Competitor Performance]
+
+Startups are involved in almost every industry. However, startups across industries have very different requirements, trajectories and measure their performance in different ways. Comparing startups across industries does not necessarily provide a clear view as to whether the potential of a firm is remarkable, likely errant, or within normal ranges. Acccordingly, industry classification has been found to be a key determinant of startup investment \cite{shan2014,croce2016,gimmon2010}.
+
+\item[Local Economy]
+
+Headquarters location is a key indicator of startup investment success \cite{beckwith2016,croce2016,gimmon2010}. A clear example of this effect is Silicon Valley, a location known for producing an outsized number of successful startups. Silicon Valley provides a focal point for engineering talent, previously successful entrepreneurs, and venture capital firms. Therefore, we might expect different signs of startup potential for Silicon Valley startups compared to those in locations where development and traction are more difficult to attain.
+
+\item[Broader Economy]
+
+Although startups are less affected by broader economic trends than larger, well-established companies economic challenges have a knock-on effect for startup investment. The Global Financial Crisis led to a 20\% decrease in the average amount of funds raised by startups per funding round, disproportionately affecting later-stage funding rounds. Therefore, when comparing startups of different ages, these sort of shocks have key implications for assessing what is a normal trajectory. This may explain why the year a startup is founded can influence startup investment \cite{croce2016,hoenen2014}.
+
+\end{description}

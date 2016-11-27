@@ -8,11 +8,17 @@ formatters:
         format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 handlers:
-    console:
+    debug_console_handler:
         class: logging.StreamHandler
         level: DEBUG
         formatter: console_fmt
         stream: ext://sys.stdout
+
+    error_console_handler:
+        class: logging.StreamHandler
+        level: ERROR
+        formatter: console_fmt
+        stream: ext://sys.stderr
 
     info_file_handler:
         class: logging.handlers.RotatingFileHandler
@@ -35,7 +41,7 @@ handlers:
 loggers:
     console_logger:
         level: DEBUG
-        handlers: [console]
+        handlers: [debug_console_handler, error_console_handler]
         propagate: no
     file_logger:
         level: INFO
@@ -43,5 +49,5 @@ loggers:
 
 root:
     level: DEBUG
-    handlers: [console, info_file_handler, error_file_handler]
+    handlers: [debug_console_handler, error_console_handler, info_file_handler, error_file_handler]
 ...

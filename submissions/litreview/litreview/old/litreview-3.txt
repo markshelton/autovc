@@ -1,0 +1,67 @@
+litreview-3.txt
+
+(0.) Introduction
+    (0.1) Background
+    (0.2) Rationale
+    (0.3) Implications
+    (0.4) Signposting
+1. Theoretical Background
+    (1.0) Intro
+    1.1 Technology Startups
+        (1.1.0) Intro
+        1.1.1 Resource Discovery
+        1.1.2 Developmental Lifecycle
+        1.1.3 Determinants of Performance
+    1.2 Startup Investment
+        (1.2.0) Intro
+        1.2.1 Effect on Startup Performance
+        1.2.2 Investment Assessment
+        1.2.3 Risk Management
+    1.3 Rationale
+2. Feature Selection
+    (2.0) Intro (includes Figure 1)
+    2.1 Venture Quality
+        (2.1.0) Intro
+        2.1.1 Human Capital
+        2.1.2 Social Capital
+        2.1.3 Intellectual Capital
+    2.2 Investment Confidence
+        (2.2.0) Intro
+        2.2.1 Past Investments
+        2.2.2 Past Performance
+        2.2.3 Comparable Performance
+    2.3 Feature Summary (includes Table 1)
+3. Data Sources
+    (3.0) Intro
+    3.1 Task Properties
+        (3.1.0) Intro (includes Table 2)
+        3.1.1 Problem
+        3.1.2 Desired Solution
+    3.2 Source Properties
+        (3.2.0) Intro (includes Table 3)
+        3.2.1 Surveys & Interviews
+        3.2.2 Startup Databases
+        3.2.3 Social Media
+        3.2.4 Patent Filings
+        3.2.5 Financial Reports
+    3.3 Source Evaluation (includes Table 4)
+4. Learning Algorithms
+    (4.0) Intro
+    4.1 Task Properties
+        (4.1.0) Intro (includes Table 5)
+        4.1.1 Problem
+        4.1.2 Desired Solution
+    4.2 Algorithm Properties
+        (4.2.0) Intro (includes Table 6)
+        4.2.1 Naive Bayes
+        4.2.2 Logistic Regression
+        4.2.3 K-Nearest Neighbours
+        4.2.4 Decision Trees
+        4.2.5 Random Forests
+        4.2.6 Support Vector Machines
+        4.2.7 Artificial Neural Networks
+    4.3 Algorithm Evaluation (includes Table 7)
+5. Conclusion
+    (5.1) Overview
+    (5.2) Rationale
+    (5.3) Implications

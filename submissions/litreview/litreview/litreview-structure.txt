@@ -1,0 +1,110 @@
+litreview-structure.txt
+
+(0.) Introduction                                       0850~~~
+    (0.1) Background                                    0350
+    (0.2) Rationale                                     0350
+    (0.3) Implications                                  0100
+    (0.4) Signposting                                   0075
+
+1. Theoretical Background
+    (1.0) Intro                                         0100
+    1.1 Technology Startups
+        (1.1.0) Intro                                   0075
+        1.1.1 Entrepreneurial Theory
+        1.1.2 Developmental Lifecycle
+        1.1.3 Determinants of Performance
+            (1.1.3.0) Intro
+            (1.1.3.1) Human Capital
+            (1.1.3.2) Social Capital
+            (1.1.3.3) Intellectual Capital
+    1.2 Startup Investment
+        (1.2.0) Intro
+        1.2.1 Startup Motivation
+        1.2.2 Investment Assessment
+        1.2.3 Risk Management
+    1.3 Proposed Framework (includes Figure 1)
+
+2. Feature Selection
+    (2.0) Intro (includes Table 1)                      0075
+    2.1 Venture Quality
+        (2.1.0) Intro
+        2.1.1 Human Capital
+            (2.1.1.0) Intro
+            (2.1.1.1) Founder Capability
+            (2.1.1.2) NED Capability
+            (2.1.1.3) Staff Capability
+        2.1.2 Social Capital
+            (2.1.2.0) Intro
+            (2.1.2.1) Social Media Reach
+            (2.1.2.2) Media Coverage
+            (2.1.2.3) Alliances
+        2.1.3 Intellectual Capital
+            (2.1.3.0) Intro
+            (2.1.3.1) Patent Filings
+    2.2 Investment Confidence
+        (2.2.0) Intro
+        2.2.1 3rd Party Validation
+            (2.2.1.0) Intro
+            (2.2.1.1) Investment Record
+            (2.2.1.2) Investor Reputation
+            (2.2.1.3) Awards & Grants
+        2.2.2 Historical Performance
+            (2.2.2.0) Intro
+            (2.2.2.1) Financial
+            (2.2.2.2) Non-Financial
+        2.2.3 Context
+            (2.2.3.0) Intro
+            (2.2.3.1) Competitor Performance
+            (2.2.3.2) Local Economy
+            (2.2.3.3) Broader Economy
+    2.3 Feature Evaluation
+
+3. Data Sources                                         1500~~~
+    (3.0) Intro (includes Table 2)                      0125
+    3.1 Source Characteristics                          1150~~
+        (3.1.0) Intro                                   0075
+        3.1.1 Surveys & Interviews                      0150
+        3.1.2 Startup Databases                         0425~
+            (3.1.2.0) Intro                             0125
+            (3.1.2.1) CrunchBase                        0150
+            (3.1.2.2) AngelList                         0150
+        3.1.3 Social Media                              0250~
+            (3.1.3.0) Intro                             0075
+            (3.1.3.2) LinkedIn                          0100
+            (3.1.3.1) Twitter                           0075
+        3.1.4 Patent Filings                            0100
+        3.1.5 Financial Reports                         0100
+    3.2 Source Evaluation                               0200
+
+4. Learning Algorithms                                  2900~~~
+    (4.0) Intro                                         0225~~
+    4.1 Task Characteristics                            0950~~
+        (4.1.0) Intro (includes Table 3)                0150
+        4.1.1 Problem                                   0425~
+            (4.1.1.1) Missing values                    0075
+            (4.1.1.2) Mixed feature types               0075
+            (4.1.1.3) Irrelevant features               0075
+            (4.1.1.4) Imbalanced classes                0075
+            (4.1.1.5) Small training set                0075
+            (4.1.1.6) High dimensionality               0075
+        4.1.2 Desired Solution                          0375~
+            (4.1.2.1) Predictive power                  0075
+            (4.1.2.2) Interpretability                  0075
+            (4.1.2.3) Incremental learning              0075
+            (4.1.2.4) Ease of tuning                    0075
+            (4.1.2.5) Computational speed               0075
+    4.2 Algorithm Characteristics                       1525~~
+        (4.2.0) Intro (includes Table 4)                0100
+        4.2.1 Naive Bayes                               0225
+        4.2.2 Logistic Regression                       0225
+        4.2.3 K-Nearest Neighbours                      0175
+        4.2.4 Decision Trees                            0175
+        4.2.5 Random Forests                            0175
+        4.2.6 Support Vector Machines                   0175
+        4.2.7 Artificial Neural Networks                0275
+    4.3 Algorithm Evaluation (includes Table 5)         0200~~
+
+5. Conclusion                                           0325~~~
+    (5.1) Overview                                      0075
+    (5.2) Rationale                                     0125
+    (5.3) Implications                                  0125
