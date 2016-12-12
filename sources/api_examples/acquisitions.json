@@ -1,0 +1,171 @@
+{
+  "metadata": {
+    "version": 3,
+    "www_path_prefix": "https://www.crunchbase.com",
+    "api_path_prefix": "https://api.crunchbase.com",
+    "image_path_prefix": "http://public.crunchbase.com/t_api_images/"
+  },
+  "data": {
+    "type": "Acquisition",
+    "uuid": "6724bdafca1bf7c88255d37235f4cafd",
+    "properties": {
+      "api_path": "acquisitions/6724bdafca1bf7c88255d37235f4cafd",
+      "web_path": "acquisition/6724bdafca1bf7c88255d37235f4cafd",
+      "price": null,
+      "price_currency_code": "USD",
+      "price_usd": null,
+      "payment_type": null,
+      "acquisition_type": "Acqui-hire",
+      "acquisition_status": "Pending",
+      "disposition_of_acquired": "Separate Entity",
+      "announced_on": "2016-09-23",
+      "announced_on_trust_code": 7,
+      "completed_on": null,
+      "completed_on_trust_code": null,
+      "created_at": 1474568225,
+      "updated_at": 1474606037
+    },
+    "relationships": {
+      "acquiree": {
+        "cardinality": "OneToOne",
+        "paging": {
+          "total_items": 1,
+          "first_page_url": "https://api.crunchbase.com/v/3/acquisitions/6724bdaf-ca1b-f7c8-8255-d37235f4cafd/acquiree",
+          "sort_order": "not_ordered"
+        },
+        "item": {
+          "type": "Organization",
+          "uuid": "7845697cc3a0135428c93cee63505530",
+          "properties": {
+            "permalink": "tuplejump",
+            "api_path": "organizations/tuplejump",
+            "web_path": "organization/tuplejump",
+            "name": "tuplejump",
+            "also_known_as": null,
+            "short_description": "tuplejump offers big data solutions that enable businesses to capture and analyze data.",
+            "description": "Tuplejump is a unified data mining and analysis platform that leverage data equity and build on it. Tuplejump is a smartly integrated and passionately crafted platform to speed up the development and ease the operations for modern big data solutions. Tuplejump unifies and optimizes workflows for engineers, analysts, and data scientists by bringing in a fresh experience to data processing and reporting with a modern visualization framework built on the latest technologies with great flexibility in sharing and embedding.",
+            "profile_image_url": "http://public.crunchbase.com/t_api_images/v1397752506/48b1a1b106d4fc352c9448bc96dd82f8.png",
+            "primary_role": "company",
+            "role_company": null,
+            "role_investor": null,
+            "role_group": null,
+            "role_school": null,
+            "founded_on": "2013-05-29",
+            "founded_on_trust_code": 7,
+            "is_closed": false,
+            "closed_on": null,
+            "closed_on_trust_code": 0,
+            "num_employees_min": 11,
+            "num_employees_max": 50,
+            "stock_exchange": null,
+            "stock_symbol": null,
+            "total_funding_usd": 0,
+            "number_of_investments": 0,
+            "homepage_url": "http://www.tuplejump.com",
+            "created_at": 1366423878,
+            "updated_at": 1478674614
+          }
+        }
+      },
+      "acquirer": {
+        "cardinality": "OneToOne",
+        "paging": {
+          "total_items": 1,
+          "first_page_url": "https://api.crunchbase.com/v/3/acquisitions/6724bdaf-ca1b-f7c8-8255-d37235f4cafd/acquirer",
+          "sort_order": "not_ordered"
+        },
+        "item": {
+          "type": "Organization",
+          "uuid": "7063d08796b82cc1ee88c221288acc2a",
+          "properties": {
+            "permalink": "apple",
+            "api_path": "organizations/apple",
+            "web_path": "organization/apple",
+            "name": "Apple",
+            "also_known_as": null,
+            "short_description": "Apple is a multinational corporation that designs, manufactures, and markets consumer electronics, personal computers, and software.",
+            "description": "Apple is a multinational corporation that designs, manufactures, and markets mobile communication and media devices, personal computers, portable digital music players, and sells a variety of related software, services, peripherals, networking solutions, and third-party digital content and applications.\r\n\r\n\r\nApple provides many products and services, including iPhone; iPad; iPod; Mac; Apple TV; a portfolio of consumer and professional software applications; the iOS and OS X operating systems; iCloud; and accessories, service, and support offerings. \r\n\r\n\r\nIt sells its products worldwide through its retail stores, online stores, direct sales force and third-party cellular network carriers, wholesalers, retailers, and value-added resellers to the consumer and also sells third-party iPhone, iPad, Mac and iPod compatible products, including application software and accessories through its online and retail stores.\r\n\r\n\r\nIntroduced in 1984, the Macintosh was the first widely sold personal computer with a graphical user interface (GUI). That feature and others such as an improved floppy drive design and a low-cost hard drive that made data retrieval faster helped Apple cultivate a reputation for innovation.\r\n\r\n\r\nApple was named as the most admired company in the United States in 2008 and in the world from 2008 to 2012 by the Fortune magazine.\r\n\r\n\r\nThe company was founded by Steven Paul Jobs, Steve Wozniak, and Ronald Gerald Wayne on April 1, 1976, and is headquartered in Cupertino, California.",
+            "profile_image_url": "http://public.crunchbase.com/t_api_images/v1411584838/z5utpyzqil1rznbizd65.png",
+            "primary_role": "company",
+            "role_company": true,
+            "role_investor": true,
+            "role_group": null,
+            "role_school": null,
+            "founded_on": "1976-04-01",
+            "founded_on_trust_code": 7,
+            "is_closed": false,
+            "closed_on": null,
+            "closed_on_trust_code": 0,
+            "num_employees_min": 10001,
+            "num_employees_max": 1000000,
+            "stock_exchange": "NASDAQ",
+            "stock_symbol": "AAPL",
+            "total_funding_usd": 1000250000,
+            "number_of_investments": 8,
+            "homepage_url": "http://www.apple.com",
+            "created_at": 1198326533,
+            "updated_at": 1480820932
+          }
+        }
+      },
+      "images": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/acquisitions/6724bdaf-ca1b-f7c8-8255-d37235f4cafd/images",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "videos": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/acquisitions/6724bdaf-ca1b-f7c8-8255-d37235f4cafd/videos",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "news": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 2,
+          "first_page_url": "https://api.crunchbase.com/v/3/acquisitions/6724bdaf-ca1b-f7c8-8255-d37235f4cafd/news",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+          {
+            "type": "News",
+            "uuid": "34af896d024bf0166954533f8ef2f263",
+            "properties": {
+              "title": "Apple Buys Tuplejump to Expand Machine-Learning Capabilities",
+              "author": "Alex Webb",
+              "posted_on": "2016-09-23",
+              "posted_on_trust_code": null,
+              "url": "http://www.bloomberg.com/news/articles/2016-09-22/apple-buys-tuplejump-to-expand-machine-learning-capabilities",
+              "created_at": 1474606037,
+              "updated_at": 1474606037
+            }
+          },
+          {
+            "type": "News",
+            "uuid": "d7bb02afbf07f993c4da875fe300bc8b",
+            "properties": {
+              "title": "Apple acquires another machine learning company: Tuplejump",
+              "author": "Greg Kumparak",
+              "posted_on": "2016-09-22",
+              "posted_on_trust_code": null,
+              "url": "https://techcrunch.com/2016/09/22/apple-acquires-another-machine-learning-company-tuplejump/",
+              "created_at": 1474568336,
+              "updated_at": 1474604529
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+INTEGER
+REAL
+TEXT
+
+Address:
+    name: String #PK
+    street_1: String
+    street_2: String
+    city: String
+    city_web_path: Path #FK - Location
+    region: String
+    region_web_path: Path #FK - Location
+    country: String
+    country_web_path: Path #FK - Location
+    latitude: Float
+    longitude: Float
+    created_at: Timestamp
+    updated_at: Timestamp
+
+Acquisition:
+    api_path: Path
+    web_path: Path
+    price: Integer
+    price_currency_code: String
+    price_usd: Integer
+    payment_type: String
+    acquisition_type: String
+    acquisition_status: String
+    disposition_of_acquired: String
+    announced_on: Date
+    announced_on_trust_code: TrustCode
+    completed_on: Date
+    completed_on_trust_code: TrustCode
+    created_at: Timestamp
+    updated_at: Timestamp
+    acquirer: Path #FK - Organization
+    acquiree: Path #Foreign Key - Organization
+
+Category:
+    path: Path
+    name: String
+    organizations_in_category: Integer
+    products_in_category: Integer
+    created_at: Timestamp
+    updated_at: Timestamp
+
+Degree:
+    type: String
+    uuid: UUID
+    started_on: Date
+    started_on_trust_code: TrustCode
+    completed_on: Date
+    completed_on_trust_code: TrustCode
+    degree_type_name: String
+    degree_subject: String
+    created_at: Timestamp
+    updated_at: Timestamp
+    school: Path #FK -Organization
+    person: Path #FK - Person

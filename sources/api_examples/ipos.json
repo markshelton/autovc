@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "version": 3,
+    "www_path_prefix": "https://www.crunchbase.com",
+    "api_path_prefix": "https://api.crunchbase.com",
+    "image_path_prefix": "http://public.crunchbase.com/t_api_images/"
+  },
+  "data": {
+    "type": "Ipo",
+    "uuid": "00092ea5e2c54eb666b13c11c642e0ee",
+    "properties": {
+      "api_path": "ipos/00092ea5e2c54eb666b13c11c642e0ee",
+      "web_path": "ipo/00092ea5e2c54eb666b13c11c642e0ee",
+      "went_public_on": "2000-09-22",
+      "went_public_on_trust_code": 7,
+      "stock_exchange_symbol": "SHE",
+      "stock_symbol": "000639",
+      "shares_sold": null,
+      "opening_share_price": null,
+      "opening_share_price_currency_code": "USD",
+      "opening_share_price_usd": null,
+      "opening_valuation": null,
+      "opening_valuation_currency_code": "USD",
+      "opening_valuation_usd": null,
+      "money_raised": null,
+      "money_raised_currency_code": "USD",
+      "money_raised_usd": null,
+      "created_at": 1465882323,
+      "updated_at": 1480762833
+    },
+    "relationships": {
+      "funded_company": {
+        "cardinality": "ManyToMany",
+        "paging": {
+          "total_items": 1,
+          "first_page_url": "https://api.crunchbase.com/v/3/ipos/00092ea5-e2c5-4eb6-66b1-3c11c642e0ee/funded_company",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+          {
+            "type": "Organization",
+            "uuid": "8db118b45900d00e71febf304cbff91f",
+            "properties": {
+              "permalink": "xiwang-foodstuffs",
+              "api_path": "organizations/xiwang-foodstuffs",
+              "web_path": "organization/xiwang-foodstuffs",
+              "name": "Xiwang Foodstuffs",
+              "also_known_as": null,
+              "short_description": "Xiwang Foodstuffs produces and sells corn oil, cane sugar, white wine, feed and feed ingredients.",
+              "description": "Xiwang Foodstuffs Co., Ltd. is primarily engaged in the food processing and distribution. The Company operates its businesses primarily through the production and distribution of corn oil. The Company primarily provides refined corn oil, including corn oil in bulk and corn oil with small package, as well as corn germ meals, olive oil and other products. The Company distributes its products mainly in domestic market.",
+              "profile_image_url": "http://public.crunchbase.com/t_api_images/v1465881745/dd1xhqe9yrlu8nh3jgch.png",
+              "primary_role": "company",
+              "role_company": null,
+              "role_investor": null,
+              "role_group": null,
+              "role_school": null,
+              "founded_on": "1987-01-01",
+              "founded_on_trust_code": 4,
+              "is_closed": false,
+              "closed_on": null,
+              "closed_on_trust_code": 0,
+              "num_employees_min": 1,
+              "num_employees_max": 10,
+              "stock_exchange": "SHE",
+              "stock_symbol": "000639",
+              "total_funding_usd": 0,
+              "number_of_investments": 0,
+              "homepage_url": "http://www.xiwangshipin.com.cn",
+              "created_at": 1465881901,
+              "updated_at": 1478790949
+            }
+          }
+        ]
+      },
+      "stock_exchange": {
+        "cardinality": "OneToOne",
+        "paging": {
+          "total_items": 1,
+          "first_page_url": "https://api.crunchbase.com/v/3/ipos/00092ea5-e2c5-4eb6-66b1-3c11c642e0ee/stock_exchange",
+          "sort_order": "not_ordered"
+        },
+        "item": {
+          "type": "StockExchange",
+          "uuid": "0fa0411fc92cbdfde055d35075701646",
+          "properties": {
+            "name": "Shenzhen Stock Exchange",
+            "short_name": "SHE",
+            "symbol": "SHE",
+            "created_at": 1443567671,
+            "updated_at": 1476909274
+          }
+        }
+      },
+      "images": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/ipos/00092ea5-e2c5-4eb6-66b1-3c11c642e0ee/images",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "videos": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/ipos/00092ea5-e2c5-4eb6-66b1-3c11c642e0ee/videos",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "news": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/ipos/00092ea5-e2c5-4eb6-66b1-3c11c642e0ee/news",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      }
+    }
+  }
+}

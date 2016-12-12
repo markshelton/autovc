@@ -1,0 +1,424 @@
+{
+  "metadata": {
+    "version": 3,
+    "www_path_prefix": "https://www.crunchbase.com",
+    "api_path_prefix": "https://api.crunchbase.com",
+    "image_path_prefix": "http://public.crunchbase.com/t_api_images/"
+  },
+  "data": {
+    "type": "Organization",
+    "uuid": "00000aa4ba429b68a9c3040c9f3bf9b9",
+    "properties": {
+      "permalink": "formel-d-gmbh",
+      "api_path": "organizations/formel-d-gmbh",
+      "web_path": "organization/formel-d-gmbh",
+      "name": "Formel D GmbH",
+      "also_known_as": null,
+      "short_description": "Formel D GmbH is a automotive manufacturer and supplier for the world.",
+      "description": null,
+      "profile_image_url": null,
+      "primary_role": "company",
+      "role_company": true,
+      "role_investor": null,
+      "role_group": null,
+      "role_school": null,
+      "founded_on": "1993-01-01",
+      "founded_on_trust_code": 4,
+      "is_closed": null,
+      "closed_on": null,
+      "closed_on_trust_code": 0,
+      "num_employees_min": 10001,
+      "num_employees_max": 1000000,
+      "stock_exchange": null,
+      "stock_symbol": null,
+      "total_funding_usd": 0,
+      "number_of_investments": 0,
+      "homepage_url": null,
+      "created_at": 1464764317,
+      "updated_at": 1473559763
+    },
+    "relationships": {
+      "primary_image": {
+        "cardinality": "OneToOne",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/primary_image",
+          "sort_order": "not_ordered"
+        }
+      },
+      "founders": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/founders",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "featured_team": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/featured_team",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "current_team": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/current_team",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "past_team": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/past_team",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "board_members_and_advisors": {
+        "cardinality": "ManyToMany",
+        "paging": {
+          "total_items": 1,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/board_members_and_advisors",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+          {
+            "type": "Job",
+            "uuid": "efc709dddf0c8feacd4a9331e74dc959",
+            "properties": {
+              "title": "Member of the Advisory Board",
+              "started_on": null,
+              "started_on_trust_code": null,
+              "ended_on": null,
+              "ended_on_trust_code": 0,
+              "is_current": true,
+              "created_at": 1464764317,
+              "updated_at": 1464764317
+            },
+            "relationships": {
+              "person": {
+                "type": "Person",
+                "uuid": "70a772017d1be00659bfb0874ac53c63",
+                "properties": {
+                  "permalink": "bernd-bohr",
+                  "api_path": "people/bernd-bohr",
+                  "web_path": "person/bernd-bohr",
+                  "first_name": "Bernd",
+                  "last_name": "Bohr",
+                  "gender": "Male",
+                  "also_known_as": null,
+                  "bio": "Dr.-Ing. Bernd Bohr was born in Mannheim in 1956. He completed his studies of mechanical engineering in Aachen with a dissertation in the area of control engineering in 1983 and obtained a doctoral degree. \r\n\r\nIn 1983 he joined Robert Bosch GmbH, Reutlingen Plant, where he was active as head of production planning from 1986. In 1993, he became managing director for manufacturing at Nippon ABS Ltd., Tokyo, where he assumed worldwide responsibility for the company‘s automotive electronics division in 1996 and managed the development of ABS and Brakes division in 1998. In 1999, Dr. Bohr was appointed as member of the Management Board of Robert Bosch GmbH responsible for the Diesel Injection division with corporate responsibility for the region of Japan. \r\n\r\nFrom 2003 to June 30, 2013 he was active as chairman of the vehicle technology division with responsibility for the worldwide automotive activities of the group.\r\n\r\nBohr is Chairman of the Supervisory Board of Knorr-Bremse AG and member of the Advisory Board of Formel D GmbH.",
+                  "profile_image_url": "http://public.crunchbase.com/t_api_images/v1464671432/ujz5bk0ztlg450ieui9d.jpg",
+                  "role_investor": null,
+                  "born_on": null,
+                  "born_on_trust_code": null,
+                  "died_on": null,
+                  "died_on_trust_code": null,
+                  "created_at": 1464671449,
+                  "updated_at": 1464764508
+                }
+              }
+            }
+          }
+        ]
+      },
+      "investors": {
+        "cardinality": "ManyToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/investors",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "owned_by": {
+        "cardinality": "ManyToOne",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/owned_by",
+          "sort_order": "not_ordered"
+        }
+      },
+      "sub_organizations": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/sub_organizations",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "offices": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/offices",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "headquarters": {
+        "cardinality": "OneToOne",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/headquarters",
+          "sort_order": "not_ordered"
+        }
+      },
+      "products": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/products",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "categories": {
+        "cardinality": "ManyToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/categories",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "customers": {
+        "cardinality": "ManyToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/customers",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "competitors": {
+        "cardinality": "ManyToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/competitors",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "memberships": {
+        "cardinality": "ManyToOne",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/memberships",
+          "sort_order": "not_ordered"
+        }
+      },
+      "members": {
+        "cardinality": "ManyToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/members",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "funding_rounds": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/funding_rounds",
+          "sort_order": "announced_on DESC"
+        },
+        "items": [
+
+        ]
+      },
+      "investments": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/investments",
+          "sort_order": "announced_on DESC"
+        },
+        "items": [
+
+        ]
+      },
+      "acquisitions": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/acquisitions",
+          "sort_order": "announced_on DESC"
+        },
+        "items": [
+
+        ]
+      },
+      "acquired_by": {
+        "cardinality": "OneToOne",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/acquired_by",
+          "sort_order": "not_ordered"
+        }
+      },
+      "ipo": {
+        "cardinality": "OneToOne",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/ipo",
+          "sort_order": "not_ordered"
+        }
+      },
+      "funds": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/funds",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "websites": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 6,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/websites",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+          {
+            "type": "WebPresence",
+            "uuid": "373ed7c3b1075cf341aff96693b608ff",
+            "properties": {
+              "website_type": "facebook",
+              "website_name": "facebook",
+              "url": "https://www.facebook.com/formeld",
+              "created_at": 1473454541,
+              "updated_at": 1473454541
+            }
+          },
+          {
+            "type": "WebPresence",
+            "uuid": "37cc72eb202896ec629a30756767defc",
+            "properties": {
+              "website_type": "homepage",
+              "website_name": "homepage",
+              "url": "http://www.formeld.com",
+              "created_at": 1473281399,
+              "updated_at": 1473281399
+            }
+          },
+          {
+            "type": "WebPresence",
+            "uuid": "6994dc8d6a0083974faa2177150fe58a",
+            "properties": {
+              "website_type": "twitter",
+              "website_name": "twitter",
+              "url": "https://www.twitter.com/formeld_es",
+              "created_at": 1473454542,
+              "updated_at": 1473454542
+            }
+          },
+          {
+            "type": "WebPresence",
+            "uuid": "7dc96b71f3eef0a388768afa4027d62b",
+            "properties": {
+              "website_type": "homepage",
+              "website_name": "homepage",
+              "url": "http://www.formeld.com",
+              "created_at": 1473454719,
+              "updated_at": 1473454719
+            }
+          },
+          {
+            "type": "WebPresence",
+            "uuid": "a1be19a5b527ffbdd15ab6505a315301",
+            "properties": {
+              "website_type": "facebook",
+              "website_name": "facebook",
+              "url": "https://www.facebook.com/formeld",
+              "created_at": 1473381850,
+              "updated_at": 1473381850
+            }
+          },
+          {
+            "type": "WebPresence",
+            "uuid": "eb2ca1082c839c4e88a06f9dcd1d8bf7",
+            "properties": {
+              "website_type": "twitter",
+              "website_name": "twitter",
+              "url": "https://www.twitter.com/formeld_es",
+              "created_at": 1473358654,
+              "updated_at": 1473358654
+            }
+          }
+        ]
+      },
+      "images": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/images",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "videos": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/videos",
+          "sort_order": "not_ordered"
+        },
+        "items": [
+
+        ]
+      },
+      "news": {
+        "cardinality": "OneToMany",
+        "paging": {
+          "total_items": 0,
+          "first_page_url": "https://api.crunchbase.com/v/3/organizations/formel-d-gmbh/news",
+          "sort_order": "posted_on DESC"
+        },
+        "items": [
+
+        ]
+      }
+    }
+  }
+}
