@@ -28,13 +28,14 @@ class configManager(object):
         log.info("Completed config loading process")
         self.log_config()
 
-    def search_directory(config_dir):
+    def find_config_files(self, config_dir):
+
+        def search_directory(config_dir):
             file_names = []
             for file in os.listdir(config_dir):
                 file_names.append(config_dir+file)
             return file_names
 
-    def find_config_files(self, config_dir):
         try:
             file_names = search_directory(config_dir)
             log.info("%s | config directory loaded", config_dir)
