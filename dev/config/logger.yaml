@@ -48,6 +48,6 @@ loggers:
         handlers: [info_file_handler, error_file_handler]
 
 root:
-    level: INFO
+    level: DEBUG
     handlers: [debug_console_handler, error_console_handler, info_file_handler, error_file_handler]
 ...
