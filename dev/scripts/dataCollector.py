@@ -1,6 +1,6 @@
 #!/Anaconda3/env/honours python
 
-"""main"""
+"""dataCollector.py"""
 
 #standard modules
 import logging
@@ -12,7 +12,9 @@ import time
 import atexit
 
 #third-party modules
-from simple_requests import *
+from ratelimit import *
+import requests as rq
+import concurrent.futures as cf
 
 #local modules
 import logManager
@@ -47,15 +49,11 @@ cm = db.load_config()
 #logger
 log = logging.getLogger(__name__)
 
-#requests
-#session = FuturesSession(max_workers=int(cm.max_workers))
-
-
 #helper functions
 
-def format_request(node_type, node_id):
-    request = "%s/%s/%s/%s?user_key=%s" % (cm.base_url, cm.version, node_type, node_id, cm.cb_key)
-    return request
+def format_url(node_type, node_id):
+    url = "%s/%s/%s/%s?user_key=%s" % (cm.base_url, cm.version, node_type, node_id, cm.cb_key)
+    return url
 
 def parse_json(json):
     record = {}
@@ -81,10 +79,8 @@ def get_tables(database):
     return connnection.execute(query)
 
 def get_nodelist():
-    request = format_request("node_keys","node_keys.tar.gz")
-    session = Requests()
-    print(request)
-    response = session.one(request)
+    request = format_url("node_keys","node_keys.tar.gz")
+    response = rq.get(request)
     with open(cm.nl_archive_file, 'wb') as f:
         f.write(response.content)
     return cm.nl_archive_file
@@ -95,25 +91,21 @@ def track_time(start_time, current_record, total_records, table):
     time_remaining = (elapsed_time / percent_complete - elapsed_time)
     log.info("%s | %s | %s | %.2f | %.2f | %.2f" % (table, current_record, total_records, percent_complete * 100, elapsed_time / 60, time_remaining / 60))
 
-def store_response(response):
-    record = parse_json(response.json())
-    table = record["api_path"].split("/")[0]
+@rate_limited(float(cm.request_space))
+def load_url(session, url):
+    return session.get(url)
+
+#Done
+def store_response(response, table):
     store = "%s%s.csv" % (cm.crawl_extract_dir, table)
+    record = parse_json(response.json())
     store_record(record, store)
-
-class preprocessor(ResponsePreprocessor):
-    def success(self, bundle):
-        store_response(bundle.response)
-        return bundle.ret()
-
-    def error(self, bundle):
-        #raise type(bundle.exception)(bundle.exception).with_traceback(bundle.traceback)
-        return None
 
 #core functions
 
 #Done
 def setup():
+    db.clear_files(cm.crawl_extract_dir, cm.database_file, cm.nl_database_file)
     nodelist = load_nodelist()
     database = cm.database_file
     tables = get_tables(nodelist)
@@ -123,37 +115,33 @@ def setup():
 def load_nodelist():
     if not(os.path.isfile(cm.nl_database_file)):
         nodelist = get_nodelist()
-        db.load_file(nodelist,cm.nl_database_file)
+        db.load_database(nodelist,cm.nl_extract_dir, cm.nl_database_file)
     nodelist = cm.nl_database_file
     return nodelist
 
 #TODO more complicated diff
 def select_records(nodelist, database, table):
     connection = sqlite3.connect(nodelist)
-    query = "SELECT %s FROM %s" % (TABLE_PK_LOOKUP[table],table)
+    query = "SELECT %s FROM %s LIMIT 10" % (TABLE_PK_LOOKUP[table],table)
     records = connection.execute(query).fetchall()
     return records
 
 #Done
-def prepare_requests(records, table):
-    requests = [format_request(table, record) for record, in records]
-    return requests
+def prepare_urls(records, table):
+    urls = [format_url(table, record) for record, in records]
+    return urls
 
 #Done
-def make_requests(requests):
-    session = Requests(concurrent=int(cm.max_workers),
-                   minSecondsBetweenRequests=60/float(cm.requests_per_min),
-                   defaultTimeout=int(cm.default_timeout),
-                   responsePreprocessor=preprocessor(),
-                   retryStrategy=Backoff())
-    session.swarm(requests)
-    """
-    while True:
-        print(len(session._requestQueue.queue))
-        if len(session._requestQueue.queue) == 0:
-            print("HELLO")
-            break
-    """
+def make_requests(urls, table):
+    start_time = time.time()
+    session = rq.Session()
+    with cf.ThreadPoolExecutor() as ex:
+        futures = [ex.submit(load_url, session, url) for url in urls]
+        for tally, future in enumerate(cf.as_completed(futures)):
+            response = future.result()
+            if response.status_code == 200:
+                store_response(response, table)
+            track_time(start_time, tally, len(urls), table)
 
 #Done
 def load_responses(database, table):
@@ -164,21 +152,11 @@ def main():
     nodelist, database, tables = setup()
     for table, in tables:
         records = select_records(nodelist, database, table)
-        requests = prepare_requests(records, table)
-        make_requests(requests)
-        #store_responses(responses, len(records), table)
-        #load_responses(database, table)
+        urls = prepare_urls(records, table)
+        make_requests(urls, table)
+        load_responses(database, table)
 
 if __name__ == "__main__":
     main()
 
 #Graveyard
-
-#Done
-def store_responses(responses, total, table):
-    start_time = time.time()
-    store = "%s%s.csv" % (cm.crawl_extract_dir, table)
-    for tally, response in enumerate(responses):
-        record = parse_json(response.json())
-        store_record(record, store)
-        track_time(start_time, tally, total, table)
