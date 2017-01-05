@@ -41,7 +41,7 @@ handlers:
 loggers:
     console_logger:
         level: DEBUG
-        handlers: [debug_console_handler, error_console_handler]
+        handlers: [debug_console_handler]
         propagate: no
     file_logger:
         level: INFO

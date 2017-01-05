@@ -66,7 +66,7 @@ def load_file(abs_source_file, database_file):
     db_uri = ("sqlite:///"+ database_file +"::"+ source_name)
     try:
         log.info("%s | Import started", source_file)
-        odo.odo(abs_source_file, db_uri, engine="c")
+        odo.odo(abs_source_file, db_uri, engine="c", has_header=True, encoding="utf-8")
         log.info("%s | Import successful", source_file)
     except:
         try:

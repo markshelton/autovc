@@ -5,11 +5,11 @@
 #standard modules
 import logging
 import sqlite3
-import json
 import os
 import csv
 import time
-import atexit
+import sys
+import signal
 
 #third-party modules
 from ratelimit import *
@@ -58,7 +58,8 @@ def format_url(node_type, node_id):
 def parse_json(json):
     record = {}
     record["uuid"] = json["data"]["uuid"]
-    for field in json["data"]["properties"].keys():
+    fields = json["data"]["properties"].keys()
+    for field in fields:
         record[field] = json["data"]["properties"][field]
     return record
 
@@ -68,7 +69,7 @@ def store_record(record, store):
         write_header = False
     elif not os.path.exists(os.path.dirname(store)):
         os.makedirs(os.path.dirname(store))
-    with open(store, 'a+',newline='') as f:
+    with open(store, 'a+',newline='',encoding="utf-8") as f:
         writer = csv.writer(f,delimiter=",")
         if write_header: writer.writerow(record.keys())
         writer.writerow(record.values())
@@ -85,11 +86,11 @@ def get_nodelist():
         f.write(response.content)
     return cm.nl_archive_file
 
-def track_time(start_time, current_record, total_records, table):
+def track_time(start_time, current_record, total_records, table, status):
     elapsed_time = time.time() - start_time
-    percent_complete = current_record / float(total_records) + 0.001
+    percent_complete = current_record / float(total_records) + 0.00001
     time_remaining = (elapsed_time / percent_complete - elapsed_time)
-    log.info("%s | %s | %s | %.2f | %.2f | %.2f" % (table, current_record, total_records, percent_complete * 100, elapsed_time / 60, time_remaining / 60))
+    log.info("%s | %s | %s | %.2f | %.2f | %.2f | %s" % (table, current_record, total_records, percent_complete * 100, elapsed_time / 60, time_remaining / 60, status))
 
 @rate_limited(float(cm.request_space))
 def load_url(session, url):
@@ -97,51 +98,67 @@ def load_url(session, url):
 
 #Done
 def store_response(response, table):
-    store = "%s%s.csv" % (cm.crawl_extract_dir, table)
-    record = parse_json(response.json())
-    store_record(record, store)
+    if response.status_code == 200:
+        store = "%s%s.csv" % (cm.crawl_extract_dir, table)
+        record = parse_json(response.json())
+        store_record(record, store)
+        status = "Successful"
+    else: status = "Failed"
+    return status
 
 #core functions
 
 #Done
 def setup():
-    db.clear_files(cm.crawl_extract_dir, cm.database_file, cm.nl_database_file)
     nodelist = load_nodelist()
     database = cm.database_file
     tables = get_tables(nodelist)
-    return nodelist, database, tables
+    ex = cf.ThreadPoolExecutor()
+    return nodelist, database, tables, ex
 
 #Done
 def load_nodelist():
     if not(os.path.isfile(cm.nl_database_file)):
-        nodelist = get_nodelist()
-        db.load_database(nodelist,cm.nl_extract_dir, cm.nl_database_file)
+        if not (os.path.isfile(cm.nl_archive_file)):
+            nodelist = get_nodelist()
+        db.load_database(cm.nl_archive_file,cm.nl_extract_dir, cm.nl_database_file)
     nodelist = cm.nl_database_file
     return nodelist
 
-#TODO more complicated diff
+#Done
 def select_records(nodelist, database, table):
-    connection = sqlite3.connect(nodelist)
-    query = "SELECT %s FROM %s LIMIT 10" % (TABLE_PK_LOOKUP[table],table)
-    records = connection.execute(query).fetchall()
+    c_database = sqlite3.connect(database)
+    c_nodelist = sqlite3.connect(nodelist)
+    query = "SELECT name FROM sqlite_master WHERE type= \'table\' AND name=\'%s\';" % (table)
+    table_exists = (len(c_database.execute(query).fetchall()) == 1)
+    if table_exists:
+        query = "ATTACH DATABASE \'{0}\' AS db2;".format(nodelist)
+        c_database.execute(query)
+        query = "SELECT A.{0} FROM db2.{1} AS A LEFT OUTER JOIN {1} AS B ON REPLACE(A.{0},\'-\',\'\') = B.{0} WHERE datetime(A.updated_at) > datetime(B.updated_at,\'unixepoch\') OR B.updated_at IS NULL;".format(TABLE_PK_LOOKUP[table],table)
+        records = c_database.execute(query).fetchall()
+    else:
+        query = "SELECT %s FROM %s LIMIT 20" % (TABLE_PK_LOOKUP[table],table)
+        records = c_nodelist.execute(query).fetchall()
     return records
 
 #Done
 def prepare_urls(records, table):
-    urls = [format_url(table, record) for record, in records]
+    node_type = API_TABLE_LOOKUP[table]
+    if TABLE_PK_LOOKUP[table] == "uuid":
+        urls = [format_url(node_type, record) for record, in records]
+    else: urls = [format_url(node_type, record.split("/")[2]) for record, in records]
     return urls
 
 #Done
-def make_requests(urls, table):
+def make_requests(ex, urls, table):
     start_time = time.time()
     session = rq.Session()
-    with cf.ThreadPoolExecutor() as ex:
-        futures = [ex.submit(load_url, session, url) for url in urls]
-        for tally, future in enumerate(cf.as_completed(futures)):
-            response = future.result()
-            if response.status_code == 200:
-                store_response(response, table)
-            track_time(start_time, tally, len(urls), table)
+    futures = [ex.submit(load_url, session, url) for url in urls]
+    for tally, future in enumerate(cf.as_completed(futures)):
+        response = future.result()
+        status = store_response(response, table)
+        track_time(start_time, tally, len(urls), table, status)
+        if tally == 50: raise ValueError
 
 #Done
 def load_responses(database, table):
@@ -149,14 +166,24 @@ def load_responses(database, table):
     db.load_file(store, database)
 
 def main():
-    nodelist, database, tables = setup()
+    #db.clear_files(cm.crawl_extract_dir, cm.database_file, cm.nl_database_file)
+    nodelist, database, tables, ex = setup()
     for table, in tables:
         records = select_records(nodelist, database, table)
         urls = prepare_urls(records, table)
-        make_requests(urls, table)
+        make_requests(ex, urls, table)
         load_responses(database, table)
 
+def exit_gracefully():
+    nodelist, database, tables, ex = setup()
+    for table, in tables:
+        try: load_responses(database, table)
+        except: pass
+    ex.shutdown(wait=False)
+    sys.exit(0)
+
 if __name__ == "__main__":
-    main()
+    try: main()
+    except: exit_gracefully()
 
 #Graveyard

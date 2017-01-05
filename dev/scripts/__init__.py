@@ -1,8 +1,9 @@
-__all__ = ["logManager", "configManager", "dbLoader"]
+__all__ = ["logManager", "configManager", "dbLoader", "dataCollector"]
 
 #local modules
 import logManager
 import dbLoader
+import dataCollector
 
 #logic
-dbLoader.main()
+dataCollector.main()
