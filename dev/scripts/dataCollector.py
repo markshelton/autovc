@@ -9,7 +9,6 @@ import os
 import csv
 import time
 import sys
-import signal
 
 #third-party modules
 from ratelimit import *
@@ -63,7 +62,7 @@ def parse_json(json):
         record[field] = json["data"]["properties"][field]
     return record
 
-def store_record(record, store):
+def store_record(record, store, columns):
     write_header = True
     if os.path.isfile(store):
         write_header = False
@@ -71,8 +70,13 @@ def store_record(record, store):
         os.makedirs(os.path.dirname(store))
     with open(store, 'a+',newline='',encoding="utf-8") as f:
         writer = csv.writer(f,delimiter=",")
-        if write_header: writer.writerow(record.keys())
-        writer.writerow(record.values())
+        if columns:
+            if write_header: writer.writerow(columns)
+            values = list(record.get(column) for column in columns)
+        else:
+            if write_header: writer.writerow(record.keys())
+            values = record.values()
+        writer.writerow(values)
 
 def get_tables(database):
     connnection = sqlite3.connect(database)
@@ -96,12 +100,20 @@ def track_time(start_time, current_record, total_records, table, status):
 def load_url(session, url):
     return session.get(url)
 
+def get_columns(database, table):
+    c_database = sqlite3.connect(database)
+    cursor = c_database.execute("SELECT * FROM %s" % (table))
+    columns = [desc[0] for desc in cursor.description]
+    return columns
+
 #Done
-def store_response(response, table):
+def store_response(response, database, table):
     if response.status_code == 200:
         store = "%s%s.csv" % (cm.crawl_extract_dir, table)
         record = parse_json(response.json())
-        store_record(record, store)
+        try: columns = get_columns(database, table)
+        except: columns = None
+        store_record(record, store, columns)
         status = "Successful"
     else: status = "Failed"
     return status
@@ -150,15 +162,14 @@ def prepare_urls(records, table):
     return urls
 
 #Done
-def make_requests(ex, urls, table):
+def make_requests(ex, urls, database, table):
     start_time = time.time()
     session = rq.Session()
     futures = [ex.submit(load_url, session, url) for url in urls]
     for tally, future in enumerate(cf.as_completed(futures)):
         response = future.result()
-        status = store_response(response, table)
+        status = store_response(response, database, table)
         track_time(start_time, tally, len(urls), table, status)
-        if tally == 50: raise ValueError
 
 #Done
 def load_responses(database, table):
@@ -166,24 +177,26 @@ def load_responses(database, table):
     db.load_file(store, database)
 
 def main():
+    db.clear_files(cm.crawl_extract_dir)
     #db.clear_files(cm.crawl_extract_dir, cm.database_file, cm.nl_database_file)
     nodelist, database, tables, ex = setup()
     for table, in tables:
         records = select_records(nodelist, database, table)
         urls = prepare_urls(records, table)
-        make_requests(ex, urls, table)
+        make_requests(ex, urls, database, table)
         load_responses(database, table)
 
-def exit_gracefully():
+def exit():
     nodelist, database, tables, ex = setup()
     for table, in tables:
         try: load_responses(database, table)
         except: pass
     ex.shutdown(wait=False)
+    log.info("Program completed.")
     sys.exit(0)
 
 if __name__ == "__main__":
     try: main()
-    except: exit_gracefully()
+    except ValueError: exit()
 
 #Graveyard

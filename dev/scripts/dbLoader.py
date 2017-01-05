@@ -66,17 +66,18 @@ def load_file(abs_source_file, database_file):
     db_uri = ("sqlite:///"+ database_file +"::"+ source_name)
     try:
         log.info("%s | Import started", source_file)
-        odo.odo(abs_source_file, db_uri, engine="c", has_header=True, encoding="utf-8")
+        odo.odo(abs_source_file, db_uri, engine="python", has_header=True,  encoding="utf-8")
         log.info("%s | Import successful", source_file)
     except:
         try:
-            log.debug("%s | Alternative import started", source_file)
+            log.info("%s | Alternative import started", source_file)
             t = odo.resource(abs_source_file)
-            ds = odo.discover(t, engine="c")
-            odo.odo(abs_source_file, db_uri, dshape=ds, engine="c")
+            ds = odo.discover(t, engine="python")
+            odo.odo(abs_source_file, db_uri, dshape=ds, engine="python")
             log.info("%s | Import successful", source_file)
-        except:
-            log.error("%s | Import failed", source_file, exc_info=True)
+        except Exception as e:
+            log.error("%s | Import failed", source_file)
+            raise e
 
 def load_files(extract_dir, database_file):
     log.info("%s | Started import process", database_file)
