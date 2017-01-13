@@ -24,6 +24,7 @@ $RECYCLE.BIN/
 *.exe
 *.o
 *.so
+*.pyc
 
 # Logs and databases #
 *.log

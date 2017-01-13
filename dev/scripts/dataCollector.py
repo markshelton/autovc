@@ -98,7 +98,8 @@ def track_time(start_time, current_record, total_records, table, status):
 
 @rate_limited(float(cm.request_space))
 def load_url(session, url):
-    return session.get(url)
+    headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0' }
+    return session.get(url, headers=headers)
 
 def get_columns(database, table):
     c_database = sqlite3.connect(database)
@@ -125,7 +126,7 @@ def setup():
     nodelist = load_nodelist()
     database = cm.database_file
     tables = get_tables(nodelist)
-    ex = cf.ThreadPoolExecutor()
+    ex = cf.ThreadPoolExecutor(max_workers=10)
     return nodelist, database, tables, ex
 
 #Done
@@ -149,7 +150,7 @@ def select_records(nodelist, database, table):
         query = "SELECT A.{0} FROM db2.{1} AS A LEFT OUTER JOIN {1} AS B ON REPLACE(A.{0},\'-\',\'\') = B.{0} WHERE datetime(A.updated_at) > datetime(B.updated_at,\'unixepoch\') OR B.updated_at IS NULL;".format(TABLE_PK_LOOKUP[table],table)
         records = c_database.execute(query).fetchall()
     else:
-        query = "SELECT %s FROM %s LIMIT 20" % (TABLE_PK_LOOKUP[table],table)
+        query = "SELECT %s FROM %s LIMIT 600" % (TABLE_PK_LOOKUP[table],table)
         records = c_nodelist.execute(query).fetchall()
     return records
 
@@ -170,15 +171,16 @@ def make_requests(ex, urls, database, table):
         response = future.result()
         status = store_response(response, database, table)
         track_time(start_time, tally, len(urls), table, status)
+        if tally % 500 == 50: load_responses(database, table)
 
 #Done
 def load_responses(database, table):
     store = "%s%s.csv" % (cm.crawl_extract_dir, table)
     db.load_file(store, database)
+    db.clear_files(store)
 
 def main():
     db.clear_files(cm.crawl_extract_dir)
-    #db.clear_files(cm.crawl_extract_dir, cm.database_file, cm.nl_database_file)
     nodelist, database, tables, ex = setup()
     for table, in tables:
         records = select_records(nodelist, database, table)
@@ -193,10 +195,13 @@ def exit():
         except: pass
     ex.shutdown(wait=False)
     log.info("Program completed.")
-    sys.exit(0)
 
 if __name__ == "__main__":
-    try: main()
-    except ValueError: exit()
+    #db.clear_files(cm.crawl_extract_dir, cm.database_file, cm.nl_database_file)
+    while True:
+        try: main()
+        except Exception as e:
+            log.error("Error: %s" % e)
+            exit()
 
 #Graveyard
