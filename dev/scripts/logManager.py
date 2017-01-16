@@ -8,23 +8,21 @@ import logging.config
 import os
 
 #third-party modules
-import yaml
 
 #local modules
+import configManager
 
 #constants
 LOG_CONFIG = "../config/logger.yaml"
 
 #program
-warn = False
-if os.path.exists(LOG_CONFIG):
-    with open(LOG_CONFIG, 'rt') as f:
-        config = yaml.safe_load(f.read())
-    logging.config.dictConfig(config)
-else:
+try: config = configManager.load_yaml(LOG_CONFIG)
+except:
     logging.basicConfig(level=logging.INFO)
-    warn = True
-log = logging.getLogger(__name__)
-if warn: log.warn("Default log config failed")
-else: log.info("Default log config loaded")
-log.info("Logger created")
+    log.warn("Default log config failed")
+else:
+    logging.config.dictConfig(config)
+    log = logging.getLogger(__name__)
+    log.info("Default log config loaded")
+    log.info("Logger created")
+

@@ -9,16 +9,18 @@ import os
 import csv
 import time
 import sys
+import json
 
 #third-party modules
 from ratelimit import *
 import requests as rq
 import concurrent.futures as cf
+import dpath.util as dp
 
 #local modules
 import logManager
 import dbLoader as db
-from configManager import configManager
+import configManager
 
 #constants
 
@@ -61,6 +63,114 @@ def parse_json(json):
     for field in fields:
         record[field] = json["data"]["properties"][field]
     return record
+
+def get_table(json):
+    table = json["properties"]["api_path"].split("/")[0]
+    table_lookup = {v: k for k, v in API_TABLE_LOOKUP.items()}
+    table = table_lookup[table]
+    return table
+
+def get_value(dictionary, glob):
+    try: return dp.get(dictionary, glob)
+    except KeyError: return None
+
+def unpack_properties(keychain, reference, response):
+    res_keys = get_value(response, keychain).keys() #keys=[created_at]
+    table = get_value(reference, keychain).split(".")[0] #funds
+    dp.delete(reference, keychain)
+    for res_key in res_keys:
+        keychain.append(res_key) #kc=[properties, created_at]
+        value = "{0}.{1}".format(table, res_key) #funds.created_at
+        dp.new(reference, keychain, value)
+        keychain.pop()
+
+def store(keychain, reference, response, records):
+    #kc = [properties, created_at]
+    ref = get_value(reference, keychain).split(".") # [funds, created_at]
+    table, attribute = tuple(ref) #table = funds, attribute = created_at
+    res = get_value(response, keychain) #1474603967
+    if get_value(records, table):
+        length = len(get_value(records, table))
+    else: length = 1
+    ref = [table, length - 1, attribute]
+    existing = get_value(records, ref)
+    if existing: ref = [table, length, attribute]
+    dp.new(records, ref, res)
+    return records
+
+def split_key(keychain, reference):
+    # kc = [relationships, venture_firm.item.uuid]
+    print("BEFORE:", keychain)
+    key = ''.join(keychain[-1:]) # key = venture_firm.item.uuid
+    value = get_value(reference, keychain) # value = funds.venture_firm
+    dp.delete(reference, keychain)
+    keychain.pop() # kc=[relationships]
+    keychain.extend(key.split(".",maxsplit=1))
+    # kc=[relationships, venture_firm, item.uuid]
+    print("AFTER:", keychain)
+    dp.new(reference, keychain, value)
+
+def parse(keychain, visited, reference, response, records):
+    key = ''.join(keychain[-1:]) #kc=[relationships, images.items]
+    value = get_value(reference, keychain)
+    print(key, keychain, value)
+    nb = input("yo")
+    if "." in key: #images.items
+        print("A")
+        split_key(keychain, reference)
+        if keychain not in visited:
+            parse(keychain, visited, reference, response, records)
+            visited.append(list(keychain))
+        keychain.pop()
+    elif type(value) is list:
+        print("B")
+        #TODO
+    elif type(value) is dict or value is None: #kc=[relationships]
+        print("C")
+        if type(value) is dict: ref_keys = value.keys()
+        elif value is None: ref_keys = reference.keys()
+        for ref_key in ref_keys:
+            keychain.append(ref_key) #kc=[relationships, investors.items]
+            if keychain not in visited:
+                parse(keychain, visited, reference, response, records)
+                visited.append(list(keychain))
+            keychain.pop()
+    elif key == "items":
+        print("D")
+        res_items = get_value(response, keychain)
+        print("ITEMS:", res_items)
+        for i, res_item in enumerate(res_items):
+            parse(keychain, visited, reference, response, records)
+    elif key == "properties": #kc=[properties]
+        print("E")
+        if keychain not in visited:
+            unpack_properties(keychain, reference, response)
+            parse(keychain, visited, reference, response, records)
+            visited.append(list(keychain))
+    else:
+        print("F")
+        records = store(keychain, reference, response, records)
+        print("RECORDS:", records)
+        nb = input("hi")
+
+def play(reference, response):
+    records = {}
+    keychain = []
+    visited = []
+    parse(keychain, visited, reference, response, records)
+    exit()
+    return records
+
+def parse_json_new(reference, response):
+    record = {}
+    response = response["data"]
+    table = get_table(response)
+    reference = configManager.load_yaml(reference)[table]
+    record = play(reference, response)
+    print(reference)
+    return record
+
+    #dump = json.dumps(output, indent=4)
 
 def store_record(record, store, columns):
     write_header = True
@@ -188,7 +298,7 @@ def main():
         make_requests(ex, urls, database, table)
         load_responses(database, table)
 
-def exit():
+def clean_exit():
     nodelist, database, tables, ex = setup()
     for table, in tables:
         try: load_responses(database, table)
@@ -196,12 +306,18 @@ def exit():
     ex.shutdown(wait=False)
     log.info("Program completed.")
 
-if __name__ == "__main__":
-    #db.clear_files(cm.crawl_extract_dir, cm.database_file, cm.nl_database_file)
+def loop():
+    db.clear_files(cm.crawl_extract_dir, cm.database_file, cm.nl_database_file)
     while True:
         try: main()
         except Exception as e:
             log.error("Error: %s" % e)
-            exit()
+            clean_exit()
 
-#Graveyard
+if __name__ == "__main__":
+    #loop()
+    ref_path = "../config/crawler.yaml"
+    json_path = "../../sources/api_examples/funds.json"
+    json = json.loads(open(json_path).read())
+    parse_json_new(ref_path, json)
+

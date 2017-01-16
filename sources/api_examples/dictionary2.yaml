@@ -9,8 +9,8 @@ Overview:
             1-M: Organization (Funded Company), FundingRound
         Ipo:
             1-1: Organization (Funded Company), Ipo
-        Organization:
             1-1: StockExchange, Organization
+        Organization:
             1-M: Organization (Parent), Organization
         Person: None
         Product:
@@ -125,8 +125,10 @@ Ipo: #Primary
     money_raised: Integer
     money_raised_currency_code: String
     money_raised_usd: Integer
+    stock_symbol: String
     created_at: Timestamp
     updated_at: Timestamp
+    stock_exchange: UUID #FK - StockExchange
     funded_company: UUID #FK - Organization
 
 Organization: #Primary
@@ -151,8 +153,6 @@ Organization: #Primary
     num_employees_max: Integer
     created_at: Timestamp
     updated_at: Timestamp
-    stock_symbol: String
-    stock_exchange: UUID #FK - StockExchange
     parent_organization: UUID #FK - Organization
 
 Person: #Primary
@@ -258,6 +258,7 @@ Job: #Secondary
     is_advisory: Boolean #Created
     is_founder: Boolean #Created
     is_primary: Boolean #Created
+    is_featured: Boolean #Created
     started_on: Date
     started_on_trust_code: TrustCode
     ended_on: Date

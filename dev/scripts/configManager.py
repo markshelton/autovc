@@ -8,6 +8,7 @@ import logging
 import os
 
 #third-party modules
+import yaml
 
 #local modules
 import logManager
@@ -68,6 +69,12 @@ class configManager(object):
     def log_config(self):
         for entry in self.__dict__.items():
             log.info(entry)
+
+def load_yaml(path):
+        if os.path.exists(path):
+            with open(path, 'rt') as f:
+                output = yaml.safe_load(f.read())
+                return output
 
 #testing
 def main():

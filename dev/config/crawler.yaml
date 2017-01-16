@@ -1,0 +1,279 @@
+---
+acquisitions:
+  uuid:
+    - acquisitions.uuid
+    - collection.entity
+  properties: acquisitions.properties #dict
+  relationships:
+    acquiree.item.uuid: acquisitions.acquiree
+    acquirer.item.uuid: acquisitions.acquirer
+    images.items: #list
+      uuid:
+        - images.uuid
+        - collection.content
+      properties: images.properties #dict
+    videos.items: #list
+      uuid:
+        - videos.uuid
+        - collection.content
+      properties: videos.properties #dict
+    news.items: #list
+      uuid:
+        - news.uuid
+        - collection.content
+      properties: news.properties #dict
+funds:
+  uuid:
+    - funds.uuid
+    - collection.entity
+    - fund_investors.fund
+  properties: funds.properties #dict
+  relationships:
+    venture_firm.item.uuid: funds.venture_firm
+    investors.items: #list
+      uuid: fund_investors.investor
+      properties: fund_investors.properties #dict
+    images.items: #list
+      uuid:
+        - images.uuid
+        - collection.content
+      properties: images.properties #dict
+    videos.items: #list
+      uuid:
+        - videos.uuid
+        - collection.content
+      properties: videos.properties #dict
+    news.items: #list
+      uuid:
+        - news.uuid
+        - collection.content
+      properties: news.properties #dict
+funding_rounds:
+  uuid:
+    - funding_rounds.uuid
+    - collection.entity
+  properties: funding_rounds.properties #dict
+  relationships:
+    funded_organization.item.uuid: funding_rounds.funded_organization
+    images.items: #list
+      uuid:
+        - images.uuid
+        - collection.content
+      properties: images.properties #dict
+    videos.items: #list
+      uuid:
+        - videos.uuid
+        - collection.content
+      properties: videos.properties #dict
+    news.items: #list
+      uuid:
+        - news.uuid
+        - collection.content
+      properties: news.properties #dict
+ipos:
+  uuid:
+    - ipos.uuid
+    - collection.entity
+  properties: ipos.properties #dict
+  relationships:
+    funded_company.items: #list
+      uuid: ipos.funded_company
+    stock_exchange.item:
+      uuid:
+        - ipos.stock_exchange
+        - stock_exchanges.uuid
+      properties: stock_exchanges.properties #dict
+    images.items: #list
+      uuid:
+        - images.uuid
+        - collection.content
+      properties: images.properties #dict
+    videos.items: #list
+      uuid:
+        - videos.uuid
+        - collection.content
+      properties: videos.properties #dict
+    news.items: #list
+      uuid:
+        - news.uuid
+        - collection.content
+      properties: news.properties #dict
+organizations:
+  uuid:
+    - organizations.uuid
+    - jobs.employer
+    - collection.entity
+    - trade.vendor
+    - competition.competitor_one
+  properties: organizations.properties #dict
+  relationships:
+    primary_image.item:
+      uuid:
+        - images.uuid
+        - collection.content
+      properties: images.properties #dict
+      True: collection.is_primary
+    founders.items: #list
+      uuid: jobs.employee
+      True: jobs.is_founder
+    featured_team.items: #list
+      uuid: jobs.uuid
+      properties: jobs.properties #dict
+      relationships.person.uuid: jobs.employee
+      True: jobs.is_featured
+    current_team.items: #list
+      uuid: jobs.uuid
+      properties: jobs.properties #dict
+      relationships.person.uuid: jobs.employee
+      True: jobs.is_current
+    past_team.items: #list
+      uuid: jobs.uuid
+      properties: jobs.properties #dict
+      relationships.person.uuid: jobs.employee
+    board_members_and_advisors.items: #list
+      uuid: jobs.uuid
+      properties: jobs.properties #dict
+      relationships.person.uuid: jobs.employee
+      True: jobs.is_advisory
+    offices.items: #list
+      uuid:
+        - address.uuid
+        - collection.content
+      properties: address.properties #dict
+    headquarters.item: #list
+      uuid:
+        - address.uuid
+        - collection.content
+      properties: address.properties #dict
+      True: collection.is_primary
+    categories.items: #list
+      uuid:
+        - category.uuid
+        - collection.content
+      properties: category.properties #dict
+    customers.items: #list
+      uuid: trade.customer
+    competitors.items: #list
+      uuid: competition.competitor_two
+    websites.items:
+      uuid:
+        - website.uuid
+        - collection.content
+      properties: website.properties #dict
+    images.items: #list
+      uuid:
+        - images.uuid
+        - collection.content
+      properties: images.properties #dict
+    videos.items: #list
+      uuid:
+        - videos.uuid
+        - collection.content
+      properties: videos.properties #dict
+    news.items: #list
+      uuid:
+        - news.uuid
+        - collection.content
+      properties: news.properties #dict
+people:
+  uuid:
+    - people.uuid
+    - jobs.employee
+    - degree.student
+    - investments.investor
+    - collection.entity
+  properties: people.properties #dict
+  relationships:
+    primary_affiliation.item:
+      uuid: jobs.uuid
+      properties: jobs.properties
+      relationships.organization.uuid: jobs.employer
+      True: jobs.is_primary
+    primary_location.item:
+      uuid:
+        - location.uuid
+        - collection.content
+      properties: location.properties
+      True: location.is_primary
+    primary_image.item:
+      uuid:
+        - images.uuid
+        - collection.content
+      properties: images.properties #dict
+      True: collection.is_primary
+    websites.items: #list
+      uuid:
+        - website.uuid
+        - collection.content
+      properties: website.properties #dict
+    degrees.items: #list
+      uuid: degree.uuid
+      properties: degree.properties #dict
+      relationships.school.uuid: degree.school
+    jobs.items: #list
+      uuid: jobs.uuid
+      properties: jobs.properties #dict
+      relationships.organization.uuid: jobs.employer
+    advisory_roles.items: #list
+      uuid: jobs.uuid
+      properties: jobs.properties #dict
+      relationships.organization.uuid: jobs.employer
+      True: jobs.is_advisory
+    investments.items: #list
+      uuid: investments.uuid
+      properties: investments.properties #dict
+      relationships.funding_round.uuid: investments.funding_round
+    images.items: #list
+      uuid:
+        - images.uuid
+        - collection.content
+      properties: images.properties #dict
+    videos.items: #list
+      uuid:
+        - videos.uuid
+        - collection.content
+      properties: videos.properties #dict
+    news.items: #list
+      uuid:
+        - news.uuid
+        - collection.content
+      properties: news.properties #dict
+products:
+  uuid:
+    - products.uuid
+    - collection.entity
+  properties: products.properties #dict
+  relationships:
+    owner.item.uuid: products.owner
+    categories.items: #list
+      uuid:
+        - category.uuid
+        - collection.content
+      properties: category.properties #dict
+    primary_image.item:
+      uuid:
+        - images.uuid
+        - collection.content
+      properties: images.properties #dict
+      True: collection.is_primary
+    websites.items:
+      uuid:
+        - website.uuid
+        - collection.content
+      properties: website.properties #dict
+    images.items: #list
+      uuid:
+        - images.uuid
+        - collection.content
+      properties: images.properties #dict
+    videos.items: #list
+      uuid:
+        - videos.uuid
+        - collection.content
+      properties: videos.properties #dict
+    news.items: #list
+      uuid:
+        - news.uuid
+        - collection.content
+      properties: news.properties #dict
+...
