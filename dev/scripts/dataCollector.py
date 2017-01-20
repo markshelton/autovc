@@ -19,8 +19,9 @@ import dpath.util as dp
 
 #local modules
 import logManager
-import dbLoader as db
 import configManager
+import dbLoader as db
+import responseParser as rp
 
 #constants
 
@@ -102,13 +103,16 @@ def get_columns(database, table):
     return columns
 
 #Done
-def store_response(response, database, table):
+def store_response(response, database):
     if response.status_code == 200:
-        store = "%s%s.csv" % (cm.crawl_extract_dir, table)
-        record = parse_json(response.json())
-        try: columns = get_columns(database, table)
-        except: columns = None
-        store_record(record, store, columns)
+        records = rp.parse(cm.crawler_ref, response.json())
+        for table in records:
+            store = "%s%s.csv" % (cm.crawl_extract_dir, table)
+            try: columns = get_columns(database, table)
+            except sqlite3.OperationalError: columns = None
+            for record_number in records[table]:
+                record = records[table][record_number]
+                store_record(record, store, columns)
         status = "Successful"
     else: status = "Failed"
     return status
@@ -163,15 +167,14 @@ def make_requests(ex, urls, database, table):
     futures = [ex.submit(load_url, session, url) for url in urls]
     for tally, future in enumerate(cf.as_completed(futures)):
         response = future.result()
-        status = store_response(response, database, table)
+        status = store_response(response, database)
         track_time(start_time, tally, len(urls), table, status)
-        if tally % 500 == 50: load_responses(database, table)
+        if tally % 500 == 100: load_responses(database)
 
 #Done
-def load_responses(database, table):
-    store = "%s%s.csv" % (cm.crawl_extract_dir, table)
-    db.load_file(store, database)
-    db.clear_files(store)
+def load_responses(database):
+    db.load_files(cm.crawl_extract_dir, database)
+    db.clear_files(cm.crawl_extract_dir)
 
 def main():
     db.clear_files(cm.crawl_extract_dir)
@@ -191,12 +194,14 @@ def clean_exit():
     log.info("Program completed.")
 
 def loop():
-    db.clear_files(cm.crawl_extract_dir, cm.database_file, cm.nl_database_file)
+    db.clear_files(cm.crawl_extract_dir, cm.database_file)
     while True:
         try: main()
         except Exception as e:
-            log.error("Error: %s" % e)
+            log.error(e)
             clean_exit()
 
 if __name__ == "__main__":
-    loop()
+    #loop()
+    db.clear_files(cm.database_file)
+    main()

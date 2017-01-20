@@ -11,16 +11,19 @@ acquisitions:
       uuid:
         - images.uuid
         - collection.content
+      type: collection.type
       properties: images.properties #dict
     videos.items: #list
       uuid:
         - videos.uuid
         - collection.content
+      type: collection.type
       properties: videos.properties #dict
     news.items: #list
       uuid:
         - news.uuid
         - collection.content
+      type: collection.type
       properties: news.properties #dict
 funds:
   uuid:
@@ -37,16 +40,19 @@ funds:
       uuid:
         - images.uuid
         - collection.content
+      type: collection.type
       properties: images.properties #dict
     videos.items: #list
       uuid:
         - videos.uuid
         - collection.content
+      type: collection.type
       properties: videos.properties #dict
     news.items: #list
       uuid:
         - news.uuid
         - collection.content
+      type: collection.type
       properties: news.properties #dict
 funding_rounds:
   uuid:
@@ -59,16 +65,19 @@ funding_rounds:
       uuid:
         - images.uuid
         - collection.content
+      type: collection.type
       properties: images.properties #dict
     videos.items: #list
       uuid:
         - videos.uuid
         - collection.content
+      type: collection.type
       properties: videos.properties #dict
     news.items: #list
       uuid:
         - news.uuid
         - collection.content
+      type: collection.type
       properties: news.properties #dict
 ipos:
   uuid:
@@ -87,16 +96,19 @@ ipos:
       uuid:
         - images.uuid
         - collection.content
+      type: collection.type
       properties: images.properties #dict
     videos.items: #list
       uuid:
         - videos.uuid
         - collection.content
+      type: collection.type
       properties: videos.properties #dict
     news.items: #list
       uuid:
         - news.uuid
         - collection.content
+      type: collection.type
       properties: news.properties #dict
 organizations:
   uuid:
@@ -111,6 +123,7 @@ organizations:
       uuid:
         - images.uuid
         - collection.content
+      type: collection.type
       properties: images.properties #dict
       True: collection.is_primary
     founders.items: #list
@@ -125,7 +138,6 @@ organizations:
       uuid: jobs.uuid
       properties: jobs.properties #dict
       relationships.person.uuid: jobs.employee
-      True: jobs.is_current
     past_team.items: #list
       uuid: jobs.uuid
       properties: jobs.properties #dict
@@ -139,17 +151,20 @@ organizations:
       uuid:
         - address.uuid
         - collection.content
+      type: collection.type
       properties: address.properties #dict
     headquarters.item: #list
       uuid:
         - address.uuid
         - collection.content
+      type: collection.type
       properties: address.properties #dict
       True: collection.is_primary
     categories.items: #list
       uuid:
         - category.uuid
         - collection.content
+      type: collection.type
       properties: category.properties #dict
     customers.items: #list
       uuid: trade.customer
@@ -159,21 +174,25 @@ organizations:
       uuid:
         - website.uuid
         - collection.content
+      type: collection.type
       properties: website.properties #dict
     images.items: #list
       uuid:
         - images.uuid
         - collection.content
+      type: collection.type
       properties: images.properties #dict
     videos.items: #list
       uuid:
         - videos.uuid
         - collection.content
+      type: collection.type
       properties: videos.properties #dict
     news.items: #list
       uuid:
         - news.uuid
         - collection.content
+      type: collection.type
       properties: news.properties #dict
 people:
   uuid:
@@ -193,18 +212,21 @@ people:
       uuid:
         - location.uuid
         - collection.content
+      type: collection.type
       properties: location.properties
       True: location.is_primary
     primary_image.item:
       uuid:
         - images.uuid
         - collection.content
+      type: collection.type
       properties: images.properties #dict
       True: collection.is_primary
     websites.items: #list
       uuid:
         - website.uuid
         - collection.content
+      type: collection.type
       properties: website.properties #dict
     degrees.items: #list
       uuid: degree.uuid
@@ -227,16 +249,19 @@ people:
       uuid:
         - images.uuid
         - collection.content
+      type: collection.type
       properties: images.properties #dict
     videos.items: #list
       uuid:
         - videos.uuid
         - collection.content
+      type: collection.type
       properties: videos.properties #dict
     news.items: #list
       uuid:
         - news.uuid
         - collection.content
+      type: collection.type
       properties: news.properties #dict
 products:
   uuid:
@@ -249,31 +274,37 @@ products:
       uuid:
         - category.uuid
         - collection.content
+      type: collection.type
       properties: category.properties #dict
     primary_image.item:
       uuid:
         - images.uuid
         - collection.content
+      type: collection.type
       properties: images.properties #dict
       True: collection.is_primary
     websites.items:
       uuid:
         - website.uuid
         - collection.content
+      type: collection.type
       properties: website.properties #dict
     images.items: #list
       uuid:
         - images.uuid
         - collection.content
+      type: collection.type
       properties: images.properties #dict
     videos.items: #list
       uuid:
         - videos.uuid
         - collection.content
+      type: collection.type
       properties: videos.properties #dict
     news.items: #list
       uuid:
         - news.uuid
         - collection.content
+      type: collection.type
       properties: news.properties #dict
 ...
