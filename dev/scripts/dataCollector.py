@@ -9,7 +9,6 @@ import os
 import csv
 import time
 import sys
-import json
 
 #third-party modules
 from ratelimit import *
@@ -18,8 +17,6 @@ import concurrent.futures as cf
 import dpath.util as dp
 
 #local modules
-import logManager
-import configManager
 import dbLoader as db
 import responseParser as rp
 
@@ -51,27 +48,89 @@ cm = db.load_config()
 #logger
 log = logging.getLogger(__name__)
 
+
+csv.field_size_limit(2147483647)
+
 #helper functions
+
+"""
+New Response:
+1. check - Response.keys == Store.keys
+    yes - Load Response -> Store [DONE]
+    no -
+        2a. Read Store --> Dict
+        2b. Merge Response & Store --> Combined
+        2c. Delete current Store file
+        2d. Load Combined -> Store [DONE]
+
+Hits Milestone (e.g. 100 Responses):
+3. check - Store.keys == SQL.keys
+    yes - Load Store -> SQL [DONE]
+    no -
+        4a. Read SQL --> Dict
+        4b. Merge Store & SQL --> Combined
+        4c. Delete current SQL table
+        4d. Load Combined -> SQL [DONE]
+"""
+
+#record = {uuid: blah, xx: blah}
+#store_dict[{uuid: blah, xx: blah}, {uuid:blah, xx: blah}]
+
+def find_keys(temp, database, table):
+    with sqlite3.connect(database) as c_database:
+        try: cursor = c_database.execute("SELECT * FROM %s" % (table))
+        except: columns = []
+        else: columns = [desc[0] for desc in cursor.description]
+    if len(columns) > len(temp.keys()): keys = columns
+    else: keys = temp.keys()
+    #print("KEYS:", keys)
+    return keys
+
+def read_store(store):
+    store_keys, store_dict = [], []
+    with open(store, 'r+',newline='',encoding="utf-8") as f:
+        reader = csv.DictReader(f,delimiter=",")
+        store_keys = reader.fieldnames
+        for line in reader:
+            store_dict.append(line)
+    return store_keys, store_dict
+
+def update_store(store_dict, record):
+    records = []
+    records.append(record)
+    for store_record in store_dict:
+        new_store_record = {}
+        for key in record.keys():
+            if key in store_record.keys():
+                new_store_record[key] = store_record[key]
+            else: new_store_record[key] = None
+        records.append(new_store_record)
+    return records
+
+def fill_na(store_keys, record):
+    new_record = {}
+    for key in store_keys:
+        if key in record.keys(): new_record[key] = None
+        else: new_record[key] = record[key]
+    return new_record
+
+def store_records(records, store):
+    if type(records) is dict: records = [records]
+    write_header = True
+    if os.path.isfile(store):
+        write_header = False
+    if not os.path.exists(os.path.dirname(store)):
+        os.makedirs(os.path.dirname(store))
+    with open(store, 'a+',newline='',encoding="utf-8") as f:
+        writer = csv.writer(f,delimiter=",")
+        if write_header:
+            writer.writerow(records[0].keys())
+        for record in records:
+            writer.writerow(record.values())
 
 def format_url(node_type, node_id):
     url = "%s/%s/%s/%s?user_key=%s" % (cm.base_url, cm.version, node_type, node_id, cm.cb_key)
     return url
-
-def store_record(record, store, columns):
-    write_header = True
-    if os.path.isfile(store):
-        write_header = False
-    elif not os.path.exists(os.path.dirname(store)):
-        os.makedirs(os.path.dirname(store))
-    with open(store, 'a+',newline='',encoding="utf-8") as f:
-        writer = csv.writer(f,delimiter=",")
-        if columns:
-            if write_header: writer.writerow(columns)
-            values = list(record.get(column) for column in columns)
-        else:
-            if write_header: writer.writerow(record.keys())
-            values = record.values()
-        writer.writerow(values)
 
 def get_tables(database):
     connnection = sqlite3.connect(database)
@@ -95,27 +154,6 @@ def track_time(start_time, current_record, total_records, table, status):
 def load_url(session, url):
     headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0' }
     return session.get(url, headers=headers)
-
-def get_columns(database, table):
-    c_database = sqlite3.connect(database)
-    cursor = c_database.execute("SELECT * FROM %s" % (table))
-    columns = [desc[0] for desc in cursor.description]
-    return columns
-
-#Done
-def store_response(response, database):
-    if response.status_code == 200:
-        records = rp.parse(cm.crawler_ref, response.json())
-        for table in records:
-            store = "%s%s.csv" % (cm.crawl_extract_dir, table)
-            try: columns = get_columns(database, table)
-            except sqlite3.OperationalError: columns = None
-            for record_number in records[table]:
-                record = records[table][record_number]
-                store_record(record, store, columns)
-        status = "Successful"
-    else: status = "Failed"
-    return status
 
 #core functions
 
@@ -160,6 +198,28 @@ def prepare_urls(records, table):
     else: urls = [format_url(node_type, record.split("/")[2]) for record, in records]
     return urls
 
+def store_response(response, database):
+    if response.status_code == 200:
+        records = rp.parse(cm.crawler_ref, response.json())
+        for table in records:
+            store = "%s%s.csv" % (cm.crawl_extract_dir, table)
+            for record_number in records[table]:
+                record = records[table][record_number]
+                if os.path.isfile(store):
+                    store_keys, store_dict = read_store(store)
+                    if list(record.keys()) > store_keys:
+                        #print("MORE", table)
+                        record = update_store(store_dict, record)
+                        db.clear_files(store)
+                    elif list(record.keys()) < store_keys:
+                        #print("LESS", table)
+                        record = fill_na(store_keys, record)
+                    #else: print("EQUAL", table)
+                store_records(record, store)
+        status = "Pass"
+    else: status = "Fail"
+    return status
+
 #Done
 def make_requests(ex, urls, database, table):
     start_time = time.time()
@@ -169,9 +229,10 @@ def make_requests(ex, urls, database, table):
         response = future.result()
         status = store_response(response, database)
         track_time(start_time, tally, len(urls), table, status)
-        if tally % 500 == 100: load_responses(database)
+        #input("yo")
+        if tally % 400 == 100: load_responses(database)
 
-#Done
+
 def load_responses(database):
     db.load_files(cm.crawl_extract_dir, database)
     db.clear_files(cm.crawl_extract_dir)
@@ -183,7 +244,7 @@ def main():
         records = select_records(nodelist, database, table)
         urls = prepare_urls(records, table)
         make_requests(ex, urls, database, table)
-        load_responses(database, table)
+        load_responses(database)
 
 def clean_exit():
     nodelist, database, tables, ex = setup()
@@ -203,5 +264,5 @@ def loop():
 
 if __name__ == "__main__":
     #loop()
-    db.clear_files(cm.database_file)
+    db.clear_files(cm.crawl_extract_dir, cm.database_file)
     main()

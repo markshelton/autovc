@@ -63,7 +63,7 @@ def unpack(keychain, reference, response):
         dp.new(reference, safe(keychain), value)
         keychain.pop()
 
-def get_ref(keychain, reference, records):
+def get_ref(keychain, reference, response, records):
     ref_inits = get_value(reference, safe(keychain))
     if type(ref_inits) is str: ref_inits = [ref_inits]
     ref_values = []
@@ -75,7 +75,8 @@ def get_ref(keychain, reference, records):
         else: length = 0
         ref = [table, length, attribute]
         if get_value(records, ref):
-            ref = [table, length+1, attribute]
+            if get_value(records, ref) != get_value(response, keychain):
+                ref = [table, length+1, attribute]
         ref_values.append(ref)
     return ref_values
 
@@ -126,14 +127,25 @@ def parse_properties(keychain, visited, reference, response, records):
             _parse(keychain, visited, reference, response, records)
         finally: visited.append(list(keychain))
 
+def add_primary(ref, reference, response, records):
+    ref_value = get_value(reference, ["uuid"])
+    res_value = get_value(response, ["uuid"])
+    for key in ref_value:
+        table, attribute = tuple(key.split("."))
+        if get_value(records, ref[:-1]):
+            if ref[0] in table:
+                ref[2] = attribute
+                dp.new(records, ref, res_value)
+
 def store(keychain, reference, response, records):
     log.debug("Store record")
-    ref_values = get_ref(keychain, reference, records)
+    ref_values = get_ref(keychain, reference, response, records)
     for ref in ref_values:
         if type(keychain[-1]) is bool: res = keychain[-1]
         else: res = get_value(response, keychain)
         if type(res) is bool: res = str(res)
         dp.new(records, ref, res)
+        add_primary(list(ref), reference, response, records)
     return records
 
 def _parse(keychain, visited, reference, response, records):
@@ -149,12 +161,36 @@ def _parse(keychain, visited, reference, response, records):
         parse_dict(keychain, visited, reference, response, records)
     else: records = store(keychain, reference, response, records)
 
+def count_elements(d):
+    cnt = 0
+    for e in d:
+        if type(d[e]) is dict: cnt += test(d[e])
+        else: cnt += 1
+    return cnt
+
+def clean(records):
+    marked = []
+    for record_type in records:
+        for record_number in records[record_type]:
+            record = records[record_type][record_number]
+            num_elements = count_elements(record)
+            if num_elements < 2:
+                marked.append([record_type,record_number])
+    for mark in marked: dp.delete(records, mark)
+    marked = []
+    for record_type in records:
+        if not records[record_type]:
+            marked.append(record_type)
+    for mark in marked: del records[mark]
+    return records
+
 def parse(reference, response):
     response = response["data"]
     table = get_table(response)
     reference = configManager.load_yaml(reference)[table]
     records, keychain, visited = {}, [], []
     _parse(keychain, visited, reference, response, records)
+    records = clean(records)
     log.debug("Record: {0}".format(dumps(records, indent=1)))
     log.info("Record: {0}".format(log_records(records)))
     return records
