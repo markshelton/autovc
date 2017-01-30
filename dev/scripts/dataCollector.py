@@ -8,13 +8,13 @@ import sqlite3
 import os
 import csv
 import time
-import sys
+import json
 
 #third-party modules
 from ratelimit import *
 import requests as rq
 import concurrent.futures as cf
-import dpath.util as dp
+import sqlalchemy.exc
 
 #local modules
 import dbLoader as db
@@ -48,34 +48,6 @@ cm = db.load_config()
 #logger
 log = logging.getLogger(__name__)
 
-
-csv.field_size_limit(2147483647)
-
-#helper functions
-
-"""
-New Response:
-1. check - Response.keys == Store.keys
-    yes - Load Response -> Store [DONE]
-    no -
-        2a. Read Store --> Dict
-        2b. Merge Response & Store --> Combined
-        2c. Delete current Store file
-        2d. Load Combined -> Store [DONE]
-
-Hits Milestone (e.g. 100 Responses):
-3. check - Store.keys == SQL.keys
-    yes - Load Store -> SQL [DONE]
-    no -
-        4a. Read SQL --> Dict
-        4b. Merge Store & SQL --> Combined
-        4c. Delete current SQL table
-        4d. Load Combined -> SQL [DONE]
-"""
-
-#record = {uuid: blah, xx: blah}
-#store_dict[{uuid: blah, xx: blah}, {uuid:blah, xx: blah}]
-
 def find_keys(temp, database, table):
     with sqlite3.connect(database) as c_database:
         try: cursor = c_database.execute("SELECT * FROM %s" % (table))
@@ -83,59 +55,18 @@ def find_keys(temp, database, table):
         else: columns = [desc[0] for desc in cursor.description]
     if len(columns) > len(temp.keys()): keys = columns
     else: keys = temp.keys()
-    #print("KEYS:", keys)
     return keys
-
-def read_store(store):
-    store_keys, store_dict = [], []
-    with open(store, 'r+',newline='',encoding="utf-8") as f:
-        reader = csv.DictReader(f,delimiter=",")
-        store_keys = reader.fieldnames
-        for line in reader:
-            store_dict.append(line)
-    return store_keys, store_dict
-
-def update_store(store_dict, record):
-    records = []
-    records.append(record)
-    for store_record in store_dict:
-        new_store_record = {}
-        for key in record.keys():
-            if key in store_record.keys():
-                new_store_record[key] = store_record[key]
-            else: new_store_record[key] = None
-        records.append(new_store_record)
-    return records
-
-def fill_na(store_keys, record):
-    new_record = {}
-    for key in store_keys:
-        if key in record.keys(): new_record[key] = None
-        else: new_record[key] = record[key]
-    return new_record
-
-def store_records(records, store):
-    if type(records) is dict: records = [records]
-    write_header = True
-    if os.path.isfile(store):
-        write_header = False
-    if not os.path.exists(os.path.dirname(store)):
-        os.makedirs(os.path.dirname(store))
-    with open(store, 'a+',newline='',encoding="utf-8") as f:
-        writer = csv.writer(f,delimiter=",")
-        if write_header:
-            writer.writerow(records[0].keys())
-        for record in records:
-            writer.writerow(record.values())
 
 def format_url(node_type, node_id):
     url = "%s/%s/%s/%s?user_key=%s" % (cm.base_url, cm.version, node_type, node_id, cm.cb_key)
     return url
 
 def get_tables(database):
-    connnection = sqlite3.connect(database)
-    query = "SELECT name FROM sqlite_master WHERE type=\'table\'"
-    return connnection.execute(query)
+    with sqlite3.connect(database) as connection:
+        query = "SELECT name FROM sqlite_master WHERE type=\'table\'"
+        try: tables = connection.execute(query)
+        except: tables = (None,)
+    return tables
 
 def get_nodelist():
     request = format_url("node_keys","node_keys.tar.gz")
@@ -157,15 +88,13 @@ def load_url(session, url):
 
 #core functions
 
-#Done
 def setup():
     nodelist = load_nodelist()
     database = cm.database_file
-    tables = get_tables(nodelist)
-    ex = cf.ThreadPoolExecutor(max_workers=10)
+    tables = get_tables(nodelist) # ##[("organizations",)]#
+    ex = cf.ThreadPoolExecutor(max_workers=int(cm.max_workers))
     return nodelist, database, tables, ex
 
-#Done
 def load_nodelist():
     if not(os.path.isfile(cm.nl_database_file)):
         if not (os.path.isfile(cm.nl_archive_file)):
@@ -174,29 +103,102 @@ def load_nodelist():
     nodelist = cm.nl_database_file
     return nodelist
 
-#Done
 def select_records(nodelist, database, table):
-    c_database = sqlite3.connect(database)
-    c_nodelist = sqlite3.connect(nodelist)
-    query = "SELECT name FROM sqlite_master WHERE type= \'table\' AND name=\'%s\';" % (table)
-    table_exists = (len(c_database.execute(query).fetchall()) == 1)
-    if table_exists:
-        query = "ATTACH DATABASE \'{0}\' AS db2;".format(nodelist)
-        c_database.execute(query)
-        query = "SELECT A.{0} FROM db2.{1} AS A LEFT OUTER JOIN {1} AS B ON REPLACE(A.{0},\'-\',\'\') = B.{0} WHERE datetime(A.updated_at) > datetime(B.updated_at,\'unixepoch\') OR B.updated_at IS NULL;".format(TABLE_PK_LOOKUP[table],table)
-        records = c_database.execute(query).fetchall()
-    else:
-        query = "SELECT %s FROM %s LIMIT 600" % (TABLE_PK_LOOKUP[table],table)
-        records = c_nodelist.execute(query).fetchall()
+    with sqlite3.connect(database) as c_database:
+        query = "SELECT name FROM sqlite_master WHERE type= \'table\' AND name=\'%s\';" % (table)
+        table_exists = (len(c_database.execute(query).fetchall()) == 1)
+        if table_exists:
+            query = "ATTACH DATABASE \'{0}\' AS db2;".format(nodelist)
+            c_database.execute(query)
+            query = "SELECT A.{0} FROM db2.{1} AS A LEFT OUTER JOIN {1} AS B ON REPLACE(A.{0},\'-\',\'\') = B.{0} WHERE datetime(A.updated_at) > datetime(B.updated_at,\'unixepoch\') OR B.updated_at IS NULL;".format(TABLE_PK_LOOKUP[table],table)
+            records = c_database.execute(query).fetchall()
+        else:
+            with sqlite3.connect(nodelist) as c_nodelist:
+                query = "SELECT %s FROM %s LIMIT 100" % (TABLE_PK_LOOKUP[table],table)
+                records = c_nodelist.execute(query).fetchall()
     return records
 
-#Done
 def prepare_urls(records, table):
     node_type = API_TABLE_LOOKUP[table]
     if TABLE_PK_LOOKUP[table] == "uuid":
         urls = [format_url(node_type, record) for record, in records]
     else: urls = [format_url(node_type, record.split("/")[2]) for record, in records]
     return urls
+
+def read_store(store):
+    store_keys, store_list = [], []
+    with open(store, 'r+',newline='',encoding="utf-8") as f:
+        reader = csv.DictReader(f,delimiter=",")
+        store_keys = reader.fieldnames
+        for line in reader:
+            store_list.append(line)
+    return store_keys, store_list
+
+def update_store(store_list, record, record_keys):
+    records = []
+    records.extend(record)
+    for store_record in store_list:
+        new_store_record = {}
+        for key in record_keys:
+            if key in store_record.keys():
+                new_store_record[key] = store_record[key]
+            else: new_store_record[key] = None
+        records.append(new_store_record)
+    return records
+
+def fill_na(new_keys, partial_records):
+    if type(partial_records) is dict:
+        partial_records = [partial_records]
+    full_records = []
+    for partial_record in partial_records:
+        full_record = {}
+        for key in new_keys:
+            if key in partial_record.keys():
+                full_record[key] = partial_record[key]
+            else: full_record[key] = None
+        full_records.append(full_record)
+    return full_records
+
+def check_type(records):
+    return (type(records) is list and type(records[0]) is dict)
+
+def store_records(records, keys, store):
+    store_name = os.path.basename(store)
+    if type(records) is dict: records = list(records)
+    if check_type(records):
+        write_header = True
+        if os.path.isfile(store):
+            write_header = False
+        if not os.path.exists(os.path.dirname(store)):
+            os.makedirs(os.path.dirname(store))
+        with open(store, 'a+',newline='',encoding="utf-8") as f:
+            writer = csv.writer(f,delimiter=",")
+            if write_header:
+                writer.writerow(keys)
+            for record in records:
+                writer.writerow([record[key] for key in keys])
+    else: log.error("{0} | Record format error".format(store_name))
+
+def check_record_structure(record, store):
+    store_name = os.path.basename(store)
+    record, record_keys = [record], list(record.keys()) #PASS
+    record_keys = sorted(record_keys)
+    new_store, new_keys = record, record_keys
+    try: store_keys, store_list = read_store(store)
+    except FileNotFoundError: pass
+    else:
+        store_keys = sorted(store_keys)
+        if record_keys != store_keys:
+            if len(record_keys) <= len(store_keys):
+                log.debug("{0} | Irregular record - missing key".format(store_name))
+                new_store = fill_na(store_keys, record)
+                new_keys = store_keys
+            else:
+                log.info("{0} | Irregular record - new key".format(store_name))
+                new_store = update_store(store_list, record, record_keys)
+                new_keys = record_keys
+                db.clear_files(store)
+    return new_store, new_keys
 
 def store_response(response, database):
     if response.status_code == 200:
@@ -205,22 +207,13 @@ def store_response(response, database):
             store = "%s%s.csv" % (cm.crawl_extract_dir, table)
             for record_number in records[table]:
                 record = records[table][record_number]
-                if os.path.isfile(store):
-                    store_keys, store_dict = read_store(store)
-                    if list(record.keys()) > store_keys:
-                        #print("MORE", table)
-                        record = update_store(store_dict, record)
-                        db.clear_files(store)
-                    elif list(record.keys()) < store_keys:
-                        #print("LESS", table)
-                        record = fill_na(store_keys, record)
-                    #else: print("EQUAL", table)
-                store_records(record, store)
+                log.debug("Record: {0}".format(json.dumps(record, indent=1)))
+                new_store, new_keys = check_record_structure(record, store)
+                store_records(new_store, new_keys, store)
         status = "Pass"
     else: status = "Fail"
     return status
 
-#Done
 def make_requests(ex, urls, database, table):
     start_time = time.time()
     session = rq.Session()
@@ -229,13 +222,64 @@ def make_requests(ex, urls, database, table):
         response = future.result()
         status = store_response(response, database)
         track_time(start_time, tally, len(urls), table, status)
-        #input("yo")
-        if tally % 400 == 100: load_responses(database)
+        if tally % 500 == 0: load_responses(database)
 
+def read_db(database, table):
+    db_keys, db_list = [], []
+    with sqlite3.connect(database) as c_database:
+        try:
+            cursor = c_database.execute('SELECT * FROM {0}'.format(table))
+            db_list = list(cursor.fetchall())
+            db_keys = list([description[0] for description in cursor.description])
+        except: pass
+    return db_keys, db_list
+
+def update_db(db_dict, new_store, new_keys):
+    records = list(new_store)
+    for db_record in db_dict:
+        new_db_record = {}
+        for key in new_keys:
+            if key in db_record.keys(): new_db_record[key] = db_record[key]
+            else: new_db_record[key] = None
+        records.append(new_db_record)
+    return records
+
+def check_store_structure(store, database):
+    drop = False
+    store_name = os.path.basename(store)
+    table = os.path.splitext(store_name)[0]
+    store_keys, store_list = read_store(store)
+    store_keys = sorted(store_keys)
+    new_store, new_keys = store_list, store_keys
+    try: db_keys, db_list = read_db(database, table)
+    except sqlalchemy.exc.DatabaseError:
+        log.error("{0} | Read Database failed", store_name,exc_info=1)
+    else:
+        db_keys = sorted(db_keys)
+        if len(db_keys) > 0 and store_keys != db_keys:
+            if len(store_keys) <= len(db_keys):
+                log.debug("{0} | Irregular store - missing key".format(store_name))
+                new_store = fill_na(db_keys, store_list)
+                new_keys = db_keys
+            else:
+                log.info("{0} | Irregular store - new key".format(store_name))
+                db_dict = [dict(zip(db_keys,db_entry)) for db_entry in db_list]
+                new_store = update_db(db_dict, new_store, store_keys)
+                new_keys = store_keys
+                drop = True
+    return new_store, new_keys, drop
 
 def load_responses(database):
-    db.load_files(cm.crawl_extract_dir, database)
-    db.clear_files(cm.crawl_extract_dir)
+    stores = db.get_files(cm.crawl_extract_dir, ".csv",full=True)
+    for store in stores:
+        store_name = os.path.basename(store)
+        new_store, new_keys, drop = check_store_structure(store, database)
+        db.clear_file(store)
+        store_records(new_store, new_keys, store)
+        try: db.load_file(store, database, drop)
+        except sqlalchemy.exc.DatabaseError:
+            log.error("{0} | Loading error".format(store_name), exc_info=1)
+        finally: db.clear_file(store)
 
 def main():
     db.clear_files(cm.crawl_extract_dir)
@@ -255,7 +299,7 @@ def clean_exit():
     log.info("Program completed.")
 
 def loop():
-    db.clear_files(cm.crawl_extract_dir, cm.database_file)
+    #db.clear_files(cm.crawl_extract_dir, cm.database_file)
     while True:
         try: main()
         except Exception as e:
@@ -263,6 +307,6 @@ def loop():
             clean_exit()
 
 if __name__ == "__main__":
-    #loop()
-    db.clear_files(cm.crawl_extract_dir, cm.database_file)
-    main()
+    loop()
+    #db.clear_files(cm.crawl_extract_dir, cm.database_file)
+    #main()

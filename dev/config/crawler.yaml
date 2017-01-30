@@ -207,14 +207,13 @@ people:
       uuid: jobs.uuid
       properties: jobs.properties
       relationships.organization.uuid: jobs.employer
-      True: jobs.is_primary
     primary_location.item:
       uuid:
         - location.uuid
         - collection.content
       type: collection.type
       properties: location.properties
-      True: location.is_primary
+      True: collection.is_primary
     primary_image.item:
       uuid:
         - images.uuid

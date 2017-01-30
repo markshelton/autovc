@@ -1,0 +1,85 @@
+Header:
+
+Topic: Honours Update 5
+Date/Time: Monday 10:00AM - 10:30AM , 23 January 2017
+Location: Tim French's Office, CSSE, UWA
+
+Attendees:
+-Prof Melinda Hodkiewicz
+-Dr Tim French
+-Mark Shelton
+
+Attachments:
+-None
+
+Body:
+
+configManager
+-Status: FUNCTIONAL
+-Functions:
+    - Loads configuration (e.g. constants) into readable object
+    - Recursively traverses config directory to discover files
+-Bugs: None
+-Improvements:
+    - Convert all config files to YAML - easier format to write
+
+logManager
+-Status: FUNCTIONAL
+-Functions:
+    - Loads logging configuration from YAML file
+-Bugs: None
+-Improvements:
+    - Roll logs daily
+    - Timestamp file names
+
+dbLoader
+-Status: FUNCTIONAL
+-Functions:
+    - Handles most IO functions
+    - Extracts CSV from GZIP archive
+    - Loads CSV into SQL
+    - Clears files from directory
+-Bugs: None
+-Improvements:
+    -Refactor odo for pandas.read_csv and pandas.csv_to_sql
+
+dataCollector
+-Status: WIP
+-Functions:
+    - Collects data from API and files into SQL
+    - Selects records from comparison with nodelist
+    - Asynchronously requests response from API
+    - Parses response into records (responseParser)
+    - Loads records into SQL (dbLoader)
+-Bugs:
+    - Funds > CHECK constraint failed: fund_investors
+    - People > CHECK constraint failed: location
+-Improvements: None
+
+responseParser
+-Status: FUNCTIONAL
+-Functions:
+    - Recursively parses JSON response into relational records
+-Bugs: None
+-Improvements: None
+
+dfBuilder
+-Status: FUTURE
+-Functions:
+    - Creates flat file ready for ML from relational database
+-Bugs: N/A
+-Improvements: N/A
+
+mlEngine
+-Status: FUTURE
+-Functions:
+    - Runs multiple ML algorithms over flat file
+-Bugs: N/A
+-Improvements: N/A
+
+dataVisualizer
+-Status: FUTURE
+-Functions:
+    - Visualises results of ML algorithms
+-Bugs: N/A
+-Improvements: N/A
