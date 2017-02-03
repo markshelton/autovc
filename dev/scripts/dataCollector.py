@@ -19,6 +19,7 @@ import sqlalchemy.exc
 #local modules
 import dbLoader as db
 import responseParser as rp
+import sqlManager as sm
 
 #constants
 
@@ -61,13 +62,6 @@ def format_url(node_type, node_id):
     url = "%s/%s/%s/%s?user_key=%s" % (cm.base_url, cm.version, node_type, node_id, cm.cb_key)
     return url
 
-def get_tables(database):
-    with sqlite3.connect(database) as connection:
-        query = "SELECT name FROM sqlite_master WHERE type=\'table\'"
-        try: tables = connection.execute(query)
-        except: tables = (None,)
-    return tables
-
 def get_nodelist():
     request = format_url("node_keys","node_keys.tar.gz")
     response = rq.get(request)
@@ -91,7 +85,7 @@ def load_url(session, url):
 def setup():
     nodelist = load_nodelist()
     database = cm.database_file
-    tables = get_tables(nodelist) # ##[("organizations",)]#
+    tables = sm.get_tables(nodelist) # ##[("organizations",)]#
     ex = cf.ThreadPoolExecutor(max_workers=int(cm.max_workers))
     return nodelist, database, tables, ex
 
@@ -211,7 +205,8 @@ def store_response(response, database):
                 new_store, new_keys = check_record_structure(record, store)
                 store_records(new_store, new_keys, store)
         status = "Pass"
-    else: status = "Fail"
+    else:
+        status = "Fail"
     return status
 
 def make_requests(ex, urls, database, table):
@@ -221,8 +216,12 @@ def make_requests(ex, urls, database, table):
     for tally, future in enumerate(cf.as_completed(futures)):
         response = future.result()
         status = store_response(response, database)
+        if status == "Fail":
+            log.debug("Request failed: {0}".format(response.request.url))
         track_time(start_time, tally, len(urls), table, status)
-        if tally % 500 == 0: load_responses(database)
+        if tally % 500 == 0:
+            load_responses(database)
+            db.export_files(database, cm.export_dir)
 
 def read_db(database, table):
     db_keys, db_list = [], []
@@ -270,16 +269,18 @@ def check_store_structure(store, database):
     return new_store, new_keys, drop
 
 def load_responses(database):
-    stores = db.get_files(cm.crawl_extract_dir, ".csv",full=True)
-    for store in stores:
-        store_name = os.path.basename(store)
-        new_store, new_keys, drop = check_store_structure(store, database)
-        db.clear_file(store)
-        store_records(new_store, new_keys, store)
-        try: db.load_file(store, database, drop)
-        except sqlalchemy.exc.DatabaseError:
-            log.error("{0} | Loading error".format(store_name), exc_info=1)
-        finally: db.clear_file(store)
+    try: stores = db.get_files(cm.crawl_extract_dir, ".csv",full=True)
+    except: pass
+    else:
+        for store in stores:
+            store_name = os.path.basename(store)
+            new_store, new_keys, drop = check_store_structure(store, database)
+            db.clear_file(store)
+            store_records(new_store, new_keys, store)
+            try: db.load_file(store, database, drop)
+            except sqlalchemy.exc.DatabaseError:
+                log.error("{0} | Loading error".format(store_name), exc_info=1)
+            finally: db.clear_file(store)
 
 def main():
     db.clear_files(cm.crawl_extract_dir)

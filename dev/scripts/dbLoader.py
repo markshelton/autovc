@@ -7,17 +7,16 @@ import os
 import tarfile
 import logging
 import shutil
-import sqlite3
 
 #third-party modules
 import odo
 import datashape as ds
 import sqlalchemy.exc
-import pandas as pd
 
 #local modules
 import logManager
 from configManager import configManager
+import sqlManager as sm
 
 #constants
 TARGET_TYPE = ".csv"
@@ -28,6 +27,29 @@ log = logging.getLogger(__name__)
 #functions
 def load_config(config_dir=None):
     return configManager(config_dir)
+
+def export_file(database_file, export_dir, table, drop=False):
+    table_name = "{0}.csv".format(table)
+    table_uri = "sqlite:///{0}::{1}".format(database_file, table)
+    export_file = "{0}{1}".format(export_dir, table_name)
+    log.info("{0} | Export started".format(table_name))
+    if drop: odo.drop(table_uri)
+    while True:
+        try: odo.odo(table_uri, export_file)
+        except FileNotFoundError:
+            os.makedirs(export_dir)
+            continue
+        except sqlalchemy.exc.DatabaseError:
+            log.error("{0} | Export failed".format(table_name), exc_info=1)
+        else: log.info("{0} | Export successful".format(table_name))
+        finally: break
+
+def export_files(database_file, export_dir):
+    log.info("{0} Started export process".format(database_file))
+    tables = sm.get_tables(database_file)
+    for table, in tables:
+        export_file(database_file, export_dir, table)
+    log.info("{0} Completed export process".format(database_file))
 
 def clear_file(path):
     if os.path.isfile(path):
@@ -70,7 +92,8 @@ def extract_archive(achive_dir, extract_dir):
                 extract_file(archive, archive_file, extract_dir)
     log.info("%s | Completed extraction process", achive_dir)
 
-def fix_datashape(dshape):
+def get_datashape(odo_resource):
+    dshape = odo.discover(odo_resource, engine="python", has_header=True, encoding="utf-8", errors="ignore")
     dshape = ''.join(str(dshape).split("*")[1].split()).replace(" ", "").replace(":", "\":\"").replace(",","\",\"").replace("{", "{\"").replace("}", "\"}")
     dictshape = eval(dshape)
     dkeys = [x.split(":")[0].replace("\"","") for x in dshape.replace("{","").replace("}","").split(",")]
@@ -82,11 +105,6 @@ def fix_datashape(dshape):
         value = ds.Option(value)
         dictList.append([key, value])
     dshape = ds.var * ds.Record(dictList)
-    return dshape
-
-def get_datashape(odo_resource):
-    dshape = odo.discover(odo_resource, engine="python", has_header=True, encoding="utf-8", errors="ignore")
-    dshape = fix_datashape(dshape)
     return dshape
 
 def load_file(abs_source_file, database_file, drop=False):
