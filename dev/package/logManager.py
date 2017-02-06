@@ -1,0 +1,57 @@
+#!/Anaconda3/env/honours python
+
+"""logManager"""
+
+#standard modules
+import logging
+import logging.config
+import inspect
+import time
+from functools import wraps
+import os
+
+#third-party modules
+import yaml
+
+#local modules
+
+#constants
+LOG_CONFIG = "../config/_logger.yaml"
+
+def load_yaml(path):
+    if os.path.exists(path):
+        with open(path, 'rt') as f:
+            output = yaml.safe_load(f.read())
+            return output
+
+try: config = load_yaml(LOG_CONFIG)
+except:
+    logging.basicConfig(level=logging.INFO)
+    log = logging.getLogger(__name__)
+    log.warn("Default log config failed")
+else:
+    logging.config.dictConfig(config)
+    log = logging.getLogger(__name__)
+    log.info("Default log config loaded")
+    log.info("Logger created")
+
+def timed(f):
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        start = time.time()
+        result = f(*args, **kwds)
+        elapsed = time.time() - start
+        log.debug("%s took %0.2fs." % (f.__name__, elapsed))
+        return result
+    return wrapper
+
+def traced(f):
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        result = f(*args, **kwds)
+        trace = inspect.currentframe()
+        frames = inspect.getouterframes(inspect.currentframe())
+        trace.extend([getattr(frame,"function") for frame in frames if getattr(frame,"function") is not "wrapper"])
+        log.debug("Trace: %s" % (trace))
+        return result
+    return wrapper

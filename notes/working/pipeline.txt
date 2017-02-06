@@ -20,3 +20,57 @@
 Helpers:
 1. LogManager (logger.yaml --> info.log, error.log, stdout)
 2. ConfigManager (default.conf --> cm.__attr__)
+
+
+
+_______________________________________________________________
+
+dataCollector
+1. LoadNodesList()
+2. CrawlNodes()
+
+--> crawl.db
+
+Data sources:
+
+A sql rebuild --> 2013-12.db (static)
+    I: 2013-Dec-xx_mysql.tar.gz
+    W: Extract archive
+    W: Import sql statements into database
+    O: 2013-12.db
+
+B json parse --> 2014-05.db (static)
+    I: 2014-May-xx_json.zip
+    W: Extract archive (recursively)
+    W: Parse json records
+    W: Import records into database
+    O: 2014-05.db
+
+C csv combine -> 2016-09.db (static)
+    I: 2016-Sep-11_xls.xlsx
+    W: Convert xlsx into csv
+    W: Import csv into database
+    O: 2016-09.db
+
+D crawl API --> 2017-02.db (dynamic)
+    I:
+    W:
+    O:
+
+E source_combiner --> combined.db (dynamic)
+    I: databases, shared_attributes
+    W:
+    O:
+
+for source in sources:
+    1. dfBuilder (database.db --> data.df)
+    2. DataCleaner (data.df --> (features.df, labels.df))
+    3. LearningEngine ((features.df, labels.df) --> results.log)
+    4. ResultsPlotter (results.log --> results.png)
+
+
+Helpers:
+1. LogManager (logger.yaml --> info.log, error.log, stdout)
+2. ConfigManager (default.conf --> cm.__attr__)
+
+Input:

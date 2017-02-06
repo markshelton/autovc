@@ -1,0 +1,59 @@
+---
+cb_key: 6f66ebd8155186e810f5cdacc03f90d8
+base_url: https://api.crunchbase.com
+version: v/3
+max_workers: 15
+request_space: 0.24
+initial_load: 1000
+load_rate: 500
+extraction_target: .csv
+data: &data ../../sources/data/
+metadata: &metadata ../../sources/metadata/
+date: &timestamp 2017-02-06/
+compile_version: &version 0
+raw_dir: &raw raw/
+processed_dir: &processed processed/
+export_dir: &export export/
+config_dir: &config ../config/
+paths:
+  database_file: [*data, *timestamp, *version, /, *processed, main.db]
+  diff_database_file: [*data, *timestamp, *version, /, *processed, diff.db]
+  nl_archive_file: [*data, *timestamp, *version, /, *raw, nodes.tar.gz]
+  nl_extract_dir: [*data, *timestamp, *version, /, *processed, nodes/]
+  nl_database_file: [*data, *timestamp, *version, /, *processed, nodes.db]
+  csv_archive_file: [*data, *timestamp, *version, /, *raw, dumps.tar.gz]
+  csv_extract_dir: [*data, *timestamp, *version, /, *processed, dumps/]
+  csv_database_file: [*data, *timestamp, *version, /, *processed, dumps.db]
+  crawl_extract_dir: [*data, *timestamp, *version, /, *processed, crawl/]
+  crawl_export_dir: [*data, *timestamp, *version, /, *export]
+  api_examples_dir: [*metadata, api_examples/]
+  logger_ref: [*config, _logger.yaml]
+  crawler_ref: [*config, _crawler.yaml]
+  log_dir: [../logs/, *timestamp, *version, /]
+api_table_lookup:
+  acquisitions: acquisitions
+  funding_rounds: funding-rounds
+  funds: funds
+  ipos: ipos
+  organizations: organizations
+  people: people
+  products: products
+table_pk_lookup:
+  acquisitions: uuid
+  funding_rounds: uuid
+  funds: uuid
+  ipos: uuid
+  organizations: permalink
+  people: permalink
+  products: permalink
+selected_tables:
+  - acquisitions
+  - funding_rounds
+  - funds
+  - ipos
+#  - organizations
+#  - people
+  - products
+headers:
+  User-Agent: Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0
+...

@@ -1,0 +1,39 @@
+sources:
+  output:
+    2017-02-06-0:
+        input:
+          - nodes:
+            - nodes.tar.gz
+            - nodes.db
+            - extract:
+              - acquisitions.csv
+              - funding_rounds.csv #etc.
+        working:
+          - crawl:
+            - temp:
+                - acquisitions.csv
+                - news.csv #etc.
+            - backup:
+                - acquisitions.csv
+                - news.csv #etc.
+            - crawl.db
+          - flatten:
+            - temp:
+            - backup:
+                - flat.csv
+            - flat.db
+        output:
+          -
+        logs:
+          - debug.log
+          - info.log
+          - warning.log
+          - error.log
+        config:
+          - _crawler.yaml
+          - _logger.yaml
+          - _models.yaml
+          - setup.yaml
+        env:
+          - env.yaml
+          - stash.yaml
