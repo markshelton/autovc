@@ -32,6 +32,7 @@ $RECYCLE.BIN/
 *.sqlite
 *.csv
 *.db
+*.json
 
 # Config files #
 *.conf

@@ -14,7 +14,7 @@ import yaml
 import logManager
 
 #constants
-CONFIG_DIR = "../config/"
+CONFIG_DIR = "config/"
 PRIV_FILE = "_"
 
 #logger

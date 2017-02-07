@@ -4,7 +4,6 @@
 
 #standard modules
 import os
-import tarfile
 import logging
 import shutil
 
@@ -12,6 +11,7 @@ import shutil
 import odo
 import datashape as ds
 import sqlalchemy.exc
+import setuptools.archive_util
 
 #local modules
 import logManager
@@ -35,16 +35,12 @@ def export_file(database_file, export_dir, table, drop=False):
     table_uri = "sqlite:///{0}::{1}".format(database_file, table)
     export_file = "{0}{1}".format(export_dir, table_name)
     log.info("{0} | Export started".format(table_name))
+    os.makedirs(os.path.dirname(export_dir), exist_ok=True)
     if drop: odo.drop(table_uri)
-    while True:
-        try: odo.odo(table_uri, export_file)
-        except FileNotFoundError:
-            os.makedirs(export_dir)
-            continue
-        except sqlalchemy.exc.DatabaseError:
-            log.error("{0} | Export failed".format(table_name), exc_info=1)
-        else: log.info("{0} | Export successful".format(table_name))
-        finally: break
+    try: odo.odo(table_uri, export_file)
+    except sqlalchemy.exc.DatabaseError:
+        log.error("{0} | Export failed".format(table_name), exc_info=1)
+    else: log.info("{0} | Export successful".format(table_name))
 
 def export_files(database_file, export_dir):
     log.info("{0} Started export process".format(database_file))
@@ -71,28 +67,15 @@ def clear_files(*paths):
 
 def get_files(directory, endswith=None, full=True):
     files = os.listdir(directory)
-    files = [file for file in files if os.path.splitext(file)[1] == endswith]
-    if full is True: files=["{0}{1}".format(directory,file) for file in files]
+    if endswith: files = [file for file in files if os.path.splitext(file)[1] == endswith]
+    if full: files=["{0}{1}".format(directory,file) for file in files]
     return files
 
-def extract_file(archive, archive_file, extract_dir):
-    if os.path.exists(os.path.join(extract_dir, archive_file)):
-        log.info("%s | Already extracted", archive_file)
-    else:
-        try:
-            log.info("%s | Extraction started", archive_file)
-            archive.extract(archive_file, path=extract_dir)
-            log.info("%s | Extraction successful", archive_file)
-        except:
-            log.error("%s | Extraction failed", archive_file,exc_info=True)
-
-def extract_archive(archive_dir, extract_dir):
+def extract_archive(archive_dir, extract_dir, extract_filter = None):
     log.info("%s | Started extraction process", archive_dir)
     os.makedirs(os.path.dirname(archive_dir), exist_ok=True)
-    with tarfile.open(archive_dir) as archive:
-        for archive_file in archive.getnames():
-            if archive_file.endswith(cm.extraction_target):
-                extract_file(archive, archive_file, extract_dir)
+    if extract_filter: setuptools.archive_util.unpack_archive(archive_dir, extract_dir, progress_filter=extract_filter)
+    else: setuptools.archive_util.unpack_archive(archive_dir, extract_dir)
     log.info("%s | Completed extraction process", archive_dir)
 
 def get_datashape(odo_resource):
@@ -116,7 +99,7 @@ def load_file(abs_source_file, database_file, drop=False):
     log.info("%s | Import started", source_file)
     db_uri = ("sqlite:///"+ database_file +"::"+ source_name)
     if drop: odo.drop(db_uri)
-    odo_resource = odo.resource(abs_source_file, engine="python", has_header=True,  encoding="utf-8", errors="ignore")
+    odo_resource = odo.resource(abs_source_file, engine="c", has_header=True,  encoding="utf-8", errors="ignore", lineterminator="\n")
     try: dshape = get_datashape(odo_resource)
     except ValueError:
         log.error("%s | Datashape failed",source_file,exc_info=1)

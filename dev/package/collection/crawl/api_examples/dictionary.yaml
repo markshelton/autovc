@@ -1,0 +1,328 @@
+Address:
+    Properties:
+        name: String
+        street_1: String
+        street_2: String
+        city: String
+        city_web_path: Path -> Location
+        region: String
+        region_web_path: Path -> Location
+        country: String
+        country_web_path: Path -> Location
+        latitude: Float
+        longitude: Float
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships: None
+
+Acquisition:
+    Properties:
+        api_path: Path
+        web_path: Path
+        price: Integer
+        price_currency_code: String
+        price_usd: Integer
+        payment_type: String
+        acquisition_type: String
+        acquisition_status: String
+        disposition_of_acquired: String
+        announced_on: Date
+        announced_on_trust_code: TrustCode
+        completed_on: Date
+        completed_on_trust_code: TrustCode
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships:
+        acquirer: Organization
+        acquiree: Organization
+
+Category:
+    Properties:
+        path: Path
+        name: String
+        organizations_in_category: Integer
+        products_in_category: Integer
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships: None
+
+Degree:
+    Properties:
+        type: String
+        uuid: UUID
+        started_on: Date
+        started_on_trust_code: TrustCode
+        completed_on: Date
+        completed_on_trust_code: TrustCode
+        degree_type_name: String
+        degree_subject: String
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships:
+        school: Organization
+        person: Person
+
+Fund:
+    Properties:
+        api_path: Path
+        web_path: Path
+        name: String
+        announced_on: Date
+        announced_on_trust_code: TrustCode
+        money_raised: Integer
+        money_raised_currency_code: String
+        money_raised_usd: Integer
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships:
+        venture_firm: Organization
+        investor: [Organization, Person]
+        images: [Image]
+        videos: [Video]
+        news: [News]
+
+FundingRound:
+    Properties:
+        api_path: Path
+        web_path: Path
+        funding_type: String
+        series: String
+        series_qualifier: String
+        announced_on: Date
+        announced_on_trust_code: TrustCode
+        closed_on: Date
+        closed_on_trust_code: TrustCode
+        money_raised: Integer
+        money_raised_currency_code: String
+        money_raised_usd: Integer
+        target_money_raised: Integer
+        target_money_raised_currency_code: String
+        target_money_raised_usd: Integer
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships:
+        investments: [Investment]
+        funded_organization: Organization
+        images: [Image]
+        videos: [Video]
+        news: [News]
+
+Image:
+    Properties:
+        type: String
+        uuid: UUID
+        asset_path: Path
+        content_type: String
+        height: Integer
+        width: Integer
+        filesize: Integer
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships: None
+
+Investment:
+    Properties:
+        type: String
+        uuid: UUID
+        money_invested: Integer
+        money_invested_currency_code: String
+        money_invested_usd: Integer
+        is_lead_investor: Boolean
+    Relationships:
+        investors: [Organization, Person]
+
+Ipo:
+    Properties:
+        api_path: Path
+        web_path: Path
+        went_public_on: Date
+        went_public_on_trust_code: TrustCode
+        stock_exchange_symbol: String
+        stock_symbol: String
+        shares_sold: Integer
+        opening_share_price: Float
+        opening_share_price_currency_code: String
+        opening_share_price_usd: Float
+        opening_valuation: Integer
+        opening_valuation_currency_code: String
+        opening_valuation_usd: Integer
+        money_raised: Integer
+        money_raised_currency_code: String
+        money_raised_usd: Integer
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships:
+        funded_company: Organization
+        stock_exchange: StockExchange
+        images: [Image]
+        videos: [Video]
+        news: [News]
+
+Job:
+    Properties:
+        type: String
+        uuid: UUID
+        title: String
+        is_current: Boolean
+        started_on: Date
+        started_on_trust_code: TrustCode
+        ended_on: Date
+        ended_on_trust_code: TrustCode
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships: None
+
+Location:
+    Properties:
+        web_path: Path
+        name: String
+        location_type: String
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships:
+        parent_locations: [Location]
+
+News:
+    Properties:
+        title: String
+        author: String
+        posted_on: Date
+        url: Url
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships: None
+
+Organization:
+    Properties:
+        permalink: String
+        api_path: Path
+        web_path: Path
+        name: String
+        also_known_as: [String]
+        short_description: String
+        description: String
+        profile_image_url: Url
+        primary_role: String
+        role_company: Boolean
+        role_investor: Boolean
+        role_group: Boolean
+        role_school: Boolean
+        founded_on: Date
+        founded_on_trust_code: TrustCode
+        is_closed: Boolean
+        closed_on: Date
+        closed_on_trust_code: TrustCode
+        num_employees_min: Integer
+        num_employees_max: Integer
+        total_funding_usd: Integer
+        stock_exchange: String
+        stock_symbol: String
+        number_of_investments: Integer
+        homepage_url: Url
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships:
+        primary_image: Image
+        founders: [Person]
+        featured_team: [Job]
+        current_team: [Job]
+        past_team: [Job]
+        board_members_and_advisors: [Job]
+        investors: [Organization, Person]
+        sub_organizations: [Organization]
+        headquarters: Address
+        offices: [Address]
+        products: [Product]
+        categories: [Category]
+        customers: [Customers]
+        competitors: [Organization]
+        members: [Organization, Person]
+        funding_rounds: [FundingRound]
+        investments: [Investments]
+        acquisitions: [Acquisition]
+        acquired_by: Organization
+        ipo: IPO
+        funds: [Fund]
+        websites: [Website]
+        images: [Image]
+        videos: [Video]
+        news: [News]
+
+Person:
+    Properties:
+        permalink: String
+        api_path: Path
+        web_path: Path
+        first_name: String
+        last_name: String
+        also_known_as: [String]
+        bio: String
+        profile_image_url: String
+        role_investor: Boolean
+        born_on: Date
+        born_on_trust_code: TrustCode
+        is_deceased: Boolean
+        died_on: Date
+        died_on_trust_code: TrustCode
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships:
+        primary_affiliation: Job
+        primary_location: Location
+        primary_image: Image
+        websites: [Website]
+        degrees: [Degree]
+        jobs: [Job]
+        advisory_roles: [Job]
+        founded_companies: [Organization]
+        investments: [Investment]
+        memberships: [Organization]
+        images: [Image]
+        videos: [Video]
+        news: [News]
+
+Product:
+    Properties:
+        permalink: String
+        api_path: Path
+        web_path: Path
+        name: String
+        also_known_as: [String]
+        lifecycle_stage: String
+        short_description: String
+        profile_image_url: String
+        launched_on: Date
+        launched_on_trust_code: TrustCode
+        closed_on: Date
+        closed_on_trust_code: TrustCode
+        homepage_url: Url
+        short_description: String
+        description: String
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships:
+        categories: [Category]
+        primary_image: Image
+        competitors: [Product]
+        customers: [Organization]
+        websites: [Website]
+        images: [Image]
+        video: [Video]
+        news: [News]
+
+Website:
+    Properties:
+        website_type: String
+        url: Url
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships: None
+
+Video:
+    Properties:
+        title: String
+        service_name: String
+        url: Url
+        created_at: Timestamp
+        updated_at: Timestamp
+    Relationships: None

@@ -1,0 +1,261 @@
+2016-Sep-09_csv
+
+* acquisitions.csv - 27,857
+
+acquiree_name
+acquiree_country_code
+state_code
+acquiree_region
+acquiree_city
+acquirer_name
+acquirer_country_code
+acquirer_state_code
+acquirer_region
+acquirer_city
+acquired_on
+price_usd
+price
+price_currency_code
+acquiree_cb_url
+acquirer_cb_url
+acquiree_uuid
+acquirer_uuid
+acquisition_uuid
+created_at
+updated_at
+
+* category_groups.csv - 743
+
+uuid
+category_name
+category_group_list
+
+* competitors.csv - 502,358
+
+entity_uuid
+competitor_uuid
+created_at
+updated_at
+
+* customers.csv - 251,337
+
+entity_uuid
+customer_uuid
+created_at
+updated_at
+
+* event_relationships.csv - 109,569
+
+event_uuid
+relationship_to_event
+entity_uuid
+type
+relationship_detail
+created_at
+updated_at
+
+* events.csv - 7,075
+
+uuid
+name
+short_description
+started_on
+ended_on
+registration_details
+registration_url
+start_time
+end_time
+venue_name
+venue_address
+location_uuid
+cost
+description
+city
+region
+country_code
+continent
+permalink
+cb_url
+logo_url
+profile_image_url
+event_roles
+created_at
+updated_at
+
+* funding_rounds.csv - 142,711
+
+company_name
+country_code
+state_code
+region
+city
+company_category_list
+funding_round_type
+funding_round_code
+announced_on
+raised_amount_usd
+raised_amount
+raised_amount_currency_code
+target_money_raised_usd
+target_money_raised
+target_money_raised_currency_code
+post_money_valuation_usd
+post_money_valuation
+post_money_currency_code
+investor_count
+investor_names
+cb_url
+company_uuid
+funding_round_uuid
+created_at
+updated_at
+
+* funds.csv - 4,954
+
+entity_uuid
+fund_uuid
+fund_name
+started_on
+announced_on
+raised_amount
+raised_amount_currency_code
+created_at
+updated_at
+
+* investment_partners.csv - 40,994
+
+funding_round_uuid
+investor_uuid
+partner_uuid
+
+* investments.csv - 216,873
+
+funding_round_uuid
+investor_uuid
+is_lead_investor
+
+* investors.csv - 47,632
+
+investor_name
+primary_role
+domain
+country_code
+state_code
+region
+city
+investor_type
+investment_count
+total_funding_usd
+founded_on
+closed_on
+cb_url
+logo_url
+profile_image_url
+twitter_url
+facebook_url
+uuid
+updated_at
+
+* ipos.csv - 7,001
+
+name
+country_code
+company_state_code
+region
+city
+stock_exchange_symbol
+stock_symbol
+went_public_on
+price_usd
+price
+price_currency_code
+cb_url
+ipo_uuid
+company_uuid
+uuid
+created_at
+updated_at
+
+* jobs.csv - 942,542
+
+person_uuid
+org_uuid
+started_on
+ended_on
+is_current
+title
+job_role
+executive_role
+advisory_role
+
+* org_parents.csv - 6,080
+
+org_uuid
+parent_org_uuid
+relationship_to_parent
+created_at
+updated_at
+
+* organization_descriptions.csv - 259,448
+
+uuid
+description
+
+* organizations.csv - 470,783
+
+company_name - string
+~primary_role - string
+domain - string
+homepage_url - string
+~country_code - string
+~state_code - string
+~region - string
+~city - string
+~zipcode - string
+address - string
+~status - string
+short_description - string
+category_list - string (multi-valued)
+category_group_list - string (multi-valued)
+~funding_rounds - integer
+~funding_total_usd - integer
+~founded_on - date (yyyy-mm-dd)
+~first_funding_on - date (yyyy-mm-dd)
+~last_funding_on - date (yyyy-mm-dd)
+~closed_on - date (yyyy-mm-dd)
+~employee_count - string
+email - string
+phone - string
+facebook_url - string
+cb_url - string
+logo_url - string
+profile_image_url - string
+twitter_url - string
+uuid - string
+created_at - datetime (yyyy-mm-dd hh-mm-ss.ms)
+updated_at - datetime (yyyy-mm-dd hh-mm-ss.ms)
+
+* people.csv - 545,451
+
+first_name
+last_name
+country_code
+state_code
+city
+cb_url
+logo_url
+profile_image_url
+twitter_url
+facebook_url
+primary_affiliation_organization
+primary_affiliation_title
+primary_organization_uuid
+gender
+uuid
+created_at
+updated_at
+
+* people_descriptions.csv - 290,227
+
+uuid
+description

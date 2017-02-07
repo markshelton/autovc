@@ -16,7 +16,7 @@ import yaml
 #local modules
 
 #constants
-LOG_CONFIG = "../config/_logger.yaml"
+LOG_CONFIG = "config/_logger.yaml"
 
 def load_yaml(path):
     if os.path.exists(path):
