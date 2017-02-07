@@ -37,6 +37,9 @@ $RECYCLE.BIN/
 # Config files #
 *.conf
 
+.*
+!.gitignore
+
 # =========================
 # Operating System Files
 # =========================
