@@ -6,6 +6,7 @@
 import os
 import logging
 import shutil
+import csv
 
 #third-party modules
 import odo
@@ -79,7 +80,7 @@ def extract_archive(archive_dir, extract_dir, extract_filter = None):
     log.info("%s | Completed extraction process", archive_dir)
 
 def get_datashape(odo_resource):
-    dshape = odo.discover(odo_resource, engine="python", has_header=True, encoding="utf-8", errors="ignore")
+    dshape = odo.discover(odo_resource, engine="c", has_header=True, encoding="utf-8", errors="ignore", lineterminator="\n",quotechar='"', delimiter=',',quoting=csv.QUOTE_ALL, skipinitialspace=True)
     dshape = ''.join(str(dshape).split("*")[1].split()).replace(" ", "").replace(":", "\":\"").replace(",","\",\"").replace("{", "{\"").replace("}", "\"}")
     dictshape = eval(dshape)
     dkeys = [x.split(":")[0].replace("\"","") for x in dshape.replace("{","").replace("}","").split(",")]
@@ -99,7 +100,7 @@ def load_file(abs_source_file, database_file, drop=False):
     log.info("%s | Import started", source_file)
     db_uri = ("sqlite:///"+ database_file +"::"+ source_name)
     if drop: odo.drop(db_uri)
-    odo_resource = odo.resource(abs_source_file, engine="c", has_header=True,  encoding="utf-8", errors="ignore", lineterminator="\n")
+    odo_resource = odo.resource(abs_source_file, engine="c", has_header=True,encoding="utf-8", errors="ignore", lineterminator="\n",quotechar='"', delimiter=',',quoting=csv.QUOTE_ALL, skipinitialspace=True)
     try: dshape = get_datashape(odo_resource)
     except ValueError:
         log.error("%s | Datashape failed",source_file,exc_info=1)

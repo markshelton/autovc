@@ -5,12 +5,13 @@
 #standard modules
 import logging
 import os
+import json
 
 #third-party modules
 
 #local modules
 import dbLoader as db
-import collection.responseParser as rp
+import collection.dataCollector as dc
 
 #constants
 input_file = "collection/fourteen/input/2014-May-xx_json.zip"
@@ -19,7 +20,7 @@ parse_dir = "collection/fourteen/output/parse/"
 export_dir = "collection/fourteen/output/export/"
 database_file = "collection/fourteen/output/2014-May.db"
 config_dir = "collection/fourteen/config/"
-reference = "collection/fourteen/config/_reference.yaml"
+reference_file = "collection/fourteen/config/_reference.yaml"
 
 #logger
 log = logging.getLogger(__name__)
@@ -42,9 +43,11 @@ def extract():
 
 def parse():
     db.clear_files(parse_dir)
-    for file in db.get_files(extract_dir):
-        json_content = loads(open(file, encoding="utf8").read())
-         records = rp.parse(reference, json_content)
+    for i, file in enumerate(db.get_files(extract_dir)):
+        json_content = json.loads(open(file, encoding="utf8").read())
+        reference = dc.load_yaml(reference_file)
+        dc.store_response(json_content, reference, database_file, parse_dir)
+        if i % 500 == 0: dc.load_responses(database_file)
 
 def load():
     db.clear_files(database_file)

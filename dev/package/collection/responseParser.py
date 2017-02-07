@@ -170,12 +170,6 @@ def count_elements(d):
         else: cnt += 1
     return cnt
 
-def load_yaml(path):
-    if os.path.exists(path):
-        with open(path, 'rt') as f:
-            output = yaml.safe_load(f.read())
-            return output
-
 def clean(records):
     marked = []
     for record_type in records:
@@ -194,9 +188,8 @@ def clean(records):
 
 @timed
 def parse(reference, response):
-    response = response["data"]
-    table = get_table(response)
-    reference = load_yaml(reference)[table]
+    try: response = response["data"]
+    except: pass
     records, keychain, visited = {}, [], []
     _parse(keychain, visited, reference, response, records)
     records = clean(records)

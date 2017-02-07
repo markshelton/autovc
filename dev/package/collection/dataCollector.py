@@ -9,6 +9,7 @@ import os
 import csv
 import time
 import json
+import yaml
 
 #third-party modules
 from ratelimit import *
@@ -18,8 +19,8 @@ import sqlalchemy.exc
 
 #local modules
 import dbLoader as db
-import responseParser as rp
 import sqlManager as sm
+import collection.responseParser as rp
 
 #constants
 
@@ -28,6 +29,12 @@ cm = db.load_config()
 
 #logger
 log = logging.getLogger(__name__)
+
+def load_yaml(path):
+    if os.path.exists(path):
+        with open(path, 'rt') as f:
+            output = yaml.safe_load(f.read())
+            return output
 
 def find_keys(temp, database, table):
     with sqlite3.connect(database) as c_database:
@@ -174,20 +181,15 @@ def check_record_structure(record, store):
                 db.clear_files(store)
     return new_store, new_keys
 
-def store_response(response, database):
-    if response.status_code == 200:
-        records = rp.parse(cm.crawler_ref, response.json())
-        for table in records:
-            store = "%s%s.csv" % (cm.crawl_extract_dir, table)
-            for record_number in records[table]:
-                record = records[table][record_number]
-                log.debug("Record: {0}".format(json.dumps(record, indent=1)))
-                new_store, new_keys = check_record_structure(record, store)
-                store_records(new_store, new_keys, store)
-        status = "Pass"
-    else:
-        status = "Fail"
-    return status
+def store_response(response, reference, database, extract_dir):
+    records = rp.parse(reference, response)
+    for table in records:
+        store = "%s%s.csv" % (extract_dir, table)
+        for record_number in records[table]:
+            record = records[table][record_number]
+            log.debug("Record: {0}".format(json.dumps(record, indent=1)))
+            new_store, new_keys = check_record_structure(record, store)
+            store_records(new_store, new_keys, store)
 
 def make_requests(ex, urls, database, table):
     start_time = time.time()
@@ -195,8 +197,13 @@ def make_requests(ex, urls, database, table):
     futures = [ex.submit(load_url, session, url) for url in urls]
     for tally, future in enumerate(cf.as_completed(futures)):
         response = future.result()
-        status = store_response(response, database)
-        if status == "Fail":
+        if response.status_code == 200:
+            reference = load_yaml(cm.crawler_ref)[table]
+            extract_dir = cm.crawl_extract_dir
+            store_response(response.json(), reference, database, extract_dir)
+            status = True
+        else:
+            status = False
             log.debug("Request failed: {0}".format(response.request.url))
         track_time(start_time, tally, len(urls), table, status)
         if tally % cm.load_rate == 0:

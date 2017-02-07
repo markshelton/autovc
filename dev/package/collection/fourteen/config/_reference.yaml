@@ -1,0 +1,136 @@
+---
+name: organizations.name
+permalink: organizations.permalink
+crunchbase_url: organizations.crunchbase_url
+homepage_url: organizations.homepage_url
+blog_url: organizations.blog_url
+blog_feed_url: organizations.blog_feed_url
+twitter_username: organization.twitter_username
+category_code: category.name
+number_of_employees: organization.num_employees
+founded_year: organizations.founded_on_year
+founded_month: organizations.founded_on_month
+founded_day: organizations.founded_on_day
+deadpooled_year: organizations.deadpooled_year
+deadpooled_month: organizations.deadpooled_month
+deadpooled_day: organizations.deadpooled_day
+deadpooled_url: organizations.deadpooled_url
+tag_list: organizations.tag_list
+alias_list: organizations.also_known_as
+email_address: organizations.email_address
+phone_number: organizations.phone_number
+description: organizations.short_description
+created_at: organizations.created_at
+updated_at: organizations.updated_at
+overview: organizations.description
+products: #list
+  name: products.name
+  permalink: products.permalink
+relationships: #list
+  is_past: jobs.is_past
+  title: jobs.title
+  person: #dict
+    first_name: people.first_name
+    last_name: people.last_name
+    permalink: people.permalink
+competitions: #list
+  competitor: #dict
+    name: competition.competitor_two_name
+    permalink: competition.competitor_two_permalink
+providerships: #list
+  title: trade.title
+  is_past: trade.is_past
+  provider: #dict
+    name: trade.vendor_name
+    permalink: trade.vendor_permalink
+total_money_raised:
+funding_rounds: #list
+  id: funding_rounds.id
+  round_code: funding_rounds.series
+  source_url: news.url
+  source_description: news.title
+  raised_amount: funding_rounds.money_raised
+  raised_currency_code: funding_rounds.money_raised_currency_code
+  funded_year: funding_rounds.closed_on_year
+  funded_month: funding_rounds.closed_on_month
+  funded_day: funding_rounds.closed_on_day
+  investments: #list
+    company:
+    financial_org:
+    person:
+      first_name:
+      last_name:
+      permalink:
+investments: #list
+  funding_round:
+    round_code:
+    source_url:
+    source_description:
+    raised_amount:
+    raised_currency_code:
+    funded_year:
+    funded_month:
+    funded_day:
+    company:
+      name:
+      permalink:
+acquisition: #???
+acquisitions: #list
+  price_amount: acquisitions.price
+  price_currency_code: acquisitions.price_currency_code
+  term_code: acquisitions.payment_type
+  source_url: news.url
+  source_description: news.title
+  acquired_year: acquisitions.completed_on_year
+  acquired_month: acquisitions.completed_on_month
+  acquired_day: acquisitions.completed_on_day
+  company: #dict
+    name: acquisitions.acquiree_name
+    permalink: acquisitions.acquiree_permalink
+offices: #list
+  description: address.name
+  address1: address.street_1
+  address2: address.street_2
+  zip_code: address.postal_code
+  city: address.city
+  state_code: address.region
+  country_code: address.country
+  latitude: address.latitude
+  longitude: address.longitude
+milestones: #list
+  id: milestones.id
+  description: milestones.description
+  stoned_year: milestones.stoned_year
+  stoned_month: milestones.stoned_month
+  stoned_day: milestones.stoned_day
+  source_url: news.url
+  source_text: milestones.text
+  source_description: news.title
+  stoneable_type: milestones.stoneable_type
+  stoned_value: milestones.stoned_value
+  stoned_value_type: milestones.stoned_value_type
+  stoned_acquirer: milestones.stoned_acquirer
+  stoneable: #dict ???
+    name: milestones.stoneable_name
+    permalink: milestones.stoneable_permalink
+ipo: #dict
+  valuation_amount: ipos.opening_valuation
+  valuation_currency_code: ipos.opening_valuation_currency_code
+  pub_year: ipos.went_public_on_year
+  pub_month: ipos.went_public_on_month
+  pub_day: ipos.went_public_on_day
+  stock_symbol: ipos.stock_exchange_symbol
+video_embeds: #list
+  embed_code:
+  description:
+screenshots: #list ???
+external_links: #list ???
+partners: #list
+  partner_name:
+  homepage_url:
+  link_1_url:
+  link_2_url:
+  link_3_url:
+  link_1_name:
+  link_2_name:
+  link_3_name:

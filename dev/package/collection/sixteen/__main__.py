@@ -14,6 +14,7 @@ import dbLoader as db
 #constants
 input_file = "collection/sixteen/input/2016-Sep-09_csv.tar.gz"
 extract_dir = "collection/sixteen/output/extract/"
+export_dir = "collection/sixteen/output/export/"
 database_file = "collection/sixteen/output/2016-Sep.db"
 config_dir = "collection/sixteen/config/"
 
@@ -31,18 +32,19 @@ def extract():
     db.clear_files(extract_dir)
     db.extract_archive(input_file, extract_dir, extract_filter)
 
-def parse():
-    pass
-
 def load():
     db.clear_files(database_file)
     db.load_files(extract_dir, database_file)
 
+def export():
+    db.clear_files(export_dir)
+    db.export_files(database_file, export_dir)
+
 def main():
     #cm = db.load_config(config_dir)
-    #extract()      #Done
-    parse()         #Pending
-    load()          #Pending - ERRORS
+    #extract()       #Done
+    #load()          #Done
+    #export()        #Done
 
 if __name__ == "__main__":
     main()
