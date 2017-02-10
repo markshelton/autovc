@@ -6,6 +6,7 @@
 import logging
 import os
 import json
+import time
 
 #third-party modules
 
@@ -41,17 +42,17 @@ def extract():
         db.extract_archive(file, extract_dir, extract_filter)
         db.clear_files(file)
 
-def parse():
-    db.clear_files(parse_dir)
-    for i, file in enumerate(db.get_files(extract_dir)):
+def load():
+    db.clear_files(parse_dir, database_file)
+    start_time = time.time()
+    json_files = db.get_files(extract_dir)
+    total_records = len(json_files)
+    for i, file in enumerate(json_files):
         json_content = json.loads(open(file, encoding="utf8").read())
         reference = dc.load_yaml(reference_file)
         dc.store_response(json_content, reference, database_file, parse_dir)
-        if i % 500 == 0: dc.load_responses(database_file)
-
-def load():
-    db.clear_files(database_file)
-    db.load_files(extract_dir, database_file)
+        dc.track_time(start_time, i, total_records)
+        if i % 500 == 0: dc.load_responses(parse_dir, database_file)
 
 def export():
     db.clear_files(export_dir)
@@ -59,8 +60,7 @@ def export():
 
 def main():
     #cm = db.load_config(config_dir)
-    #extract()      #Done
-    parse()         #Pending
+    extract()       #Done
     load()          #Pending
     export()        #Pending
 

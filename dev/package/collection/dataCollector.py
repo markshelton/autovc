@@ -57,7 +57,7 @@ def get_nodelist():
         f.write(response.content)
     return cm.nl_archive_file
 
-def track_time(start_time, current_record, total_records, table, status):
+def track_time(start_time, current_record, total_records, table="", status=""):
     elapsed_time = time.time() - start_time
     percent_complete = current_record / float(total_records) + 0.00001
     time_remaining = (elapsed_time / percent_complete - elapsed_time)
@@ -207,7 +207,7 @@ def make_requests(ex, urls, database, table):
             log.debug("Request failed: {0}".format(response.request.url))
         track_time(start_time, tally, len(urls), table, status)
         if tally % cm.load_rate == 0:
-            load_responses(database)
+            load_responses(cm.crawl_extract_dir, database)
             db.export_files(database, cm.crawl_export_dir)
 
 def read_db(database, table):
@@ -255,8 +255,8 @@ def check_store_structure(store, database):
                 drop = True
     return new_store, new_keys, drop
 
-def load_responses(database):
-    try: stores = db.get_files(cm.crawl_extract_dir, cm.extraction_target,full=True)
+def load_responses(extract_dir, database):
+    try: stores = db.get_files(extract_dir, full=True)
     except: pass
     else:
         for store in stores:
@@ -276,12 +276,13 @@ def main():
         records = select_records(nodelist, database, table)
         urls = prepare_urls(records, table)
         make_requests(ex, urls, database, table)
-        load_responses(database)
+        load_responses(cm.crawl_extract_dir, database)
 
 def clean_exit():
+    cm = configManager()
     nodelist, database, tables, ex = setup()
     for table in tables:
-        try: load_responses(database, table)
+        try: load_responses(cm.crawl_extract_dir, database, table)
         except: pass
     ex.shutdown(wait=False)
     log.info("Program completed.")

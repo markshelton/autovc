@@ -28,11 +28,14 @@ $RECYCLE.BIN/
 
 # Logs and databases #
 *.log
+*.log.[0-9]*
 *.sql
 *.sqlite
 *.csv
 *.db
 *.json
+*.zip
+*.tar.gz
 
 # Config files #
 *.conf

@@ -1,13 +1,24 @@
 ---
 name: organizations.name
-permalink: organizations.permalink
+permalink:
+  - organizations.permalink
+  - products.owner_permalink
+  - address.owner_permalink
+  - jobs.employer_permalink
+  - competition.competitor_one_permalink
+  - trade.customer_permalink
+  - funding_rounds.funded_organization_permalink
+  - acquisitions.acquirer_permalink
+  - milestones.company_permalink
+  - ipos.funded_company_permalink
+  - collection.entity_permalink
 crunchbase_url: organizations.crunchbase_url
 homepage_url: organizations.homepage_url
 blog_url: organizations.blog_url
 blog_feed_url: organizations.blog_feed_url
-twitter_username: organization.twitter_username
+twitter_username: organizations.twitter_username
 category_code: category.name
-number_of_employees: organization.num_employees
+number_of_employees: organizations.num_employees
 founded_year: organizations.founded_on_year
 founded_month: organizations.founded_on_month
 founded_day: organizations.founded_on_day
@@ -32,7 +43,9 @@ relationships: #list
   person: #dict
     first_name: people.first_name
     last_name: people.last_name
-    permalink: people.permalink
+    permalink:
+      - people.permalink
+      - jobs.employee_permalink
 competitions: #list
   competitor: #dict
     name: competition.competitor_two_name
@@ -43,7 +56,7 @@ providerships: #list
   provider: #dict
     name: trade.vendor_name
     permalink: trade.vendor_permalink
-total_money_raised:
+total_money_raised: organizations.total_funding
 funding_rounds: #list
   id: funding_rounds.id
   round_code: funding_rounds.series
@@ -55,26 +68,12 @@ funding_rounds: #list
   funded_month: funding_rounds.closed_on_month
   funded_day: funding_rounds.closed_on_day
   investments: #list
-    company:
-    financial_org:
-    person:
-      first_name:
-      last_name:
-      permalink:
-investments: #list
-  funding_round:
-    round_code:
-    source_url:
-    source_description:
-    raised_amount:
-    raised_currency_code:
-    funded_year:
-    funded_month:
-    funded_day:
-    company:
-      name:
-      permalink:
-acquisition: #???
+    company: investments.investor
+    financial_org: investments.investor
+    person: #dict
+      first_name: investments.investor_first_name
+      last_name: investments.investor_last_name
+      permalink: investments.investor_permalink
 acquisitions: #list
   price_amount: acquisitions.price
   price_currency_code: acquisitions.price_currency_code
@@ -110,7 +109,7 @@ milestones: #list
   stoned_value: milestones.stoned_value
   stoned_value_type: milestones.stoned_value_type
   stoned_acquirer: milestones.stoned_acquirer
-  stoneable: #dict ???
+  stoneable: #dict
     name: milestones.stoneable_name
     permalink: milestones.stoneable_permalink
 ipo: #dict
@@ -121,16 +120,5 @@ ipo: #dict
   pub_day: ipos.went_public_on_day
   stock_symbol: ipos.stock_exchange_symbol
 video_embeds: #list
-  embed_code:
-  description:
-screenshots: #list ???
-external_links: #list ???
-partners: #list
-  partner_name:
-  homepage_url:
-  link_1_url:
-  link_2_url:
-  link_3_url:
-  link_1_name:
-  link_2_name:
-  link_3_name:
+  embed_code: videos.embed_code
+  description: videos.description
