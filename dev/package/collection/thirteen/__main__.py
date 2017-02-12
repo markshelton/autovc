@@ -7,19 +7,20 @@ import logging
 import os
 import pymysql
 import codecs
+import sqlite3
 
 #third-party modules
 
 #local modules
 import dbLoader as db
+import collection.thirteen.sqlConverter as sc
 
 #constants
 input_file = "collection/thirteen/input/2013-Dec-xx_mysql.tar.gz"
 extract_dir = "collection/thirteen/output/extract/"
 export_dir = "collection/thirteen/output/export/"
-temp_dir = "collection/thirteen/output/temp/"
+parse_dir = "collection/thirteen/output/parse/"
 database_file = "collection/thirteen/output/2013-Dec.db"
-temp_database = "collection/thirteen/output/2013-Dec-temp.db"
 config_dir = "collection/thirteen/config/"
 
 #logger
@@ -37,25 +38,38 @@ def extract():
     db.clear_files(extract_dir)
     db.extract_archive(input_file, extract_dir, extract_filter)
 
-def build_temp_db(extract_dir, database_file):
-    conn =  pymysql.connect()
-    for file_name in db.get_files(extract_dir):
-        with  codecs.open(file_name, encoding='latin-1') as file:
-            script = file.read()
-            conn.executescript(script)
+def convert_db(mysql_dir,sqlite_dir):
+    os.makedirs(sqlite_dir, exist_ok=True)
+    for mysql_file in db.get_files(mysql_dir):
+        mysql_short = os.path.basename(mysql_file)
+        sqlite_file = sqlite_dir+mysql_short
+        log.info("{0} | SQL Conversion Started".format(mysql_short))
+        try: sc.convert_sql(mysql_file,sqlite_file)
+        except: log.error("{0} | SQL Conversion Failed".format(mysql_short))
+        else: log.info("{0} | SQL Conversion Successful".format(mysql_short))
 
-def export_temp_files(temp_database, temp_dir):
-    conn = pymysql.connect()
-    pass
+def create_db(sqlite_dir, database):
+    log.info("Started Database Build process")
+    with sqlite3.connect(database) as conn:
+        for sqlite_file in db.get_files(sqlite_dir):
+            with codecs.open(sqlite_file,encoding="latin-1") as file:
+                script = file.read()
+            sqlite_short = os.path.basename(sqlite_file)
+            log.info("{0} | Table Build Started".format(sqlite_short))
+            try: conn.executescript(script)
+            except:
+                conn.execute("ROLLBACK")
+                log.error("{0} | Table Build Failed".format(sqlite_short),exc_info=True)
+            else: log.info("{0} | Table Build Successful".format(sqlite_short))
+    log.info("Completed Database Build process")
 
 def parse():
-    db.clear_files(temp_database, temp_dir)
-    build_temp_db(extract_dir, temp_database)
-    export_temp_files(temp_database, temp_dir)
+    db.clear_files(parse_dir)
+    convert_db(extract_dir, parse_dir)
 
 def load():
     db.clear_files(database_file)
-    db.load_files(temp_dir, database_file)
+    create_db(parse_dir, database_file)
 
 def export():
     db.clear_files(export_dir)
@@ -64,9 +78,9 @@ def export():
 def main():
     #cm = db.load_config(config_dir)
     #extract()      #Done
-    load()          #Pending
-    parse()         #Pending
-    export()        #Pending
+    #parse()          #Done
+    #load()         #Done
+    #export()        #Done
 
 if __name__ == "__main__":
     main()

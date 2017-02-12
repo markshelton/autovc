@@ -19,6 +19,8 @@ input_file = "collection/fourteen/input/2014-May-xx_json.zip"
 extract_dir = "collection/fourteen/output/extract/"
 parse_dir = "collection/fourteen/output/parse/"
 export_dir = "collection/fourteen/output/export/"
+temp_file = "collection/fourteen/output/temp.txt"
+record_file = "collection/fourteen/output/record.txt"
 database_file = "collection/fourteen/output/2014-May.db"
 config_dir = "collection/fourteen/config/"
 reference_file = "collection/fourteen/config/_reference.yaml"
@@ -42,17 +44,49 @@ def extract():
         db.extract_archive(file, extract_dir, extract_filter)
         db.clear_files(file)
 
-def load():
-    db.clear_files(parse_dir, database_file)
-    start_time = time.time()
-    json_files = db.get_files(extract_dir)
+def get_incomplete(extract_dir):
+    all_files = set(db.get_files(extract_dir))
+    try:
+        with open(record_file, "r") as record:
+            done_files = set(record.readlines())
+    except FileNotFoundError: done_files = set()
+    json_files = all_files - done_files
+    return list(json_files)
+
+def mark_done(file, temp_file):
+    with open(temp_file, "a") as temp:
+        temp.write(file+"\n")
+
+def save_record(temp_file, record_file):
+    with open(temp_file, "r") as temp:
+        with open(record_file, "a") as record:
+            for line in temp:
+                record.write(line+"\n")
+
+def parse(start_time):
+    json_files = get_incomplete(extract_dir)
     total_records = len(json_files)
     for i, file in enumerate(json_files):
         json_content = json.loads(open(file, encoding="utf8").read())
         reference = dc.load_yaml(reference_file)
         dc.store_response(json_content, reference, database_file, parse_dir)
         dc.track_time(start_time, i, total_records)
-        if i % 500 == 0: dc.load_responses(parse_dir, database_file)
+        mark_done(file, temp_file)
+        if i % 500 == 0:
+            try: dc.load_responses(parse_dir, database_file)
+            except:
+                db.clear_files(temp_file)
+                return False
+            else:
+                save_record(temp_file, record_file)
+                db.clear_files(temp_file)
+    return True
+
+def load():
+    db.clear_files(parse_dir, database_file, record_file, temp_file)
+    start_time = time.time()
+    while(True):
+        if parse(start_time): break
 
 def export():
     db.clear_files(export_dir)
@@ -60,7 +94,7 @@ def export():
 
 def main():
     #cm = db.load_config(config_dir)
-    extract()       #Done
+    #extract()       #Done
     load()          #Pending
     export()        #Pending
 
