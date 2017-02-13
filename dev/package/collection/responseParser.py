@@ -12,7 +12,6 @@ import logging
 import dpath.util as dp
 
 #local modules
-from logManager import timed, traced
 from configManager import configManager
 
 #constants
@@ -106,7 +105,6 @@ def parse_properties(keychain, visited, reference, response, records):
             keychain_copy = list(keychain)
             visited.append(keychain_copy)
 
-@timed
 def get_ref(keychain, reference, response, records):
     ref_inits = get_value(reference, safe(keychain))
     if type(ref_inits) is str: ref_inits = [ref_inits]
@@ -124,7 +122,6 @@ def get_ref(keychain, reference, response, records):
         ref_values.append(ref)
     return ref_values
 
-@timed
 def add_primary(ref, reference, response, records):
     ref_value = get_value(reference, ["uuid"])
     res_value = get_value(response, ["uuid"])
@@ -138,11 +135,9 @@ def add_primary(ref, reference, response, records):
                 ref[2] = attribute
                 dp.new(records, ref, res_value)
 
-@timed
 def get_value_store(dictionary, glob):
     return get_value(dictionary, glob)
 
-@timed
 def store(keychain, reference, response, records): #93.45
     log.debug("Store record") #0
     ref_values = get_ref(keychain, reference, response, records) #20.26
@@ -193,7 +188,6 @@ def clean(records):
     for mark in marked: del records[mark]
     return records
 
-@timed
 def parse(reference, response):
     try: response = response["data"]
     except: pass

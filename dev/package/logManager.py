@@ -35,16 +35,6 @@ else:
     log.info("Default log config loaded")
     log.info("Logger created")
 
-def timed(f):
-    @wraps(f)
-    def wrapper(*args, **kwds):
-        start = time.time()
-        result = f(*args, **kwds)
-        elapsed = time.time() - start
-        log.debug("%s took %0.2fs." % (f.__name__, elapsed))
-        return result
-    return wrapper
-
 def traced(f):
     @wraps(f)
     def wrapper(*args, **kwds):
@@ -54,4 +44,17 @@ def traced(f):
         trace.extend([getattr(frame,"function") for frame in frames if getattr(frame,"function") is not "wrapper"])
         log.debug("Trace: %s" % (trace))
         return result
+    return wrapper
+
+def logged(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        log.info("{0} | Started".format(f.__name__))
+        start_time = time.time()
+        try: result = f(*args, **kwargs)
+        except: log.error("{0} | Failed".format(f.__name__), exc_info=True)
+        else:
+            elapsed_time = time.time() - start_time
+            log.info("{0} | Passed | {1:.2f}".format(f.__name__,elapsed_time))
+            return result
     return wrapper

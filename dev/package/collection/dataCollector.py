@@ -10,6 +10,7 @@ import csv
 import time
 import json
 import yaml
+import codecs
 
 #third-party modules
 from ratelimit import *
@@ -21,6 +22,7 @@ import sqlalchemy.exc
 import dbLoader as db
 import sqlManager as sm
 import collection.responseParser as rp
+from logManager import logged
 
 #constants
 
@@ -49,14 +51,6 @@ def format_url(node_type, node_id):
     url = "%s/%s/%s/%s?user_key=%s" % (cm.base_url, cm.version, node_type, node_id, cm.cb_key)
     return url
 
-def get_nodelist():
-    request = format_url("node_keys","node_keys.tar.gz")
-    response = rq.get(request)
-    os.makedirs(os.path.dirname(cm.nl_archive_file), exist_ok=True)
-    with open(cm.nl_archive_file, 'wb') as f:
-        f.write(response.content)
-    return cm.nl_archive_file
-
 def track_time(start_time, current_record, total_records, table="", status=""):
     elapsed_time = time.time() - start_time
     percent_complete = current_record / float(total_records) + 0.00001
@@ -76,35 +70,55 @@ def setup():
     ex = cf.ThreadPoolExecutor(max_workers=int(cm.max_workers))
     return nodelist, database, tables, ex
 
-def load_nodelist():
-    if not(os.path.isfile(cm.nl_database_file)):
-        if not (os.path.isfile(cm.nl_archive_file)):
-            nodelist = get_nodelist()
-        db.load_database(cm.nl_archive_file,cm.nl_extract_dir, cm.nl_database_file)
-    nodelist = cm.nl_database_file
-    return nodelist
+def download_nodelist(archive_file):
+    request = format_url("node_keys","node_keys.tar.gz")
+    response = rq.get(request)
+    os.makedirs(os.path.dirname(archive_file), exist_ok=True)
+    with open(archive_file, 'wb') as f:
+        f.write(response.content)
 
-def select_records(nodelist, database, table):
+def store_requests(requests, requests_dir):
+    os.makedirs(requests_dir, exist_ok=True)
+    for table in requests:
+        with codecs.open("{0}{1}.txt".format(requests_dir, table), "w+",encoding="utf-8") as file:
+            for request in requests[table]:
+                file.write(request+"\n")
+
+def select_records(nodelist, database):
+    nl_tables = set(sm.get_tables(nodelist))
+    db_tables = set(sm.get_tables(database))
+    records = {}
     with sqlite3.connect(database) as c_database:
-        query = "SELECT name FROM sqlite_master WHERE type= \'table\' AND name=\'%s\';" % (table)
-        table_exists = (len(c_database.execute(query).fetchall()) == 1)
-        if table_exists:
-            query = "ATTACH DATABASE \'{0}\' AS db2;".format(nodelist)
-            c_database.execute(query)
-            query = "SELECT A.{0} FROM db2.{1} AS A LEFT OUTER JOIN {1} AS B ON REPLACE(A.{0},\'-\',\'\') = B.{0} WHERE datetime(A.updated_at) > datetime(B.updated_at,\'unixepoch\') OR B.updated_at IS NULL;".format(cm.table_pk_lookup[table],table)
-            records = c_database.execute(query).fetchall()
-        else:
-            with sqlite3.connect(nodelist) as c_nodelist:
-                query = "SELECT %s FROM %s LIMIT %s" % (cm.table_pk_lookup[table],table, cm.initial_load)
-                records = c_nodelist.execute(query).fetchall()
+        for table in nl_tables:
+            if table in db_tables:
+                query = "ATTACH DATABASE \'{0}\' AS db2;".format(nodelist)
+                c_database.execute(query)
+                query = "SELECT A.{0} FROM db2.{1} AS A LEFT OUTER JOIN {1} AS B ON REPLACE(A.{0},\'-\',\'\') = B.{0} WHERE datetime(A.updated_at) > datetime(B.updated_at,\'unixepoch\') OR B.updated_at IS NULL;".format(cm.table_pk_lookup[table],table)
+                records[table] = c_database.execute(query).fetchall()
+            else:
+                with sqlite3.connect(nodelist) as c_nodelist:
+                    query = "SELECT %s FROM %s" % (cm.table_pk_lookup[table],table)
+                    records[table] = c_nodelist.execute(query).fetchall()
     return records
 
-def prepare_urls(records, table):
-    node_type = cm.api_table_lookup[table]
-    if cm.table_pk_lookup[table] == "uuid":
-        urls = [format_url(node_type, record) for record, in records]
-    else: urls = [format_url(node_type, record.split("/")[2]) for record, in records]
-    return urls
+@logged
+def retrieve_requests(directory):
+    requests = {}
+    for file in db.get_files(directory):
+        table = os.path.basename(file).split(".")[0]
+        with codecs.open(file, encoding="utf-8") as f:
+            requests[table] = [line.strip() for line in f]
+    return requests
+
+def prepare_requests(records):
+    requests = {}
+    for table in records:
+        node_type = cm.api_table_lookup[table]
+        if cm.table_pk_lookup[table] == "uuid":
+            requests[table] = [format_url(node_type, record) for record, in records[table]]
+        else:
+            requests[table] = [format_url(node_type, record.split("/")[2]) for record, in records[table]]
+    return requests
 
 def read_store(store):
     store_keys, store_list = [], []
@@ -191,7 +205,14 @@ def store_response(response, reference, database, extract_dir):
             new_store, new_keys = check_record_structure(record, store)
             store_records(new_store, new_keys, store)
 
-def make_requests(ex, urls, database, table):
+@logged
+def make_requests(requests, database,max_workers=15):
+    session = rq.Session()
+    ex = cf.ThreadPoolExecutor(max_workers=max_workers)
+    futures = [ex.submit(load_url, session, request) for request in requests]
+    return futures, ex
+
+def make_requests_old(ex, urls, database, table):
     start_time = time.time()
     session = rq.Session()
     futures = [ex.submit(load_url, session, url) for url in urls]

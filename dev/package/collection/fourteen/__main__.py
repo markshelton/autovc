@@ -48,7 +48,7 @@ def get_incomplete(extract_dir):
     all_files = set(db.get_files(extract_dir))
     try:
         with open(record_file, "r") as record:
-            done_files = set(record.readlines())
+            done_files = set(file.strip() for file in record.readlines())
     except FileNotFoundError: done_files = set()
     json_files = all_files - done_files
     return list(json_files)
@@ -61,29 +61,41 @@ def save_record(temp_file, record_file):
     with open(temp_file, "r") as temp:
         with open(record_file, "a") as record:
             for line in temp:
-                record.write(line+"\n")
+                record.write(line)
+
+def parse_file(start_time, i, file, total_records):
+    try:
+        json_content = json.loads(open(file, encoding="utf8").read())
+        reference = dc.load_yaml(reference_file)
+        dc.store_response(json_content, reference, database_file, parse_dir)
+    except: log.error("{0} | File Parser Failed".format(file),exc_info=True)
+    else: dc.track_time(start_time, i, total_records)
+    finally: mark_done(file, temp_file)
+
+def save_progress():
+    try: dc.load_responses(parse_dir, database_file)
+    except:
+        db.clear_files(temp_file)
+        log.error("Save Progress Failed", exc_info=True)
+        return False
+    else:
+        save_record(temp_file, record_file)
+        db.clear_files(temp_file)
+        log.info("Save Progress Successful")
+        return True
 
 def parse(start_time):
     json_files = get_incomplete(extract_dir)
     total_records = len(json_files)
     for i, file in enumerate(json_files):
-        json_content = json.loads(open(file, encoding="utf8").read())
-        reference = dc.load_yaml(reference_file)
-        dc.store_response(json_content, reference, database_file, parse_dir)
-        dc.track_time(start_time, i, total_records)
-        mark_done(file, temp_file)
+        parse_file(start_time, i, file, total_records)
         if i % 500 == 0:
-            try: dc.load_responses(parse_dir, database_file)
-            except:
-                db.clear_files(temp_file)
-                return False
-            else:
-                save_record(temp_file, record_file)
-                db.clear_files(temp_file)
+            if not save_progress(): return False
     return True
 
 def load():
-    db.clear_files(parse_dir, database_file, record_file, temp_file)
+    #db.clear_files(parse_dir, database_file, record_file, temp_file)
+    db.clear_files(parse_dir, temp_file)
     start_time = time.time()
     while(True):
         if parse(start_time): break

@@ -24,7 +24,6 @@ import sqlManager as sm
 #configManager
 def load_config(config_dir=None):
     return configManager(config_dir)
-cm = load_config()
 
 #logger
 log = logging.getLogger(__name__)

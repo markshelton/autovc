@@ -32,8 +32,10 @@ def get_uuids(tables, database):
 def get_tables(database):
     with sqlite3.connect(database) as connection:
         query = "SELECT name FROM sqlite_master WHERE type=\'table\'"
-        try: tables = connection.execute(query)
-        except: tables = (None,)
+        try:
+            tables = connection.execute(query)
+            tables = [table[0] for table in tables]
+        except: tables = list()
     return tables
 
 #core functions

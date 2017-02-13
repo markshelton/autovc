@@ -40,11 +40,15 @@ def export():
     db.clear_files(export_dir)
     db.export_files(database_file, export_dir)
 
+def flatten():
+    
+
 def main():
     #cm = db.load_config(config_dir)
     #extract()       #Done
     #load()          #Done
     #export()         #Done
+    flatten()         #Done
 
 if __name__ == "__main__":
     main()
