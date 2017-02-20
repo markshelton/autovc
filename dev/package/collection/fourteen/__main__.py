@@ -19,6 +19,8 @@ input_file = "collection/fourteen/input/2014-May-xx_json.zip"
 extract_dir = "collection/fourteen/output/extract/"
 parse_dir = "collection/fourteen/output/parse/"
 export_dir = "collection/fourteen/output/export/"
+dict_dir = "collection/fourteen/output/export/dictionary/"
+dict_file = "collection/fourteen/output/dict.csv"
 temp_file = "collection/fourteen/output/temp.txt"
 record_file = "collection/fourteen/output/record.txt"
 database_file = "collection/fourteen/output/2014-May.db"
@@ -104,11 +106,16 @@ def export():
     db.clear_files(export_dir)
     db.export_files(database_file, export_dir)
 
+def explore():
+    db.clear_files(dict_dir, dict_file)
+    db.summarise_files(export_dir, dict_dir, dict_file)
+
 def main():
     #cm = db.load_config(config_dir)
     #extract()       #Done
     load()          #Pending
     export()        #Pending
+    explore()       #Pending
 
 if __name__ == "__main__":
     main()

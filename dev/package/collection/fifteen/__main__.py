@@ -17,6 +17,10 @@ extract_dir = "collection/fifteen/output/extract/"
 export_dir = "collection/fifteen/output/export/"
 database_file = "collection/fifteen/output/2015-Dec.db"
 config_dir = "collection/fifteen/config/"
+dict_dir = "collection/fifteen/output/export/dict/"
+dict_file = "collection/fifteen/output/dict.csv"
+flat_file = "collection/fifteen/output/2015-Dec.csv"
+flat_reference = "collection/fifteen/config/_flatten.yaml"
 
 #logger
 log = logging.getLogger(__name__)
@@ -40,15 +44,21 @@ def export():
     db.clear_files(export_dir)
     db.export_files(database_file, export_dir)
 
+def explore():
+    db.clear_files(dict_dir, dict_file)
+    db.summarise_files(export_dir, dict_dir, dict_file)
+
 def flatten():
-    
+    db.clear_files(flat_file)
+    #TODO: Flatten
 
 def main():
     #cm = db.load_config(config_dir)
     #extract()       #Done
     #load()          #Done
     #export()         #Done
-    flatten()         #Done
+    #explore()
+    #flatten()         #Pending
 
 if __name__ == "__main__":
     main()

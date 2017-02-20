@@ -13,9 +13,13 @@ import odo
 import datashape as ds
 import sqlalchemy.exc
 import setuptools.archive_util
+import numpy as np
+import pandas as pd
+import scipy.stats
 
 #local modules
 import logManager
+from logManager import logged
 from configManager import configManager
 import sqlManager as sm
 
@@ -27,6 +31,8 @@ def load_config(config_dir=None):
 
 #logger
 log = logging.getLogger(__name__)
+
+odo_args = dict(engine="c", has_header=True,encoding="utf-8", errors="ignore", lineterminator="\n",quotechar='"', delimiter=',',quoting=csv.QUOTE_ALL, skipinitialspace=True)
 
 #functions
 
@@ -59,11 +65,10 @@ def clear_file(path):
     else:
         log.info("%s | Already deleted", path)
 
+@logged
 def clear_files(*paths):
-    log.info("Started clear process")
     for path in paths:
         clear_file(path)
-    log.info("Completed clear process")
 
 def get_files(directory, endswith=None, full=True):
     files = os.listdir(directory)
@@ -71,12 +76,63 @@ def get_files(directory, endswith=None, full=True):
     if full: files=["{0}{1}".format(directory,file) for file in files]
     return files
 
+def normality_test(df):
+    numerical = df.select_dtypes(include=[np.number]).columns
+    norm_chi, norm_pval = {}, {}
+    for column in df[numerical]:
+        try:
+            stat = scipy.stats.normaltest(df[column],nan_policy='omit')
+            norm_chi[column], norm_pval[column] = stat
+        except: pass
+    norm_chi = pd.Series(norm_chi)
+    norm_pval = pd.Series(norm_pval)
+    return norm_chi, norm_pval
+
+@logged
+def explore(df):
+    stats_num = pd.DataFrame(df.describe())
+    categorical = df.dtypes[df.dtypes == "object"].index
+    stats_cat = pd.DataFrame(df[categorical].describe())
+    stats = pd.concat([stats_num, stats_cat],axis=1)
+    missing = [len(df.index) - df[column].count() for column in stats]
+    datatypes = stats.dtypes
+    stats = stats.transpose()
+    norm_chi, norm_pval = normality_test(df)
+    norm_chi = norm_chi.reindex(stats.index)
+    norm_pval = norm_pval.reindex(stats.index)
+    skew = df.skew(axis=0).reindex(stats.index)
+    kurtosis = df.kurt(axis=0).reindex(stats.index)
+    stats["norm_k2"] = norm_chi
+    stats["norm_pval"] = norm_pval
+    stats["missing"] = missing
+    stats["skew"] = skew
+    stats["kurtosis"] = kurtosis
+    stats["attribute"] = stats.index
+    stats["datatype"] = datatypes
+    return stats
+
+@logged
+def summarise_files(export_dir, dictionary_dir=None, dict_file=None):
+    if not dictionary_dir: dictionary_dir = export_dir+"dictionary/"
+    if not dict_file: dict_file = dictionary_dir + "dict.csv"
+    os.makedirs(dictionary_dir)
+    stats = pd.DataFrame()
+    for file in get_files(export_dir,endswith=".csv",full=True):
+        short = os.path.basename(file)
+        try: df = odo.odo(file, pd.DataFrame)
+        except: df = odo.odo(file, pd.DataFrame, **odo_args)
+        stat = explore(df)
+        try: odo.odo(stat, dictionary_dir+short)
+        except: odo.odo(stat, dictionary_dir+short, **odo_args)
+        stat["table"] = short.split(".")[0]
+        stats = pd.concat([stat, stats])
+    odo.odo(stats, dict_file)
+
+@logged
 def extract_archive(archive_dir, extract_dir, extract_filter = None):
-    log.info("%s | Started extraction process", archive_dir)
     os.makedirs(os.path.dirname(archive_dir), exist_ok=True)
     if extract_filter: setuptools.archive_util.unpack_archive(archive_dir, extract_dir, progress_filter=extract_filter)
     else: setuptools.archive_util.unpack_archive(archive_dir, extract_dir)
-    log.info("%s | Completed extraction process", archive_dir)
 
 def get_datashape(odo_resource):
     dshape = odo.discover(odo_resource, engine="c", has_header=True, encoding="utf-8", errors="ignore", lineterminator="\n",quotechar='"', delimiter=',',quoting=csv.QUOTE_ALL, skipinitialspace=True)

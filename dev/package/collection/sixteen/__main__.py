@@ -15,6 +15,8 @@ import dbLoader as db
 input_file = "collection/sixteen/input/2016-Sep-09_csv.tar.gz"
 extract_dir = "collection/sixteen/output/extract/"
 export_dir = "collection/sixteen/output/export/"
+dict_dir = "collection/sixteen/output/export/dictionary/"
+dict_file = "collection/sixteen/output/dict.csv"
 database_file = "collection/sixteen/output/2016-Sep.db"
 config_dir = "collection/sixteen/config/"
 
@@ -40,11 +42,16 @@ def export():
     db.clear_files(export_dir)
     db.export_files(database_file, export_dir)
 
+def explore():
+    db.clear_files(dict_dir, dict_file)
+    db.summarise_files(export_dir, dict_dir, dict_file)
+
 def main():
     #cm = db.load_config(config_dir)
     #extract()       #Done
     #load()          #Done
     #export()        #Done
+    #explore()
 
 if __name__ == "__main__":
     main()

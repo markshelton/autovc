@@ -1,0 +1,12 @@
+f1_t1 | f2_t1 ... | f1_t2 | f2_t2
+Echo state neural network
+
+1. Run exploratory statistics on datasets
+2. Create feature vectors for each dataset
+
+March 20 (W4) - draft write-up of results
+April 21 (W8) - draft dissertation
+May 5 (W10) - seminar and abstract
+May 22 (W13) - final dissertation
+May 23 (W13) - seminar
+May 26 (W13) - poster
