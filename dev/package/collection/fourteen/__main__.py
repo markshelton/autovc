@@ -7,6 +7,7 @@ import logging
 import os
 import json
 import time
+import sqlite3
 
 #third-party modules
 
@@ -19,6 +20,8 @@ input_file = "collection/fourteen/input/2014-May-xx_json.zip"
 extract_dir = "collection/fourteen/output/extract/"
 parse_dir = "collection/fourteen/output/parse/"
 export_dir = "collection/fourteen/output/export/"
+dict_dir = "collection/fourteen/output/export/dictionary/"
+dict_file = "collection/fourteen/output/dict.csv"
 temp_file = "collection/fourteen/output/temp.txt"
 record_file = "collection/fourteen/output/record.txt"
 database_file = "collection/fourteen/output/2014-May.db"
@@ -93,9 +96,18 @@ def parse(start_time):
             if not save_progress(): return False
     return True
 
+def load_record(record_file, database_file):
+    with sqlite3.connect(database_file) as conn:
+        sql = "SELECT permalink FROM organizations"
+        records = conn.execute(sql)
+        with open(record_file, "w+") as record:
+            for line in records:
+                record.write(extract_dir+line[0]+".json\n")
+
 def load():
     #db.clear_files(parse_dir, database_file, record_file, temp_file)
     db.clear_files(parse_dir, temp_file)
+    load_record(record_file, database_file)
     start_time = time.time()
     while(True):
         if parse(start_time): break
@@ -104,11 +116,16 @@ def export():
     db.clear_files(export_dir)
     db.export_files(database_file, export_dir)
 
+def explore():
+    db.clear_files(dict_dir, dict_file)
+    db.summarise_files(export_dir, dict_dir, dict_file)
+
 def main():
     #cm = db.load_config(config_dir)
     #extract()       #Done
     load()          #Pending
     export()        #Pending
+    explore()       #Pending
 
 if __name__ == "__main__":
     main()

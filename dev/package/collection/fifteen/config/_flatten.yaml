@@ -1,0 +1,26 @@
+---
+companies:
+    status: status
+    country: country_code
+    state: state_code
+    region: region
+    city: city
+    num_raises: funding_rounds
+    funding_total: funding_total_usd
+    has_website: homepage_url != ""
+    date_today: strftime('%s', 'now')
+    date_founded_at: strftime('%s', founded_at)
+    date_first_raise: strftime('%s', first_funding_at)
+    date_last_raise: strftime('%s', last_funding_at)
+    date_founding_to_first_raise: date_first_raise - date_founded_at #TBD
+    date_founding_to_today: date_today - date_founded_at #TBD
+    date_founding_to_last_raise: date_last_raise - date_founded_at #TBD
+    date_first_raise_to_last_raise: date_last_raise - date_first_raise #TBD
+    frequency_of_raises_excl: date_founding_to_last_raise / num_raises
+    frequency_of_raises_incl: date_founding_to_today / num_raises
+    funding_per_raise: funding_total / num_raises
+    funding_over_time_excl: funding_total / date_founding_to_last_raise
+    funding_over_time_incl: funding_total / date_founding_to_today
+    round_type: //get_round_type()
+    category: //get_category()
+...
