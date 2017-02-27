@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 companies:
     status: status
@@ -23,4 +24,30 @@ companies:
     funding_over_time_incl: funding_total / date_founding_to_today
     round_type: //get_round_type()
     category: //get_category()
+=======
+#permalink: e.g. /organization/-fame
+---
+status: companies.status #dummy
+country: companies.country_code #dummy
+state: companies.state_code #dummy
+region: companies.region #dummy
+city: companies.city #dummy
+year_founded: year(companies.founded_at) #dummy
+year_first_raise: year(companies.first_funding_at) #dummy
+year_last_faise: year(companies.last_funding_at) #dummy
+category: (companies.category_list).split("|") #dummy -multivalued
+has_website: companies.homepage_url IS NULL #bool
+num_raises: companies.num_funding_rounds
+days_from_founding_to_first_raise: days(companies.first_funding_at - companies.founded_at)
+days_from_founding_to_today: days(today - companies.founded_at)
+days_from_founding_to_last_raise: days(companies.last_funding_at - companies.founded_at)
+days_from_first_raise_to_last_raise: days(companies.last_funding_at - companies.first_funding_at)
+frequency_of_raises_excl: days_from_founding_to_last_raise / num_raises
+frequency_of_raises_incl: days_from_founding_to_today / num_raises
+funding_total: companies.funding_total_usd
+funding_per_raise: funding_total / num_raises
+funding_per_day_excl: funding_total / days_from_founding_to_last_raise
+funding_per_day_incl: funding_total / days_from_founding_to_today
+is_acquired: 
+>>>>>>> 9b0520c64e37d3704e6e102a1faf2740e9c452a8
 ...
