@@ -5,8 +5,11 @@
 #standard modules
 import logging
 import sqlite3
+import os
 
 #third-party modules
+import sqlalchemy
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 #local modules
 import dbLoader as db
@@ -23,20 +26,29 @@ def get_uuids(tables, database):
     uuids = {}
     for table, in tables:
         query = "SELECT uuid FROM {0}".format(table)
-        with sqlite3.connect(database) as conn:
+        uri = db.build_uri(database, table, db_type="postgresql")
+        engine = sqlalchemy.create_engine(uri)
+        with engine.connect() as conn:
             try: uuid = conn.execute(query)
             except: pass
             else: uuids[table] = uuid
     return uuids
 
 def get_tables(database):
-    with sqlite3.connect(database) as connection:
-        query = "SELECT name FROM sqlite_master WHERE type=\'table\'"
-        try:
-            tables = connection.execute(query)
-            tables = [table[0] for table in tables]
-        except: tables = list()
+    uri = db.build_uri(database, db_type="postgresql")
+    m = sqlalchemy.MetaData()
+    engine = sqlalchemy.create_engine(uri)
+    m.reflect(engine)
+    tables = [table.name for table in m.tables.values()]
     return tables
+
+def drop_database(database_file):
+    db_name = os.path.basename(database_file).split(".")[0]
+    uri = db.build_uri("postgres", db_type="postgresql", create=False)
+    engine = sqlalchemy.create_engine(uri,isolation_level="AUTOCOMMIT")
+    with engine.connect() as conn:
+        try: conn.execute("DROP DATABASE \"{0}\";".format(db_name))
+        except: log.info("{0} | Database already dropped".format(db_name))
 
 #core functions
 
@@ -47,32 +59,5 @@ def main():
     uuids = get_uuids(tables, database)
     db.export_files(database, cm.export_dir)
 
-
 if __name__ == "__main__":
     main()
-
-
-#graveyard
-
-"""
-features = {
-    "has_investment_any":,
-    "has_investment_seed":,
-    "has_investment_a":,
-    "has_investment_b":,
-    "has_investment_c":,
-    "has_investment_d":,
-    "has_investment_e":,
-    "has_investment_pe":,
-    "has_ipo":,
-    "num_current_employees":,
-    "num_members":,
-    "num_founders":,
-    "num_board":,
-    "num_degrees_founders":,
-    "num_experience_founders":,
-    "founder_has_mba":,
-    "founder_has_phd":,
-    "num_prev_startups_founders":,
-}
-"""

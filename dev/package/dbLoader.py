@@ -11,7 +11,10 @@ import csv
 #third-party modules
 import odo
 import datashape as ds
+import psycopg2
+import sqlalchemy
 import sqlalchemy.exc
+import contextlib
 import setuptools.archive_util
 import numpy as np
 import pandas as pd
@@ -36,13 +39,45 @@ odo_args = dict(engine="c", has_header=True,encoding="utf-8", errors="ignore", l
 
 #functions
 
+@logged
+def connect_sqlite(db_file, table):
+    if table: uri = "sqlite:///{db_file}::{table}".format(db_file=db_file, table=table)
+    else: uri = "sqlite:///{db_file}".format(db_file=db_file)
+    return uri
+
+def create_postgresql(user, db_name):
+    with contextlib.suppress(sqlalchemy.exc.ProgrammingError):
+        with sqlalchemy.create_engine('postgresql:///?user={user}'.format(user=user), isolation_level='AUTOCOMMIT').connect() as conn:
+            conn.execute('CREATE DATABASE \"{db_name}\";'.format(db_name=db_name))
+
+@logged
+def connect_postgresql(db_file, table, create, user="postgres"):
+    db_name = os.path.basename(db_file).split(".")[0]
+    if create: create_postgresql(user, db_name)
+    if table: uri = "postgresql:///{db_name}::{table}".format(db_name=db_name, table=table)
+    else: uri = "postgresql:///{db_name}".format(db_name=db_name)
+    return uri
+
+@logged
+def build_uri(db_file, table=None, db_type=None, create=False):
+    if db_type == "sqlite":
+        uri = connect_sqlite(db_file, table)
+    elif db_type == "postgresql":
+        uri = connect_postgresql(db_file, table, create)
+    else:
+        try: uri = connect_postgresql(db_file, table)
+        except: uri = connect_sqlite(db_file, table)
+    return uri
+
 def export_file(database_file, export_dir, table, drop=False):
     table_name = "{0}.csv".format(table)
-    table_uri = "sqlite:///{0}::{1}".format(database_file, table)
+    table_uri = build_uri(database_file, table, db_type="postgresql")
+    #table_uri = "sqlite:///{0}::{1}".format(database_file, table)
     export_file = "{0}{1}".format(export_dir, table_name)
     log.info("{0} | Export started".format(table_name))
     os.makedirs(os.path.dirname(export_dir), exist_ok=True)
-    if drop: odo.drop(table_uri)
+    if drop: sm.drop_database(table_uri)
+    odo.odo(table_uri, export_file)
     try: odo.odo(table_uri, export_file)
     except sqlalchemy.exc.DatabaseError:
         log.error("{0} | Export failed".format(table_name), exc_info=1)
@@ -64,6 +99,8 @@ def clear_file(path):
         log.info("%s | Directory deleted", path)
     else:
         log.info("%s | Already deleted", path)
+    if path.endswith(".db"):
+        sm.drop_database(path)
 
 @logged
 def clear_files(*paths):
@@ -151,10 +188,11 @@ def get_datashape(odo_resource):
 
 def load_file(abs_source_file, database_file, drop=False):
     source_file = os.path.basename(abs_source_file)
-    source_name = source_file.split(".")[0]
+    table = source_file.split(".")[0]
     log.info("%s | Import started", source_file)
-    db_uri = ("sqlite:///"+ database_file +"::"+ source_name)
-    if drop: odo.drop(db_uri)
+    db_uri = build_uri(database_file, table, db_type="postgresql",create=True)
+    #db_uri = ("sqlite:///"+ database_file +"::"+ table)
+    if drop: sm.drop_database(db_uri)
     odo_resource = odo.resource(abs_source_file, **odo_args)
     try: dshape = get_datashape(odo_resource)
     except ValueError:

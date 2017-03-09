@@ -59,6 +59,26 @@ def load_yaml(path):
             output = yaml.load(f.read(),Loader=yamlordereddictloader.Loader)
             return output
 
+def main():
+    #cm = db.load_config(config_dir)
+    extract()       #Done
+    load()          #Done
+    export()         #Done
+    explore()
+    #flatten()         #Pending
+
+if __name__ == "__main__":
+    main()
+
+#graveyard
+
+
+def get_round_type():
+    pass
+
+def get_category():
+    pass
+
 @logged
 def add_attribute(conn, table, attribute_name, attribute_formula):
     conn.execute("DROP TABLE IF EXISTS temp_one")
@@ -67,18 +87,6 @@ def add_attribute(conn, table, attribute_name, attribute_formula):
     conn.execute("CREATE TABLE temp_two AS SELECT permalink, {0} AS {1} FROM {2} NATURAL JOIN flat".format(attribute_formula,attribute_name,table))
     conn.execute("DROP TABLE IF EXISTS flat")
     conn.execute("CREATE TABLE flat AS SELECT * FROM temp_one NATURAL JOIN temp_two")
-
-def get_round_type():
-    pass
-
-def get_category():
-    pass
-
-def build_sql(sql_file):
-    with sqlite3.connect(database_file) as conn:
-        with open(sql_file) as file:
-            script = file.read()
-        conn.executescript(script)
 
 @logged
 def build_sql_old(ref):
@@ -95,6 +103,12 @@ def build_sql_old(ref):
             conn.execute("DROP TABLE IF EXISTS temp_one")
             conn.execute("DROP TABLE IF EXISTS temp_two")
 
+def build_sql(sql_file):
+    with sqlite3.connect(database_file) as conn:
+        with open(sql_file) as file:
+            script = file.read()
+        conn.executescript(script)
+
 @logged
 def flatten():
     db.clear_files(flat_file)
@@ -102,14 +116,3 @@ def flatten():
     #build_sql(ref)
     build_sql(sql_file)
     #TODO: Flatten
-
-def main():
-    #cm = db.load_config(config_dir)
-    #extract()       #Done
-    #load()          #Done
-    #export()         #Done
-    #explore()
-    flatten()         #Pending
-
-if __name__ == "__main__":
-    main()

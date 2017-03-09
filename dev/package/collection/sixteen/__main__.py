@@ -49,8 +49,8 @@ def explore():
 def main():
     #cm = db.load_config(config_dir)
     #extract()       #Done
-    #load()          #Done
-    #export()        #Done
+    load()          #Done
+    export()        #Done
     #explore()
 
 if __name__ == "__main__":
