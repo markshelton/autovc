@@ -14,6 +14,7 @@ import sqlite3
 #local modules
 import dbLoader as db
 import collection.dataCollector as dc
+import sqlManager as sm
 
 #constants
 input_file = "collection/fourteen/input/2014-May-xx_json.zip"
@@ -97,12 +98,10 @@ def parse(start_time):
     return True
 
 def load_record(record_file, database_file):
-    with sqlite3.connect(database_file) as conn:
-        sql = "SELECT permalink FROM organizations"
-        records = conn.execute(sql)
-        with open(record_file, "w+") as record:
-            for line in records:
-                record.write(extract_dir+line[0]+".json\n")
+    permalinks = sm.get_permalinks(database_file, "organizations")
+    with open(record_file, "w+") as record:
+        for line in permalinks:
+            record.write(extract_dir+line[0]+".json\n")
 
 def load():
     #db.clear_files(parse_dir, database_file, record_file, temp_file)

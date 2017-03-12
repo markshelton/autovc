@@ -2,10 +2,8 @@
 import re
 import sys
 import codecs
-import time
-import sqlite3
 
-def mysql_to_sqlite(mysql_db, sqlite_db):
+def mysql_to_postgresql(mysql_db, postgresql_db):
     with codecs.open(mysql_db,encoding="latin-1") as mysql_file:
         content = mysql_file.read()
 
@@ -45,8 +43,5 @@ def mysql_to_sqlite(mysql_db, sqlite_db):
     FIX_ESCAPES_RE = re.compile(r"(?<!\\)\\''", re.M)
     content = FIX_ESCAPES_RE.sub("'", content)
 
-    with open(sqlite_db,"w+",encoding="latin-1") as sqlite_file:
-        sqlite_file.write(content)
-
-def sqlite_to_postgres(sqlite_db, postgres_db):
-    pass
+    with open(postgresql_db,"w+",encoding="latin-1") as postgresql_file:
+        postgresql_file.write(content)

@@ -69,9 +69,9 @@ def build_uri(db_file, table=None, db_type=None, create=False):
         except: uri = connect_sqlite(db_file, table)
     return uri
 
-def export_file(database_file, export_dir, table, drop=False):
+def export_file(database_file, export_dir, table, drop=False, db_type = "postgresql"):
     table_name = "{0}.csv".format(table)
-    table_uri = build_uri(database_file, table, db_type="postgresql")
+    table_uri = build_uri(database_file, table, db_type=db_type)
     #table_uri = "sqlite:///{0}::{1}".format(database_file, table)
     export_file = "{0}{1}".format(export_dir, table_name)
     log.info("{0} | Export started".format(table_name))
@@ -83,11 +83,11 @@ def export_file(database_file, export_dir, table, drop=False):
         log.error("{0} | Export failed".format(table_name), exc_info=1)
     else: log.info("{0} | Export successful".format(table_name))
 
-def export_files(database_file, export_dir):
+def export_files(database_file, export_dir, db_type = "postgresql"):
     log.info("{0} Started export process".format(database_file))
     tables = sm.get_tables(database_file)
     for table in tables:
-        export_file(database_file, export_dir, table)
+        export_file(database_file, export_dir, table, db_type = db_type)
     log.info("{0} Completed export process".format(database_file))
 
 def clear_file(path):
@@ -173,6 +173,7 @@ def extract_archive(archive_dir, extract_dir, extract_filter = None):
 
 def get_datashape(odo_resource):
     dshape = odo.discover(odo_resource, **odo_args)
+    input(dshape)
     dshape = ''.join(str(dshape).split("*")[1].split()).replace(" ", "").replace(":", "\":\"").replace(",","\",\"").replace("{", "{\"").replace("}", "\"}")
     dictshape = eval(dshape)
     dkeys = [x.split(":")[0].replace("\"","") for x in dshape.replace("{","").replace("}","").split(",")]

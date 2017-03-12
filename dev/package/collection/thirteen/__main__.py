@@ -5,11 +5,12 @@
 #standard modules
 import logging
 import os
-import pymysql
 import codecs
-import sqlite3
 
 #third-party modules
+import psycopg2
+import sqlalchemy
+import sqlalchemy.exc
 
 #local modules
 import dbLoader as db
@@ -36,29 +37,31 @@ def extract_filter(src, dst):
             return (extract_dir+base)
     return None
 
-def convert_db(mysql_dir,sqlite_dir):
-    os.makedirs(sqlite_dir, exist_ok=True)
-    for mysql_file in db.get_files(mysql_dir):
-        mysql_short = os.path.basename(mysql_file)
-        sqlite_file = sqlite_dir+mysql_short
-        log.info("{0} | SQL Conversion Started".format(mysql_short))
-        try: sc.mysql_to_sqlite(mysql_file,sqlite_file)
-        except: log.error("{0} | SQL Conversion Failed".format(mysql_short))
-        else: log.info("{0} | SQL Conversion Successful".format(mysql_short))
+def convert_db(source_dir,destination_dir, source_type="mysql", destination_type="postgresql"):
+    os.makedirs(destination_dir, exist_ok=True)
+    for source_file in db.get_files(source_dir):
+        source_short = os.path.basename(source_file)
+        destination_file = destination_dir+source_short
+        log.info("{0} | SQL Conversion Started".format(source_short))
+        try: sc.mysql_to_postgres(source_file,destination_file)
+        except: log.error("{0} | SQL Conversion Failed".format(source_short))
+        else: log.info("{0} | SQL Conversion Successful".format(source_short))
 
-def create_db(sqlite_dir, database):
+def create_db(scripts_dir, database, db_type="postgresql"):
     log.info("Started Database Build process")
-    with sqlite3.connect(database) as conn:
-        for sqlite_file in db.get_files(sqlite_dir):
-            with codecs.open(sqlite_file,encoding="latin-1") as file:
+    uri = db.build_uri(database, db_type=db_type,create=True)
+    engine = sqlalchemy.create_engine(uri)
+    with engine.connect() as conn:
+        for sql_file in db.get_files(scripts_dir):
+            with codecs.open(sql_file,encoding="latin-1") as file:
                 script = file.read()
-            sqlite_short = os.path.basename(sqlite_file)
-            log.info("{0} | Table Build Started".format(sqlite_short))
-            try: conn.executescript(script)
+            sql_short = os.path.basename(sql_file)
+            log.info("{0} | Table Build Started".format(sql_file))
+            try: conn.execute(sqlalchemy.text(script))
             except:
                 conn.execute("ROLLBACK")
-                log.error("{0} | Table Build Failed".format(sqlite_short),exc_info=True)
-            else: log.info("{0} | Table Build Successful".format(sqlite_short))
+                log.error("{0} | Table Build Failed".format(sql_short),exc_info=True)
+            else: log.info("{0} | Table Build Successful".format(sql_short))
     log.info("Completed Database Build process")
 
 def extract():
@@ -71,7 +74,7 @@ def parse():
 
 def load():
     db.clear_files(database_file)
-    create_db(parse_dir, database_file)
+    create_db(extract_dir, database_file)
 
 def export():
     db.clear_files(export_dir)
@@ -84,10 +87,10 @@ def explore():
 def main():
     #cm = db.load_config(config_dir)
     #extract()      #Done
-    #parse()          #Done
-    #load()         #Done
-    #export()        #Done
-    #explore()       #Done
+    parse()          #Done
+    load()         #Done
+    export()        #Done
+    explore()       #Done
 
 if __name__ == "__main__":
     main()

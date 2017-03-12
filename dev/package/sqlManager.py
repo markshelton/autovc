@@ -34,6 +34,17 @@ def get_uuids(tables, database):
             else: uuids[table] = uuid
     return uuids
 
+def get_permalinks(database, table):
+    permalinks = []
+    query = "SELECT permalink FROM {0};".format(table)
+    try:
+        uri = db.build_uri(database, table, db_type="postgresql")
+        engine = sqlalchemy.create_engine(uri)
+        with engine.connect() as conn:
+            permalinks = conn.execute(query)
+    except: pass
+    return permalinks
+
 def get_tables(database):
     uri = db.build_uri(database, db_type="postgresql")
     m = sqlalchemy.MetaData()
