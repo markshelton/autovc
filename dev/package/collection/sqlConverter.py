@@ -3,7 +3,7 @@ import re
 import sys
 import codecs
 
-def mysql_to_postgresql(mysql_db, postgresql_db):
+def mysql_to_sqlite(mysql_db, sqlite_db):
     with codecs.open(mysql_db,encoding="latin-1") as mysql_file:
         content = mysql_file.read()
 
@@ -43,5 +43,15 @@ def mysql_to_postgresql(mysql_db, postgresql_db):
     FIX_ESCAPES_RE = re.compile(r"(?<!\\)\\''", re.M)
     content = FIX_ESCAPES_RE.sub("'", content)
 
-    with open(postgresql_db,"w+",encoding="latin-1") as postgresql_file:
-        postgresql_file.write(content)
+    with open(sqlite_db,"w+",encoding="latin-1") as sqlite_file:
+        sqlite_file.write(content)
+
+def convert_db(source_dir,destination_dir, source_type="mysql", destination_type="postgresql"):
+    os.makedirs(destination_dir, exist_ok=True)
+    for source_file in db.get_files(source_dir):
+        source_short = os.path.basename(source_file)
+        destination_file = destination_dir+source_short
+        log.info("{0} | SQL Conversion Started".format(source_short))
+        try: mysql_to_sqlite(source_file,destination_file)
+        except: log.error("{0} | SQL Conversion Failed".format(source_short))
+        else: log.info("{0} | SQL Conversion Successful".format(source_short))

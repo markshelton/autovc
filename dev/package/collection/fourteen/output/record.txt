@@ -1,1 +1,1 @@
-collection/fourteen/output/extract/micro-term-imlogix.json
+collection/fourteen/output/extract/clickgolf.json
