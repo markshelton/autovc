@@ -16,16 +16,18 @@ import sqlite3
 #local modules
 import dbLoader as db
 import collection.sqlConverter as sc
+from logManager import logged
 
 #constants
 input_file = "collection/thirteen/input/2013-Dec-xx_mysql.tar.gz"
 extract_dir = "collection/thirteen/output/extract/"
 export_dir = "collection/thirteen/output/export/"
-dict_dir = "collection/thirteen/output/export/dictionary/"
 dict_file = "collection/thirteen/output/dict.csv"
 parse_dir = "collection/thirteen/output/parse/"
 database_file = "collection/thirteen/output/2013-Dec.db"
 config_dir = "collection/thirteen/config/"
+flat_file = "collection/thirteen/output/flatten/flat.csv"
+flatten_config = "collection/thirteen/config/flatten.sql"
 
 #logger
 log = logging.getLogger(__name__)
@@ -54,9 +56,14 @@ def export():
     db.clear_files(export_dir)
     db.export_files(database_file, export_dir)
 
+def flatten():
+    db.clear_files(flat_file)
+    flatten_database(database_file, flat_file, flatten_config)
+
 def explore():
-    db.clear_files(dict_dir, dict_file)
-    db.summarise_files(export_dir, dict_dir, dict_file)
+    db.clear_files(dict_file)
+    db.summarise_files(flatten_dir, flatten_dir, dict_file)
+
 
 def main():
     #cm = db.load_config(config_dir)
@@ -64,7 +71,8 @@ def main():
     #parse()          #Done
     #load()         #Done
     #export()        #Done
-    explore()       #Done
+    flatten()
+    #explore()       #Done
 
 if __name__ == "__main__":
     main()

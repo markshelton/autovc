@@ -67,6 +67,12 @@ def drop_database(database_file, db_type="sqlite"):
             try: conn.execute("DROP DATABASE \"{0}\";".format(db_name))
             except: log.info("{0} | Database already dropped".format(db_name))
 
+def execute_script(database_file, script_file):
+    with sqlite3.connect(database_file) as conn:
+        with open(script_file) as file:
+            script = file.read()
+        conn.executescript(script)
+
 def create_db(scripts_dir, database, db_type="sqlite"):
     if db_type == "postgresql": pass
     else:

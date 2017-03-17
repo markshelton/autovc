@@ -12,6 +12,7 @@ import csv
 import odo
 import datashape as ds
 import psycopg2
+import sqlite3
 import sqlalchemy
 import sqlalchemy.exc
 import contextlib
@@ -35,7 +36,7 @@ def load_config(config_dir=None):
 #logger
 log = logging.getLogger(__name__)
 
-odo_args = dict(engine="c", has_header=True,encoding="utf-8", errors="ignore", lineterminator="\n",quotechar='"', delimiter=',',quoting=csv.QUOTE_ALL, skipinitialspace=True)
+odo_args = dict(engine="c", has_header=True, errors="ignore", lineterminator="\n",quotechar='"', delimiter=',',quoting=csv.QUOTE_ALL, skipinitialspace=True)
 
 #functions
 
@@ -66,26 +67,6 @@ def build_uri(db_file, table=None, db_type=None, create=False):
         except: uri = connect_sqlite(db_file, table)
     return uri
 
-def export_file(database_file, export_dir, table, drop=False, db_type = "sqlite"):
-    table_name = "{0}.csv".format(table)
-    table_uri = build_uri(database_file, table, db_type=db_type)
-    export_file = "{0}{1}".format(export_dir, table_name)
-    log.info("{0} | Export started".format(table_name))
-    os.makedirs(os.path.dirname(export_dir), exist_ok=True)
-    if drop: sm.drop_database(table_uri)
-    odo.odo(table_uri, export_file)
-    try: odo.odo(table_uri, export_file)
-    except sqlalchemy.exc.DatabaseError:
-        log.error("{0} | Export failed".format(table_name), exc_info=1)
-    else: log.info("{0} | Export successful".format(table_name))
-
-def export_files(database_file, export_dir, db_type = "sqlite"):
-    log.info("{0} Started export process".format(database_file))
-    tables = sm.get_tables(database_file)
-    for table in tables:
-        export_file(database_file, export_dir, table, db_type = db_type)
-    log.info("{0} Completed export process".format(database_file))
-
 def clear_file(path):
     if os.path.isfile(path):
         os.remove(path)
@@ -102,6 +83,27 @@ def clear_file(path):
 def clear_files(*paths):
     for path in paths:
         clear_file(path)
+
+def export_file(database_file, export_file, table, drop=False, delete = True, db_type = "sqlite"):
+    if delete: clear_file(export_file)
+    table_name = "{0}.csv".format(table)
+    table_uri = build_uri(database_file, table, db_type=db_type)
+    log.info("{0} | Export started".format(table_name))
+    os.makedirs(os.path.dirname(export_file), exist_ok=True)
+    if drop: sm.drop_database(table_uri)
+    try: odo.odo(table_uri, export_file)
+    except sqlalchemy.exc.DatabaseError:
+        log.error("{0} | Export failed".format(table_name), exc_info=1)
+    else: log.info("{0} | Export successful".format(table_name))
+
+def export_files(database_file, export_dir, db_type = "sqlite"):
+    log.info("{0} Started export process".format(database_file))
+    tables = sm.get_tables(database_file)
+    for table in tables:
+        table_name = "{0}.csv".format(table)
+        export_file = "{0}{1}".format(export_dir, table_name)
+        export_file(database_file, export_file, table, db_type = db_type)
+    log.info("{0} Completed export process".format(database_file))
 
 def get_files(directory, endswith=None, full=True):
     files = os.listdir(directory)
@@ -146,9 +148,9 @@ def explore(df):
 
 @logged
 def summarise_files(export_dir, dictionary_dir=None, dict_file=None):
-    if not dictionary_dir: dictionary_dir = export_dir+"dictionary/"
+    if not dictionary_dir: dictionary_dir = export_dir
     if not dict_file: dict_file = dictionary_dir + "dict.csv"
-    os.makedirs(dictionary_dir)
+    os.makedirs(dictionary_dir,exist_ok=True)
     stats = pd.DataFrame()
     for file in get_files(export_dir,endswith=".csv",full=True):
         short = os.path.basename(file)
@@ -182,13 +184,18 @@ def get_datashape(odo_resource):
     dshape = ds.var * ds.Record(dictList)
     return dshape
 
-def load_file(abs_source_file, database_file, drop=False):
+@logged
+def load_dataframe(df, database_file, table):
+    with sqlite3.connect(database_file) as conn:
+        df.to_sql(table, conn, if_exists="replace")
+
+def load_file(abs_source_file, database_file, drop=False, encoding="utf-8"):
     source_file = os.path.basename(abs_source_file)
     table = source_file.split(".")[0]
     log.info("%s | Import started", source_file)
     db_uri = build_uri(database_file, table, db_type="sqlite",create=True)
     if drop: sm.drop_database(db_uri)
-    odo_resource = odo.resource(abs_source_file, **odo_args)
+    odo_resource = odo.resource(abs_source_file, encoding=encoding, **odo_args)
     try: dshape = get_datashape(odo_resource)
     except ValueError:
         log.error("%s | Datashape failed",source_file,exc_info=1)
