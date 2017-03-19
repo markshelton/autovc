@@ -16,13 +16,14 @@ import yaml
 #local modules
 
 #constants
-LOG_CONFIG = "config/_logger.yaml"
+LOG_CONFIG = "C:/Users/mark/Documents/GitHub/honours/dev/package/config/_logger.yaml"
 
 def load_yaml(path):
     if os.path.exists(path):
         with open(path, 'rt') as f:
             output = yaml.safe_load(f.read())
-            return output
+            if output is None: raise(IOError)
+            else: return output
 
 try: config = load_yaml(LOG_CONFIG)
 except:

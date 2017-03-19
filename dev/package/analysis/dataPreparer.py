@@ -3,23 +3,21 @@
 """data_preparer"""
 
 #standard modules
+from collections import Counter
 import datetime
 import sqlite3
 import logging
-import matplotlib.pyplot as plt
-from collections import Counter
 import string
 import re
 import itertools
-
+import os
 
 #third party modules
-import matplotlib.pyplot as plt
+from unidecode import unidecode
+from stop_words import get_stop_words
 import numpy as np
 import pandas as pd
-from unidecode import unidecode
 import sqlalchemy
-from stop_words import get_stop_words
 import requests
 
 #local modules
@@ -43,6 +41,7 @@ files["sixteen"]["flatten_config"] = "analysis/config/flatten/sixteen.sql"
 output_table = "combo"
 merge_config = "analysis/config/flatten/merge.sql"
 database_file = "analysis/output/combo.db"
+date_data_file = "analysis/output/temp/date_data.csv"
 nrows = 500
 
 #logger
@@ -147,46 +146,41 @@ def clean(df):
         #print(column)
         if column.startswith("keys"): temp = df[column]
         elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
-        #elif column.endswith("duration"): temp = df[column]
-        #elif column.endswith("bool"): temp = df[column]
-        #elif column.endswith("dummy"): temp = make_dummies(df[column],topn=5)
-        #elif column.endswith("list"): temp = make_dummies(df[column],topn=5,sep=";")
-        #elif column.endswith("text"): temp = make_dummies(df[column],topn=5,sep=" ",text=True)
-        #elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
-        #elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
+        elif column.endswith("duration"): temp = df[column]
+        elif column.endswith("bool"): temp = df[column]
+        elif column.endswith("dummy"): temp = make_dummies(df[column],topn=5)
+        elif column.endswith("list"): temp = make_dummies(df[column],topn=5,sep=";")
+        elif column.endswith("text"): temp = make_dummies(df[column],topn=5,sep=" ",text=True)
+        elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
+        elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
         else: temp = pd.DataFrame()
         return temp
 
     def create_durations(df):
-        df.replace(0, np.nan, inplace=True)
-        zipped = list(zip(df.columns, df.values.tolist()))
-        input(zipped)
-        combos = list(itertools.combinations(zipped, 2))
+        df = df.replace(to_replace = 0, value = np.nan)
+        combos = list(itertools.combinations(list(df), 2))
         durations = []
+        temp = pd.DataFrame()
         for x, y in combos:
-            yo = (x,y)
-            input(yo)
-            if x[0] != y[0]:
-                values = []
-                for i in range(len(x[1])):
-                    value = abs(x[1][i] - y[1][i])
-                    if x[1][i] - y[1][i] < 0: label = "from_{}_to_{}_duration".format(x[0], y[0])
-                    else: label = "from_{}_to_{}_duration".format(y[0], x[0])
-                    values.append(value)
-                duration = (label, values)
-                durations.append(duration)
-        input(durations)
+            values = df[x] - df[y]
+            label = "from_{}_to_{}_duration".format(y,x)
+            new = pd.Series(values, name=label)
+            temp = pd.concat([temp, new],axis=1)
         return temp
 
     def get_date_data(ticker, start="19700101", end="20170301"):
         path = "https://stooq.com/q/d/l/?s={}&i=d&d1={}&d2={}".format(ticker, start, end)
-        df = pd.read_csv(requests.get(path).url, index_col="Date")
+        response = requests.get(path)
+        os.makedirs(os.path.dirname(date_data_file), exist_ok=True)
+        with open(date_data_file, 'wb') as f:
+            f.write(response.content)
+        df = pd.read_csv(date_data_file, index_col="Date")
         return df
 
     df_new = pd.DataFrame()
-    #date_data = get_date_data("^spx")
+    date_data = get_date_data("^spx")
     for column in df:
-        temp = handle_column(df, column)#, date_data=date_data)
+        temp = handle_column(df, column, date_data=date_data)
         if temp is not None and not temp.empty:
             df_new = pd.concat([df_new, temp],axis=1)
     df_new.columns = [unidecode(x).strip().replace(" ","-") for x in list(df_new)]
@@ -194,6 +188,7 @@ def clean(df):
     temp = create_durations(df_new[dates])
     df_new = pd.concat([df_new, temp], axis=1)
     df_new.replace(np.nan, 0, inplace=True)
+    #input(df_new.head())
     return df_new
 
 @logged
@@ -230,14 +225,14 @@ def export_dataframe(database_file, table):
     return df
 
 def main():
-    #db.clear_files(database_file)
-    del files['sixteen']
+    db.clear_files(database_file)
+    #del files['sixteen']
     for file_name, file in files.items():
-        #flatten_file(file["database_file"], file["flatten_config"], file["flat_raw_file"], file_name)
+        flatten_file(file["database_file"], file["flatten_config"], file["flat_raw_file"], file_name)
         clean_file(file["flat_raw_file"], file["flat_clean_file"],nrows=nrows)
-        #load_file(database_file, file["flat_clean_file"], file_name)
-    #merge(database_file, merge_config)
-    #df = export_dataframe(database_file, output_table)
+        load_file(database_file, file["flat_clean_file"], file_name)
+    merge(database_file, merge_config)
+    df = export_dataframe(database_file, output_table)
     #print(df)
 
 if __name__ == "__main__":
