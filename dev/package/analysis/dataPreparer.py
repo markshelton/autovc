@@ -3,7 +3,7 @@
 """data_preparer"""
 
 #standard modules
-from collections import Counter
+from collections import Counter, defaultdict
 import datetime
 import sqlite3
 import logging
@@ -15,6 +15,7 @@ import os
 #third party modules
 from unidecode import unidecode
 from stop_words import get_stop_words
+import gender_guesser.detector as gender
 import numpy as np
 import pandas as pd
 import sqlalchemy
@@ -42,7 +43,6 @@ output_table = "combo"
 merge_config = "analysis/config/flatten/merge.sql"
 database_file = "analysis/output/combo.db"
 date_data_file = "analysis/output/temp/date_data.csv"
-nrows = 500
 
 #logger
 log = logging.getLogger(__name__)
@@ -106,6 +106,23 @@ def clean(df):
         def dropna(x):
             return pd.Series([str(y) for y in x if type(y) is dict])
 
+        def suffix_keys(x):
+            c = defaultdict(list)
+            for d in x:
+                d = eval(d) # e.g. {'series-a: 2}
+                d = {k: int(v) for k,v in d.items()}
+                for k,v in d.items():
+                    c.update(d)
+            b = {}
+            for k, v in c.items():
+                if type(v) is list:
+                    input(v)
+                    v = sorted(v)
+                    for i, x in enumerate(v):
+                        b["{}_{}".format(k, i)] = x
+                else: b[k] = v
+            return b
+
         def sum_dicts(x):
             c = Counter()
             for d in x:
@@ -118,13 +135,16 @@ def clean(df):
         #todo - [a 5; b 4; a 3] // index: dummy: value
         def combine_pairs(series, sep):
             series_name = series.name
+            suffix = series_name.split("_")[-1]
             series = series.str.split(sep,expand=True).stack()
             series = series.apply(lambda x: dict([tuple(x.split(" "))]))
             df = series.unstack()
             series = df.apply(lambda x: ",".join(dropna(x)).split(","),axis=1)
-            series = series.apply(lambda x: sum_dicts(x))
+            if series_name.endswith("date_pair"): series = series.apply(lambda x: suffix_keys(x))
+            else: series = series.apply(lambda x: sum_dicts(x))
             df = pd.DataFrame.from_records(series.tolist(), index=series.index)
             df = df.add_prefix(series_name+"_")
+            df = df.add_suffix("_"+suffix)
             return df
 
         def go_dates(series, date_data):
@@ -138,12 +158,37 @@ def clean(df):
 
             new = series.apply(lambda x: match_date_data(x, date_data)) # BROKEN
             new.name = series.name+"_"+"SP500"+"_"+"number"
+            series.replace(np.nan, 0, inplace=True)
             df = pd.concat([series, new],axis=1)
             return df
 
+        @logged
+        def go_gender(series, sep):
+
+            def get_gender(names, sep):
+                #input(names)
+                try:
+                    name_list = names.split(sep)
+                    c = Counter()
+                    for name in name_list:
+                        d = gender.Detector()
+                        sex = d.get_gender(name)
+                        if sex == "mostly_male": sex = "male"
+                        elif sex == "mostly_female": sex = "female"
+                        elif sex == "andy": sex = "unknown"
+                        c.update([sex])
+                    names = ["{} {}".format(k,v) for (k,v) in c.items()]
+                    names = ";".join(names)
+                except: pass
+                return names
+
+            series = series.apply(lambda x: get_gender(x, sep))
+            series.name = series.name + "_"+"number"
+            series = combine_pairs(series,sep=sep)
+            return series
+
 
         column = column.split(":")[0]
-        #print(column)
         if column.startswith("keys"): temp = df[column]
         elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
         elif column.endswith("duration"): temp = df[column]
@@ -153,8 +198,20 @@ def clean(df):
         elif column.endswith("text"): temp = make_dummies(df[column],topn=5,sep=" ",text=True)
         elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
         elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
+        elif column.endswith("names"): temp = go_gender(df[column], sep=";")
         else: temp = pd.DataFrame()
         return temp
+
+    def get_date_data(ticker, start="19700101", end="20170301"):
+        path = "https://stooq.com/q/d/l/?s={}&i=d&d1={}&d2={}".format(ticker, start, end)
+        try:
+            response = requests.get(path)
+            os.makedirs(os.path.dirname(date_data_file), exist_ok=True)
+            with open(date_data_file, 'wb') as f:
+                f.write(response.content)
+        except: pass
+        df = pd.read_csv(date_data_file, index_col="Date")
+        return df
 
     def create_durations(df):
         df = df.replace(to_replace = 0, value = np.nan)
@@ -168,14 +225,8 @@ def clean(df):
             temp = pd.concat([temp, new],axis=1)
         return temp
 
-    def get_date_data(ticker, start="19700101", end="20170301"):
-        path = "https://stooq.com/q/d/l/?s={}&i=d&d1={}&d2={}".format(ticker, start, end)
-        response = requests.get(path)
-        os.makedirs(os.path.dirname(date_data_file), exist_ok=True)
-        with open(date_data_file, 'wb') as f:
-            f.write(response.content)
-        df = pd.read_csv(date_data_file, index_col="Date")
-        return df
+    def create_null_dummies(df):
+        pass
 
     df_new = pd.DataFrame()
     date_data = get_date_data("^spx")
@@ -187,8 +238,10 @@ def clean(df):
     dates = [col for col in list(df) if col.endswith("date")]
     temp = create_durations(df_new[dates])
     df_new = pd.concat([df_new, temp], axis=1)
+    temp = create_null_dummies(df_new)
+    df_new = pd.concat([df_new, temp], axis=1)
     df_new.replace(np.nan, 0, inplace=True)
-    #input(df_new.head())
+    input(df_new.head())
     return df_new
 
 @logged
@@ -225,32 +278,16 @@ def export_dataframe(database_file, table):
     return df
 
 def main():
+    nrows = None
     db.clear_files(database_file)
-    #del files['sixteen']
+    del files['sixteen']
     for file_name, file in files.items():
         flatten_file(file["database_file"], file["flatten_config"], file["flat_raw_file"], file_name)
         clean_file(file["flat_raw_file"], file["flat_clean_file"],nrows=nrows)
         load_file(database_file, file["flat_clean_file"], file_name)
     merge(database_file, merge_config)
-    df = export_dataframe(database_file, output_table)
+    #df = export_dataframe(database_file, output_table)
     #print(df)
 
 if __name__ == "__main__":
     main()
-
-
-"""
-match = {}
-match["thirteen"] = "keys_permalink_id"
-match["sixteen"] = "keys_cb_url_id"
-
-
-#merge(database_file, files.keys(), output_table)
-def merge(database_file, merge_tables, output_table):
-    #thirteen - keys_permalink_id e.g. /company/google
-    #fourteen - 
-    #fifteen - 
-    #sixteen - keys_cb_url_id e.g. https://www.crunchbase.com/organization/google
-    df_new = df_temp
-    return df_new
-"""

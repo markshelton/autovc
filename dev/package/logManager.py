@@ -9,6 +9,7 @@ import inspect
 import time
 from functools import wraps
 import os
+import sys; sys.path.append('')
 
 #third-party modules
 import yaml
@@ -19,6 +20,8 @@ import yaml
 LOG_CONFIG = "C:/Users/mark/Documents/GitHub/honours/dev/package/config/_logger.yaml"
 
 def load_yaml(path):
+    print(sys.path)
+    print(os.path.abspath(path))
     if os.path.exists(path):
         with open(path, 'rt') as f:
             output = yaml.safe_load(f.read())
@@ -53,7 +56,9 @@ def logged(f):
         log.info("{0} | Started".format(f.__name__))
         start_time = time.time()
         try: result = f(*args, **kwargs)
-        except: log.error("{0} | Failed".format(f.__name__), exc_info=True)
+        except:
+            elapsed_time = time.time() - start_time
+            log.error("{0} | Failed | {1:.2f}".format(f.__name__,elapsed_time), exc_info=True)
         else:
             elapsed_time = time.time() - start_time
             log.info("{0} | Passed | {1:.2f}".format(f.__name__,elapsed_time))
