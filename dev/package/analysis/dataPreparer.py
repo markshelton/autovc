@@ -11,6 +11,7 @@ import string
 import re
 import itertools
 import os
+import urllib
 
 #third party modules
 from unidecode import unidecode
@@ -56,6 +57,7 @@ def read(file,nrows=None):
 @logged
 def clean(df):
 
+    @logged
     def handle_column(df, column, date_data=None):
 
         def go_filter(series, patterns, mode="included"):
@@ -157,8 +159,8 @@ def clean(df):
                 return result
 
             new = series.apply(lambda x: match_date_data(x, date_data)) # BROKEN
-            new.name = series.name+"_"+"SP500"+"_"+"number"
-            series.replace(np.nan, 0, inplace=True)
+            new.name = "confidence_economy_broader_" + series.name+"_"+"SP500"+"_"+"number"
+            #series.replace(np.nan, 0, inplace=True)
             df = pd.concat([series, new],axis=1)
             return df
 
@@ -187,18 +189,17 @@ def clean(df):
             series = combine_pairs(series,sep=sep)
             return series
 
-
         column = column.split(":")[0]
-        if column.startswith("keys"): temp = df[column]
-        elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
-        elif column.endswith("duration"): temp = df[column]
-        elif column.endswith("bool"): temp = df[column]
-        elif column.endswith("dummy"): temp = make_dummies(df[column],topn=5)
-        elif column.endswith("list"): temp = make_dummies(df[column],topn=5,sep=";")
-        elif column.endswith("text"): temp = make_dummies(df[column],topn=5,sep=" ",text=True)
-        elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
-        elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
-        elif column.endswith("names"): temp = go_gender(df[column], sep=";")
+        print(column)
+        if column.endswith("bool"): temp = df[column]
+        #elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
+        #elif column.endswith("duration"): temp = df[column]
+        #elif column.endswith("dummy"): temp = make_dummies(df[column],topn=5)
+        #elif column.endswith("list"): temp = make_dummies(df[column],topn=5,sep=";")
+        #elif column.endswith("text"): temp = make_dummies(df[column],topn=5,sep=" ",text=True)
+        #elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
+        #elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
+        elif column.startswith("keys"): temp = df[column]
         else: temp = pd.DataFrame()
         return temp
 
@@ -240,8 +241,8 @@ def clean(df):
     df_new = pd.concat([df_new, temp], axis=1)
     temp = create_null_dummies(df_new)
     df_new = pd.concat([df_new, temp], axis=1)
-    df_new.replace(np.nan, 0, inplace=True)
-    input(df_new.head())
+    #df_new.replace(np.nan, 0, inplace=True)
+    #input(df_new.head())
     return df_new
 
 @logged
@@ -260,10 +261,11 @@ def clean_file(raw_file, clean_file,nrows=None):
     df.to_csv(clean_file, mode="w+", index=False)
 
 @logged
-def load_file(database_file, clean_file, file_name):
-    df = pd.read_csv(clean_file, encoding="latin1")
+def load_file(database_file, clean_file, file_name, index=False):
+    if index: df = pd.read_csv(clean_file, encoding="latin1", index_col=0)
+    else: df = pd.read_csv(clean_file, encoding="latin1")
     with sqlite3.connect(database_file) as conn:
-        df.to_sql(file_name, conn, if_exists='append', index=False)
+        df.to_sql(file_name, conn, if_exists='append', index=index)
 
 @logged
 def merge(database_file, script_file):
@@ -278,14 +280,14 @@ def export_dataframe(database_file, table):
     return df
 
 def main():
-    nrows = None
-    db.clear_files(database_file)
+    nrows = 1000
+    #db.clear_files(database_file)
     del files['sixteen']
     for file_name, file in files.items():
-        flatten_file(file["database_file"], file["flatten_config"], file["flat_raw_file"], file_name)
+        #flatten_file(file["database_file"], file["flatten_config"], file["flat_raw_file"], file_name)
         clean_file(file["flat_raw_file"], file["flat_clean_file"],nrows=nrows)
-        load_file(database_file, file["flat_clean_file"], file_name)
-    merge(database_file, merge_config)
+        #load_file(database_file, file["flat_clean_file"], file_name)
+    #merge(database_file, merge_config)
     #df = export_dataframe(database_file, output_table)
     #print(df)
 
