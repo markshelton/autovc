@@ -192,13 +192,13 @@ def clean(df):
         column = column.split(":")[0]
         print(column)
         if column.endswith("bool"): temp = df[column]
-        #elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
-        #elif column.endswith("duration"): temp = df[column]
-        #elif column.endswith("dummy"): temp = make_dummies(df[column],topn=5)
-        #elif column.endswith("list"): temp = make_dummies(df[column],topn=5,sep=";")
-        #elif column.endswith("text"): temp = make_dummies(df[column],topn=5,sep=" ",text=True)
-        #elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
-        #elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
+        elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
+        elif column.endswith("duration"): temp = df[column]
+        elif column.endswith("dummy"): temp = make_dummies(df[column],topn=5)
+        elif column.endswith("list"): temp = make_dummies(df[column],topn=5,sep=";")
+        elif column.endswith("text"): temp = make_dummies(df[column],topn=5,sep=" ",text=True)
+        elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
+        elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
         elif column.startswith("keys"): temp = df[column]
         else: temp = pd.DataFrame()
         return temp
@@ -221,7 +221,7 @@ def clean(df):
         temp = pd.DataFrame()
         for x, y in combos:
             values = df[x] - df[y]
-            label = "from_{}_to_{}_duration".format(y,x)
+            label = "{}_to_{}_duration".format(y,x)
             new = pd.Series(values, name=label)
             temp = pd.concat([temp, new],axis=1)
         return temp
@@ -272,22 +272,23 @@ def merge(database_file, script_file):
     sm.execute_script(database_file, script_file)
 
 @logged
-def export_dataframe(database_file, table):
+def export_dataframe(database_file, table, index=False):
     uri = db.build_uri(database_file, table=None, db_type="sqlite")
     engine = sqlalchemy.create_engine(uri)
     with engine.connect() as conn:
-        df = pd.read_sql_table(table, conn)
+        if index: df = pd.read_sql_table(table, conn, index_col ="index")
+        else: df = pd.read_sql_table(table, conn)
     return df
 
 def main():
-    nrows = 1000
+    #nrows = None
     #db.clear_files(database_file)
-    del files['sixteen']
-    for file_name, file in files.items():
-        #flatten_file(file["database_file"], file["flatten_config"], file["flat_raw_file"], file_name)
-        clean_file(file["flat_raw_file"], file["flat_clean_file"],nrows=nrows)
-        #load_file(database_file, file["flat_clean_file"], file_name)
-    #merge(database_file, merge_config)
+    #del files['sixteen']
+    #for file_name, file in files.items():
+    #    flatten_file(file["database_file"], file["flatten_config"], file["flat_raw_file"], file_name)
+    #    clean_file(file["flat_raw_file"], file["flat_clean_file"],nrows=nrows)
+    #    load_file(database_file, file["flat_clean_file"], file_name)
+    merge(database_file, merge_config)
     #df = export_dataframe(database_file, output_table)
     #print(df)
 

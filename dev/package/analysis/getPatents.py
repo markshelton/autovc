@@ -9,7 +9,7 @@ import os
 from unidecode import unidecode
 
 @logged
-def go_patents(df):
+def go_patents(df, df_old):
 
     def get_patents(company_name, index):
         end_date = "2013-01-01"
@@ -31,20 +31,26 @@ def go_patents(df):
             type_list = ";".join([v["patent_type"] for v in patents])))
         series.name = index
         df = series.to_frame().T
+        new_names = [(i,"potential_structural_patents_"+i) for i in list(df)]
+        df.rename(columns = dict(new_names), inplace=True)
         return df
 
-    counter = 0
-    for index, series in df.iterrows():
+    names = ["count_number", "first_date", "citations_total_number","citations_average_number","cited_by_total_number","cited_by_average_number","type_list"]
+    new_names = ["potential_structural_patents_"+i for i in names]
+    new = pd.DataFrame(columns = new_names)
+    for counter, (index, series) in enumerate(df.iterrows()):
         try:
-            temp = get_patents(series["keys_name_id"], series["keys_permalink_id"])
-            if not temp.empty:
-                print(series["keys_name_id"])
-                counter += 1
-                if counter == 1: new = temp
-                else: new = new.append(temp)
+            print(counter, series["keys_name_id"])
+            if series["keys_permalink_id"] in list(df_old.index): temp = df_old.loc[[series["keys_permalink_id"]]]
+            else: temp = get_patents(series["keys_name_id"], series["keys_permalink_id"])
+            if temp.empty: temp = pd.DataFrame(columns=new_names, index=[series["keys_permalink_id"]])
+            new = new.append(temp)
+            if counter % 500 == 5:
+                os.makedirs(os.path.dirname(output_file),exist_ok=True)
+                new.to_csv(output_file, mode="w+", index=True)
+                db.clear_files(output_database_file)
+                dp.load_file(output_database_file, output_file, output_table, index=True)
         except: print("Error")
-    new_names = [(i,"potential_structural_patents_"+i) for i in list(new)]
-    new.rename(columns = dict(new_names), inplace=True)
     return new
 
 source_database_file = "analysis/output/combo.db"
@@ -54,8 +60,11 @@ output_database_file = "analysis/output/extra.db"
 output_table = "patents"
 
 def main():
+    if os.path.exists(output_database_file):
+        df_old = dp.export_dataframe(output_database_file, output_table, index=True)
+    else: df_old = pd.DataFrame()
     df = dp.export_dataframe(source_database_file, source_table)
-    df = go_patents(df)
+    df = go_patents(df, df_old)
     db.clear_files(output_file)
     os.makedirs(os.path.dirname(output_file),exist_ok=True)
     df.to_csv(output_file, mode="w+", index=True)
