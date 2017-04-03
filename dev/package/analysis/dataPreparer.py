@@ -87,14 +87,15 @@ def clean(df):
             series = series[series.index.difference(excluded.index)]
             return series
 
-        def make_dummies(series, topn, sep=None, text=False):
+        def make_dummies(series, topn=None, sep=None, text=False):
             series_name = series.name
             series = series.str.lower()
             if sep: series = series.str.split(sep,expand=True).stack()
             if text: series = prepare_text(series, topn, sep)
-            counts = series.value_counts()
-            included = counts.nlargest(topn).index
-            series = go_filter(series, included)
+            if topn:
+                counts = series.value_counts()
+                included = counts.nlargest(topn).index
+                series = go_filter(series, included)
             if sep:
                 series.index = pd.MultiIndex.from_tuples(series.index)
                 df = series.unstack()
@@ -159,7 +160,7 @@ def clean(df):
                 return result
 
             new = series.apply(lambda x: match_date_data(x, date_data)) # BROKEN
-            new.name = "confidence_economy_broader_" + series.name+"_"+"SP500"+"_"+"number"
+            new.name = "confidence_context_broader_" + series.name+"_"+"SP500"+"_"+"number"
             #series.replace(np.nan, 0, inplace=True)
             df = pd.concat([series, new],axis=1)
             return df
@@ -194,9 +195,11 @@ def clean(df):
         if column.endswith("bool"): temp = df[column]
         elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
         elif column.endswith("duration"): temp = df[column]
-        elif column.endswith("dummy"): temp = make_dummies(df[column],topn=5)
-        elif column.endswith("list"): temp = make_dummies(df[column],topn=5,sep=";")
-        elif column.endswith("text"): temp = make_dummies(df[column],topn=5,sep=" ",text=True)
+        elif column.endswith("dummy"): temp = make_dummies(df[column],topn=10)
+        elif column.endswith("types_list"): temp = make_dummies(df[column],sep=";")
+        elif column.endswith("codes_list"): temp = make_dummies(df[column],sep=";")
+        elif column.endswith("list"): temp = make_dummies(df[column],topn=10,sep=";")
+        elif column.endswith("text"): temp = make_dummies(df[column],topn=10,sep=" ",text=True)
         elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
         elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
         elif column.startswith("keys"): temp = df[column]
@@ -281,13 +284,13 @@ def export_dataframe(database_file, table, index=False):
     return df
 
 def main():
-    #nrows = None
-    #db.clear_files(database_file)
+    nrows = None
+    db.clear_files(database_file)
     #del files['sixteen']
-    #for file_name, file in files.items():
-    #    flatten_file(file["database_file"], file["flatten_config"], file["flat_raw_file"], file_name)
-    #    clean_file(file["flat_raw_file"], file["flat_clean_file"],nrows=nrows)
-    #    load_file(database_file, file["flat_clean_file"], file_name)
+    for file_name, file in files.items():
+        flatten_file(file["database_file"], file["flatten_config"], file["flat_raw_file"], file_name)
+        clean_file(file["flat_raw_file"], file["flat_clean_file"],nrows=nrows)
+        load_file(database_file, file["flat_clean_file"], file_name)
     merge(database_file, merge_config)
     #df = export_dataframe(database_file, output_table)
     #print(df)
