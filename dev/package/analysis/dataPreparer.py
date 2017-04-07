@@ -57,7 +57,6 @@ def read(file,nrows=None):
 @logged
 def clean(df):
 
-    @logged
     def handle_column(df, column, date_data=None):
 
         def go_filter(series, patterns, mode="included"):
@@ -129,9 +128,11 @@ def clean(df):
         def sum_dicts(x):
             c = Counter()
             for d in x:
-                d = eval(d)
-                d = {k: float(v) for k,v in d.items()}
-                c.update(d)
+                try:
+                    d = eval(d)
+                    d = {k: float(v) for k,v in d.items()}
+                    c.update(d)
+                except: pass
             c = dict(c)
             return c
 
@@ -159,9 +160,8 @@ def clean(df):
                 except: result = 0
                 return result
 
-            new = series.apply(lambda x: match_date_data(x, date_data)) # BROKEN
+            new = series.apply(lambda x: match_date_data(x, date_data))
             new.name = "confidence_context_broader_" + series.name+"_"+"SP500"+"_"+"number"
-            #series.replace(np.nan, 0, inplace=True)
             df = pd.concat([series, new],axis=1)
             return df
 
@@ -191,7 +191,7 @@ def clean(df):
             return series
 
         column = column.split(":")[0]
-        print(column)
+        #print(column)
         if column.endswith("bool"): temp = df[column]
         elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
         elif column.endswith("duration"): temp = df[column]
@@ -207,14 +207,14 @@ def clean(df):
         return temp
 
     def get_date_data(ticker, start="19700101", end="20170301"):
-        path = "https://stooq.com/q/d/l/?s={}&i=d&d1={}&d2={}".format(ticker, start, end)
-        try:
+        try: df = pd.read_csv(date_data_file, index_col="Date")
+        except:
+            path = "https://stooq.com/q/d/l/?s={}&i=d&d1={}&d2={}".format(ticker, start, end)
             response = requests.get(path)
             os.makedirs(os.path.dirname(date_data_file), exist_ok=True)
             with open(date_data_file, 'wb') as f:
                 f.write(response.content)
-        except: pass
-        df = pd.read_csv(date_data_file, index_col="Date")
+            df = pd.read_csv(date_data_file, index_col="Date")
         return df
 
     def create_durations(df):
@@ -233,9 +233,15 @@ def clean(df):
         pass
 
     df_new = pd.DataFrame()
-    date_data = get_date_data("^spx")
+    try: date_data = get_date_data("^spx")
+    except:
+        log.error("Error with Date Data")
+        date_data = None
     for column in df:
-        temp = handle_column(df, column, date_data=date_data)
+        try: temp = handle_column(df, column, date_data=date_data)
+        except:
+            log.error("Error with Column: {0}".format(column))
+            temp = df[column]
         if temp is not None and not temp.empty:
             df_new = pd.concat([df_new, temp],axis=1)
     df_new.columns = [unidecode(x).strip().replace(" ","-") for x in list(df_new)]
@@ -244,8 +250,6 @@ def clean(df):
     df_new = pd.concat([df_new, temp], axis=1)
     temp = create_null_dummies(df_new)
     df_new = pd.concat([df_new, temp], axis=1)
-    #df_new.replace(np.nan, 0, inplace=True)
-    #input(df_new.head())
     return df_new
 
 @logged
@@ -282,6 +286,13 @@ def export_dataframe(database_file, table, index=False):
         if index: df = pd.read_sql_table(table, conn, index_col ="index")
         else: df = pd.read_sql_table(table, conn)
     return df
+
+def label_dataset(df, label):
+    y = df[label]
+    df = df.select_dtypes(['number'])
+    drops = [col for col in list(df) if col.startswith(("key","from","outcome","index"))]
+    X = df.drop(drops, axis=1)
+    return X, y
 
 def main():
     nrows = None

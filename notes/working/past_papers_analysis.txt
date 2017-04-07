@@ -1,0 +1,180 @@
+
+Previous Honours Theses
+
+------------------------------------------------------------------
+
+Alex_Honours_Thesis
+Identifying Radio Galaxies Using Machine Learning Techniques
+Total Count: 18500W
+
+-Title Page
+-Abstract (300W)
+-Acknowledgements
+-Contents
+1. Introduction (1200W)
+    1.0 Intro
+        - Gap: No research has been published on applying supervised machine learning to identifying radio galaxies.
+    1.1 Aim 1: Viability of ML
+        - Training set size
+        - Total time saving
+        - Classification accuracy
+    1.2 Aim 2: Starting point for future work
+        - Classifier comparison
+        - Feature extraction
+        - Limiting factors
+    1.3 Methods
+        - Dataset
+        - Classifiers
+        - Preprocessing
+2. Literature Review (4400W)
+    2.1 Signposting - Necessary? Probably shouldn't be a subsection
+    2.2 Source Verification
+    2.3 Source Detection
+    2.4 ML in Astronomy
+    2.5 Classification Algorithms
+        2.5.1 Intro to Classification
+        2.5.2 Support Vector Machines
+        2.5.3 Artificial Neural Networks
+3. Preprocessing (1300W)
+    3.1 Dataset
+    3.2 Constructing Truth Values
+4. Feature Extraction (2200W)
+    4.1 Base Features
+    4.2 Feature Transformations
+    4.3 PCA Dimensions
+5. Experimental Preliminaries (1800W)
+6. Experimentation (1600W)
+    6.1 Training set size
+    6.2 Classifier comparison
+        6.2.1 Accuracy Compariosn
+        6.2.2 Variability Comparison
+    6.3 Time saving
+    6.4 Misclassified examples
+7. Results & Discussion (4500W)
+    7.1 Training set size
+    7.2 Classifier comparison
+        7.2.1 Accuracy Compariosn
+        7.2.2 Variability Comparison
+    7.3 Time saving
+    7.4 Misclassified examples
+8. Conclusion (1200W)
+    8.0 Recap
+    8.1 Aim 1: Viability of ML
+    8.2 Aim 2: Starting point for future work
+A. Original Honours Proposal
+-Bibliography
+
+------------------------------------------------------------------
+
+BenjaminLyonThesis
+Characterising 802.11 Wireless Networks using Data Mining
+Total Count: 18350W
+
+-Title Page
+-Abstract (350W)
+-Acknowledgements
+-Contents
+-List of Tables
+-List of Figures
+1. Introduction (500W)
+2. Literature Review (3500W)
+3. System Design Goals (700W)
+4. Implemented System (6200W)
+5. Experiments & Results (3900W)
+6. Conclusion (3200W)
+A. Original Honours Proposal
+-Bibliography
+
+------------------------------------------------------------------
+
+EvgneiSergevThesis
+Tracking boundaries in video via segmentation
+Total Count: 14300W
+
+-Title Page
+-Abstract (300W)
+-Acknowledgements
+-Contents
+-List of Figures
+1. Introduction (1000W)
+2. Literature Review (2700W)
+3. Analyses of the problem and an existing algorithm (3500W)
+4. Estimating displacement between frames (4900W)
+5. Algorithms for temporally stable segmentation (1300W)
+6. Conclusions (600W)
+A. Original Honours Proposal
+-Bibliography
+
+------------------------------------------------------------------
+
+Ash_Tyndall_Thesis
+Towards a Low-Cost, Non-Invasive System for Occupancy Detection using a Thermal Detector Array
+Total Count: 16550W
+
+-Title Page
+-Abstract (350W)
+-Licensing
+-Acknowledgements
+-Contents
+-List of Tables
+-List of Figures
+-List of Listings
+1. Introduction (1200W)
+2. Literature Review (2800W)
+3. Design & Implementation (3800W)
+4. Evaluation (6400W)
+5. Conclusions (2000W)
+Bibliography
+A. Statistical Measures (350W)
+B. Classification Algorithms (900W)
+C. Knowledge Flows (Weka)
+D. Original Honours Proposal
+
+------------------------------------------------------------------
+
+Harry_Smallbone_Thesis
+Towards  Automated Analysis for Prediction of Myeloproliferative Neoplasms using Computer Vision
+Total Count: 14800W
+
+-Title Page
+-Abstract (300W)
+-Acknowledgements
+-Contents
+-List of Tables
+-List of Figures
+1. Introduction (1900W)
+    -Background
+    -Criteria
+        -Quantitative
+        -Reliable
+        -Robust
+        -Practical
+    -Signposting
+        -Literature Review
+        -Design & Implementation
+        -Evaluation
+2. Literature Review (2900W)
+    -Criteria Selection
+    -Data Collection (Image Acquisition)
+    -Preprocessing (Megakaryocyte Segmentation)
+    -Research Gap
+3. Design & Implementation (4300W)
+    -Data Preparation
+    -Preprocessing
+    -Feature Extraction
+4. Evaluation (4200W)
+    -Dataset
+    -Segmentation
+    -Feature Extraction
+    -Classification & Criteria Analysis
+    -Discussion
+5. Conclusions (1200W)
+    -Evaluation of Aims
+    -Future work
+    -Summary
+- Bibliography
+A. Glossary (600W)
+B. Diagnosis Criteria
+C. Statistical Measures (400W)
+- Original Honours Proposal
+- Revised Literature Review

@@ -12,25 +12,12 @@ def make_slice(input_path, output_path, date):
         c = conn.cursor()
         c.execute("ATTACH DATABASE '{0}' AS src;".format(input_path))
         for table in tables:
-            c.execute(
-                "SELECT sql FROM src.sqlite_master \
-                WHERE type='table' AND name='{0}'".format(table))
+            c.execute("SELECT sql FROM src.sqlite_master WHERE type='table' AND name='{0}'".format(table))
             c.execute(c.fetchone()[0])
-            try:
-                c.execute(
-                    "INSERT INTO main.{0} \
-                    SELECT * FROM src.{0} \
-                    WHERE created_at < '{1}';".format(table, date))
+            try: c.execute("INSERT INTO main.{0} SELECT * FROM src.{0} WHERE created_at < '{1}';".format(table, date))
             except:
-                if table == "jobs":
-                    c.execute(
-                        "INSERT INTO main.{0} \
-                        SELECT * FROM src.{0} \
-                        WHERE started_on < '{1}';".format(table, date))
-                else:
-                    c.execute(
-                        "INSERT INTO main.{0} \
-                        SELECT * FROM src.{0};".format(table, date))
+                try: c.execute("INSERT INTO main.{0} SELECT * FROM src.{0} WHERE started_on < '{1}';".format(table, date))
+                except: c.execute("INSERT INTO main.{0} SELECT * FROM src.{0};".format(table, date))
             finally: print("Table import complete: {0}".format(table))
 
 def main():
