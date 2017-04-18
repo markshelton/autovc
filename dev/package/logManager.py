@@ -9,7 +9,7 @@ import inspect
 import time
 from functools import wraps
 import os
-import sys; sys.path.append('')
+import sys
 
 #third-party modules
 import yaml
@@ -20,8 +20,6 @@ import yaml
 LOG_CONFIG = "C:/Users/mark/Documents/GitHub/honours/dev/package/config/_logger.yaml"
 
 def load_yaml(path):
-    print(sys.path)
-    print(os.path.abspath(path))
     if os.path.exists(path):
         with open(path, 'rt') as f:
             output = yaml.safe_load(f.read())
@@ -36,8 +34,8 @@ except:
 else:
     logging.config.dictConfig(config)
     log = logging.getLogger(__name__)
-    log.info("Default log config loaded")
-    log.info("Logger created")
+    log.debug("Default log config loaded")
+    log.debug("Logger created")
 
 def traced(f):
     @wraps(f)

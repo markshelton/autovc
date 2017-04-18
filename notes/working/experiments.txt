@@ -1,0 +1,92 @@
+--------------------------------------------------------------------------------------
+
+Graphics:
+
+Figure 2. Startup development lifecycle (graphic).
+Figure 2. Venture capital fund lifecycle (graphic)
+Figure 3. System architecture overview (flow chart).
+Figure 3. Mapping of features to feature groups (flow chart).
+Figure 3. Mapping of features to lifecycle stages (flow chart).
+
+--------------------------------------------------------------------------------------
+
+Factual Tables:
+
+Table 2. Data sources indicated to be relevant to startup investment.
+Table 2. Features indicated to be relevant to startup investment.
+Figure 2. Proposed conceptual framework for startup investment (tree).
+Table 2. Evaluation of machine learning algorithms for startup investment.
+Table 3. Hyperparameter search space for pipeline.
+
+--------------------------------------------------------------------------------------
+
+Exploratory: Master (2016-09-09)
+
+(!) Table 3. Final test dataset counts grouped by lifecycle stage.
+(!) Figure 3. Distribution of company ages by lifecycle stage (Box plot).
+--> Apply Constraints
+(!) Figure 3. Number of missing features per observation (histogram).
+(!) Figure 3. Number of missing observations per feature (histogram).
+Figure 3. Total funding raised under different transformations (histogram).
+--> Apply Preprocessing (Impute, Scale, Transform)
+Figure 3. Percentage of unique variance per feature (histogram).
+(!) Figure 3. Eigenvalues extracted from PCA model (line plot).
+--> Apply Feature Grouping
+Figure 3. Inter-correlations of each factor from conceptual framework (matrix).
+(!) Figure 3. Eigenvalues extracted from PCA model (line plot).
+Figure 3. Component loadings on each factor from conceptual framework (matrix).
+
+--------------------------------------------------------------------------------------
+
+Experimental (2):
+- Feature: Master (2016-04-04) | Label: Test (2017-04-04)
+- Period: 1 | N_Slices: 1 | CV: 3 | Search_Samples: 10 | Size_Train: 50,000 | Algorithms: [RF, SGD]
+
+(Y) Figure 3. Feature weights for SVM model with varying F-test selection cutoffs (bar plot). --> Feature_weights (no labels)
+(x) Figure 3. ROC Curve for different feature transformations - nplog1p, box cox etc. (line plot). --> ROC
+(x) Figure 4. ROC Curve for different feature extractions - PCA, SelectPercentile, Grouped (line plot) -- ROC
+
+--------------------------------------------------------------------------------------
+
+Experimental (3):
+- Feature: Master (2016-04-04) | Label: Test (2017-04-04)
+- Period: 1 | N_Slices: 1 | CV: 3 | Search_Samples: 20 | Size_Train: None | Algorithms: All
+
+(Y) Table 3. Classification accuracy metrics for each algorithm. --> AUC ROC |
+(Y) Figure 3. ROC Curve for each algorithm (line plot). --> ROC
+(Y) Figure 4. AUC ROC for different training set sizes (line plot). --> Learning Curve
+
+--------------------------------------------------------------------------------------
+
+Experimental (4):
+- Feature: Master (2016-04-04) | Label: Test (2017-04-04)
+- Period: 1 | N_Slices: 4 | CV: 3 | Search_Samples: 10 | Size_Train: None | Algorithms: [RF, SGD]
+
+(Y) Figure 4. ROC curves for models trained on different time slices (line plot). --> ROC
+(x) Figure 4. ROC curves for target companies at different lifecycle stages (line plot). --> ROC
+(x) Table 4. Features ranked by importance for different time slices. --> Feature_weights (labels)
+
+Exploratory:
+Table 3. Counts of observations from dataset slices of various ages.
+Table 3. Comparison of 2013 slice from 2016 dataset with original 2013 dataset.
+
+--------------------------------------------------------------------------------------
+
+Experimental (5):
+- Feature: Master (2016-04-04) | Label: Test (2017-04-04)
+- Period: [0.5, 1, 2] | N_Slices: 2 | CV: 3 | Search_Samples: 10 | Size_Train: None | Algorithms: [RF, SGD]
+
+(x) Table 4. Features ranked by importance for different prediction windows. --> Feature_weights (labels)
+(Y) Figure 4. ROC curves for models trained on different prediction windows (line plot). --> ROC
+(x) Figure 4. AUC ROC for models by lifecyle stage and prediction window (matrix) --> AUC_ROC
+(Y) Table 4. Three example company profiles and their predictions. --> Y_pred
+Figure 3. Change in company stage over time (matrix).
+
+--------------------------------------------------------------------------------------
+
+Exploratory: Logs
+Table 4. Time profiling by system component.
+
+http://scikit-learn.org/stable/developers/performance.html
+
+--------------------------------------------------------------------------------------

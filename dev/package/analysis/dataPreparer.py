@@ -191,17 +191,17 @@ def clean(df):
             return series
 
         column = column.split(":")[0]
-        #print(column)
+        print(column)
         if column.endswith("bool"): temp = df[column]
-        elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
-        elif column.endswith("duration"): temp = df[column]
-        elif column.endswith("dummy"): temp = make_dummies(df[column],topn=10)
-        elif column.endswith("types_list"): temp = make_dummies(df[column],sep=";")
-        elif column.endswith("codes_list"): temp = make_dummies(df[column],sep=";")
-        elif column.endswith("list"): temp = make_dummies(df[column],topn=10,sep=";")
-        elif column.endswith("text"): temp = make_dummies(df[column],topn=10,sep=" ",text=True)
+        #elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
+        #elif column.endswith("duration"): temp = df[column]
+        #elif column.endswith("dummy"): temp = make_dummies(df[column],topn=10)
+        #elif column.endswith("types_list"): temp = make_dummies(df[column],sep=";")
+        #elif column.endswith("codes_list"): temp = make_dummies(df[column],sep=";")
+        #elif column.endswith("list"): temp = make_dummies(df[column],topn=10,sep=";")
+        #elif column.endswith("text"): temp = make_dummies(df[column],topn=10,sep=" ",text=True)
         elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
-        elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
+        #elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
         elif column.startswith("keys"): temp = df[column]
         else: temp = pd.DataFrame()
         return temp
@@ -245,7 +245,7 @@ def clean(df):
         if temp is not None and not temp.empty:
             df_new = pd.concat([df_new, temp],axis=1)
     df_new.columns = [unidecode(x).strip().replace(" ","-") for x in list(df_new)]
-    dates = [col for col in list(df) if col.endswith("date")]
+    dates = [col for col in list(df_new) if col.endswith("date")]
     temp = create_durations(df_new[dates])
     df_new = pd.concat([df_new, temp], axis=1)
     temp = create_null_dummies(df_new)
@@ -284,15 +284,10 @@ def export_dataframe(database_file, table, index=False):
     engine = sqlalchemy.create_engine(uri)
     with engine.connect() as conn:
         if index: df = pd.read_sql_table(table, conn, index_col ="index")
-        else: df = pd.read_sql_table(table, conn)
+        else:
+            df_list = pd.read_sql_table(table, conn, chunksize=10000)
+            df = pd.concat([chunk for chunk in df_list],ignore_index=True)
     return df
-
-def label_dataset(df, label):
-    y = df[label]
-    df = df.select_dtypes(['number'])
-    drops = [col for col in list(df) if col.startswith(("key","from","outcome","index"))]
-    X = df.drop(drops, axis=1)
-    return X, y
 
 def main():
     nrows = None

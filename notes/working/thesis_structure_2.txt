@@ -1,0 +1,169 @@
+Draft Thesis Structure
+
+-Title Page: Predicting Startup Exits Using Machine Learning Techniques
+-Abstract (300 Words)
+-Acknowledgements
+-Contents
+
+-List of Tables
+    - Table 2. Data sources indicated to be relevant to startup investment.
+    - Table 2. Features indicated to be relevant to startup investment.
+    - Table 2. Evaluation of machine learning algorithms for startup investment.
+
+-List of Figures
+    - Figure 2. Startup development lifecycle (graphic).
+    - Figure 2. Venture capital fund lifecycle (graphic)
+    - Figure 2. Proposed conceptual framework for startup investment (tree).
+
+1. Introduction (1,500 Words)
+    - Rationale
+        - Technological advances have made launching startups more accessible than ever before. --> more startups
+        - Startups seek venture capital investment to support them through their development. --> more investment
+        - Venture capitalists have difficulty finding investments that can provide highly profitable liquidity events. --> more difficulty
+        - Data mining may be able to make investment screening more efficient and effective. --> solution
+    - Aim: To develop a viable system that will assist venture capitalists in screening investment candidates.
+    - Criteria
+        - Efficient: The system must be more efficient than traditional, manual investment screening.
+        - Robust: The system must be robust enough to be reliable over time and agnostic to specific data sources.
+        - Powerful: The system must be consistent in identifying high-potential candidates with high sensitivity.
+    - Signposting
+        - Literature Review
+        - Design & Implementation
+        - Evaluation
+        - Discussion
+
+2. Literature Review (3,000 Words)
+    2.1 Theoretical Background
+        2.1.0 Introduction
+        2.1.1 Technology Startups
+            2.1.1.0 Introduction
+            2.1.1.1 Determinants of Startup Performance
+            2.1.1.2 Startup Development Lifecycle
+                - Figure 2. Startup development lifecycle (graphic).
+            2.1.1.3 Investment Strategy for Startups
+            2.1.1.4 Exit Strategy for Startups
+        2.1.2 Startup Investment
+            2.1.2.0 Introduction
+            2.1.2.1 Venture Capital Firm Strategy
+                - Figure 2. Venture capital fund lifecycle (graphic)
+            2.1.2.2 Investment Opportunity Search
+            2.1.2.3 Investment Decision Making
+    2.2 Data Collection
+        2.2.0 Introduction
+            - Table 2. Data sources indicated to be relevant to startup investment.
+        2.2.1 Source Characteristics - Databases, Social Media, Other
+        2.2.2 Source Evaluation
+    2.3 Feature Selection
+        - Table 2. Features indicated to be relevant to startup investment.
+        - Figure 2. Proposed conceptual framework for startup investment (tree).
+    2.4 Classification Algorithms
+        2.4.0 Introduction
+            - Table 2. Evaluation of machine learning algorithms for startup investment.
+        2.4.1 Task Characteristics
+        2.4.2 Algorithm Characteristics
+        2.4.3 Algorithm Evaluation
+    2.5 Research Gap
+
+3. Design & Implementation (3,000 Words)
+    3.0 Introduction
+        - Figure 3. System architecture overview (flow chart).
+    3.1 Data Collection
+        - Table 3. Final test dataset counts grouped by lifecycle stage.
+        - Figure 3. Distribution of company ages by lifecycle stage (KDE plot).
+    3.2 Preprocessing
+        3.2.0 Introduction
+        3.2.1 Cleaning
+            - Figure 3. Number of missing features per observation (histogram).
+            - Figure 3. Number of missing observations per feature (histogram).
+        3.2.2 Transformation
+            - Figure 3. Total funding raised under different transformations (histogram).
+            - Figure 3. ROC Curve for different feature transformations - nplog1p, box cox etc. (line plot).
+        3.2.3 Extraction
+            - Figure 3. Eigenvalues extracted from PCA model (line plot).
+            - Figure 3. Feature weights for SVM model with varying F-test selection cutoffs (bar plot).
+    3.3 Classification Algorithms
+        - Table 3. Classification accuracy metrics for each algorithm.
+        - Figure 3. Receiver operating characteristics for each algorithm (line plot).
+        - Table 3. Hyperparameter search space for pipeline.
+
+4. Experiment 1: Efficiency
+    4.0 Introduction
+    4.1 Training Size
+        4.1.0 Introduction
+        4.1.1 Design
+        4.1.2 Results
+            - Figure 4. AUC ROC for different training set sizes (line plot).
+        4.1.3 Discussion
+    4.2 Time Profiling
+        4.2.0 Introduction
+        4.2.1 Design
+        4.2.2 Results
+            - Table 4. Time profiling by system component.
+        4.2.3 Discussion
+
+5. Experiment 2: Robustness
+    4.0 Introduction
+    4.1 Time Slices
+        4.1.0 Introduction
+        4.1.1 Design
+            - Table 3. Counts of observations from dataset slices of various ages.
+            - Table 3. Comparison of 2013 slice from 2016 dataset with original 2013 dataset.
+        4.1.2 Results
+            - Table 4. Features ranked by importance for different time slices.
+            - Figure 4. ROC curves for models trained on different time slices (line plot).
+        4.1.3 Discussion
+    4.2 Feature Sets
+        4.2.0 Introduction
+        4.2.1 Design
+            - Figure 3. Mapping of features to feature groups (flow chart).
+            - Figure 3. Inter-correlations of each factor from conceptual framework (matrix).
+            - Figure 3. Component loadings on each factor from conceptual framework (matrix).
+        4.2.2 Results
+            - Figure 4. ROC curves for models using different feature extraction techniques (line plot).
+        4.2.3 Discussion
+
+6. Experiment 3: Predictive Power
+    4.0 Introduction
+    4.1 Forecast Window
+        4.1.0 Introduction
+        4.1.1 Design
+            - Figure 3. Change in company stage over time (matrix).
+        4.1.2 Results
+            - Table 4. Features ranked by importance for different prediction windows.
+            - Figure 4. ROC curves for models trained on different prediction windows (line plot).
+        4.1.3 Discussion
+    4.2 Lifecycle Stage
+        4.2.0 Introduction
+        4.2.1 Design
+            - Figure 3. Mapping of features to lifecycle stages (flow chart).
+        4.2.2 Results
+            - Figure 4. ROC curves for target companies at different lifecycle stages (line plot).
+            - Figure 4. AUC ROC for models by lifecyle stage and prediction window (matrix)
+            - Table 4. Three example company profiles and their predictions.
+        4.2.3 Discussion
+
+7. Conclusions (1,500 Words)
+    6.1 Evaluation of Criteria
+        6.1.0 Introduction
+        6.1.1 Efficiency
+        6.1.2 Robustness
+        6.1.3 Predictive Power
+    6.2 Future research
+        6.2.0 Introduction
+        6.2.1 Network Analysis
+        6.2.2 Temporal Analysis
+        6.2.3 Full Automation
+    6.3 Summary
+
+- Bibliography
+A. Glossary
+B. Statistical Measures
+C. Conceptual Framework
+    - Figure C.1 Proposed conceptual framework for startup investment - extended (tree).
+    - Table C.1 List of included features.
+D. Additional Classifier Results
+    - Table D.2 Optimal Logistic Regression model.
+    - Figure D.1 Optimal Decision Tree model (tree).
+E. Original Honours Proposal
+F. Revised Honours Proposal
+G. Revised Literature Review
