@@ -1,0 +1,18 @@
+\begin{tabular}{lll} \toprule
+Step            & Parameter             & Values                        \\ \midrule
+Imputer         & Strategy              & Mode                          \\
+Transformer     & Function              & SQRT                          \\
+Scaler          & Function              & StandardScaler                \\
+Extractor       & Components            & Range (1, 20)                 \\
+Random Forest   & Class Weight          & Balanced                      \\
+Random Forest   & Criterion             & Entropy                       \\
+Random Forest   & Boostrap              & True                          \\
+Random Forest   & Estimators            & Range (50, 100)               \\
+Random Forest   & Max Depth             & Range (5, 10)                 \\
+Random Forest   & Max Features          & SQRT(N_Features)              \\
+Random Forest   & Min Samples Split     & 2                             \\
+Random Forest   & Min Samples Leaf      & 1                             \\
+Random Forest   & Min Weight Leaf       & 0                             \\
+Random Forest   & Max Leaf Nodes        & None                          \\
+Random Forest   & Min Impurity Split    & 1e-7                          \\
+\bottomrule \end{tabular}

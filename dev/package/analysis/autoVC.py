@@ -29,6 +29,8 @@ import scipy
 import scipy.stats as st
 import numpy as np
 import pandas as pd
+from dateutil import relativedelta
+
 
 #local
 import sqlManager as sm
@@ -113,28 +115,9 @@ class autoVC():
 
             pipe = Pipeline(steps=[
                 ("imputer", Imputer(strategy="median")),
+                ('transformer', FunctionTransformer(np.log1p)),
                 ('scaler', StandardScaler()),
-                ("thresholder", VarianceThreshold()),
-                ('transformer', FeatureUnion([
-                    ('log_pipe', Pipeline(steps=[
-                        ('log', FunctionTransformer(np.log1p)),
-                        ('log_imputer', Imputer(strategy="median")),
-                        ('log_scaler', StandardScaler())])),
-                    ('identity', None)],n_jobs=-1)),
-                ('extractor', FeatureUnion([
-                    ('pca', PCA()),
-                    ('best', SelectPercentile())],n_jobs=-1)),
-                ("clf", None)])
-
-            pipe = Pipeline(steps=[
-                ("imputer", Imputer(strategy="median")),
-                ("thresholder", VarianceThreshold()),
-                ('abs', FunctionTransformer(np.absolute)),
-                ('transformer', FeatureUnion([
-                    ('log', FunctionTransformer(np.log1p)),
-                    ('binary', Binarizer())])),
-                ('scaler', StandardScaler()),
-                ('extractor', TruncatedSVD()),
+                ('extractor', PCA()),
                 ("clf", None)])
 
             return pipe
@@ -142,22 +125,8 @@ class autoVC():
         @logged
         def _create_params(algorithm="NB"):
 
-            tf = dict(
-                transformer__transformer_weights = [
-                    #dict(log_pipe = 0, identity=1),
-                    dict(log_pipe = 0.5, identity=0.5),
-                    dict(log_pipe = 1, identity = 0)])
-            ext = dict(
-                extractor__transformer_weights = [
-                    dict(pca = 0, best=1),
-                    dict(pca = 0.5, best=0.5),
-                    dict(pca = 1, best = 0)],
-                extractor__pca__n_components=st.randint(5, 50),
-                extractor__best__percentile =st.uniform(0,100))
-            tf = dict()
-            ext = dict(extractor__n_components=st.randint(5, 50))
-            #ext = dict()
-            pp = dict(**tf, **ext)
+            ext = dict(extractor__n_components=st.randint(5, 100))
+            pp = dict(**imp, **tf, **sc, **ext)
             param_dists = dict(
                 NB = dict(**pp,
                     clf = [GaussianNB()]),
@@ -405,8 +374,6 @@ class autoVC():
             for i, j in self.feature_importances:
                 print("{}: {:.4f}".format(i, j))
         except: print("Failed.")
-        #stages = gs.create_stages(X)
-        #for stage in stages:
         return self.scores
 
     @logged
@@ -428,25 +395,22 @@ class autoVC():
 
 @logged
 def main():
-    build = 2
-    periods = [1, 2] #[0.5, 1, 2, 3]
-    #algorithms = ["NB", "DT", "LR", "KNN", "RF", "SVM", "SGD", "ANN"]
-    for i in periods:
-        vc = autoVC(
-            output_folder = "analysis/output/autoVC/{0}/".format(build),
-            merge_config = "analysis/config/master_test_merge.sql")
-        vc.load_master(
-            file_path = "analysis/input/master.db",
-            file_date = date(2016, 9, 9),
-            feature_config = "analysis/config/master_feature.sql",
-            label_config = "analysis/config/master_label.sql",
-            merge_config = "analysis/config/master_merge.sql")
-        vc.fit(
-            warm = False,
-            period = i, n_slices = 2, cv=3, n_iter = 10, max_obs_all = 50000, max_obs_best = None,
-            label = "outcome_exit_bool",
-            algorithms = ["NB", "DT", "LR", "KNN", "RF", "SVM", "ANN"],
-            store_path = vc.output_folder+"estimator.pkl")
+    vc = autoVC(
+        output_folder = "analysis/output/autoVC/{0}/".format(build),
+        merge_config = "analysis/config/master_test_merge.sql")
+    vc.load_master(
+        file_path = "analysis/input/master.db",
+        file_date = date(2016, 9, 9),
+        feature_config = "analysis/config/master_feature.sql",
+        label_config = "analysis/config/master_label.sql",
+        merge_config = "analysis/config/master_merge.sql")
+    vc.fit(
+        warm = False,
+        period = i, n_slices = 2, cv=3, n_iter = 10, max_obs_all = 50000, max_obs_best = None,
+        label = "outcome_exit_bool",
+        algorithms = ["NB", "DT", "LR", "KNN", "RF", "SVM", "ANN"],
+        store_path = vc.output_folder+"estimator.pkl")
+    if final_score:
         vc.load_test(
             file_path = "analysis/input/test.db",
             file_date = date(2017, 4, 4),
@@ -457,76 +421,37 @@ def main():
             output_results = vc.output_folder + str(i) +'_results.csv')
 
 
-def test():
-    vc = autoVC(
-        output_folder = "analysis/output/test/",
-        merge_config = "analysis/config/master_test_merge.sql")
-    from sklearn import datasets
-    from sklearn.datasets import make_classification
-    X, y = make_classification(n_samples=10000, n_informative=18,n_features=50, flip_y=0.15, random_state=217)
-    vc.algorithms = ["RF", "LR"] #["NB", "DT", "LR", "KNN", "RF", "SVM", "SGD", "ANN"]
-    estimators = []
-    for algo in vc.algorithms:
-        clf = vc._make_estimator( algorithm=algo)
-        clf.fit(X, y)
-        bst_score = "{:.3f}".format(clf.best_score_)
-        bst_est = clf.best_estimator_
-        vc._store_results(clf, output_path=bst_score+"_"+algo+"_output.csv")
-        estimators.append(bst_est)
-    vc.score_test(estimators[0], X, y, cv=5)
-    print(estimators)
+def generate_slices(time_slices, forecast_window, start_date, end_date):
+    #TODO
+    return dataset_slices
 
-def experiment_2():
-    build = 2
-    periods = [1]
-    for i in periods:
-        vc = autoVC(
-            output_folder = "analysis/output/autoVC/{0}/".format(build),
-            merge_config = "analysis/config/master_test_merge.sql")
-        vc.load_master(
-            file_path = "analysis/input/master.db",
-            file_date = date(2016, 9, 9),
-            feature_config = "analysis/config/master_feature.sql",
-            label_config = "analysis/config/master_label.sql",
-            merge_config = "analysis/config/master_merge.sql")
-        vc.fit(
-            warm = False,
-            period = i, n_slices = 1, cv=3, n_iter = 10, max_obs = 50000,
-            label = "outcome_exit_bool",
-            algorithms = ["RF", "SVM"],
-            store_path = vc.output_folder+"estimator.pkl")
-        vc.save(
-            output_config = vc.output_folder+str(i)+'_record.txt',
-            output_results = vc.output_folder + str(i) +'_results.csv')
+def generate_dataset(feature_slice, label_slice, max_observations, load_prev_files,
+    database_path, feature_config, label_config, merge_config, output_folder):
+    #TODO
+    return X,y
 
-def experiment_3():
-    build = 3
-    periods = [3] #[0.5, 1, 2, 3]
-    for i in periods:
-        vc = autoVC(
-            output_folder = "analysis/output/autoVC/{0}/".format(build),
-            merge_config = "analysis/config/master_test_merge.sql")
-        vc.load_master(
-            file_path = "analysis/input/master.db",
-            file_date = date(2016, 9, 9),
-            feature_config = "analysis/config/master_feature.sql",
-            label_config = "analysis/config/master_label.sql",
-            merge_config = "analysis/config/master_merge.sql")
-        vc.fit(
-            warm = False,
-            period = i, n_slices = 1, cv=3, n_iter = 20, max_obs_all = None, max_obs_best = 50000,
-            label = "outcome_exit_bool",
-            algorithms = ["RF", "NB", "DT", "LR", "KNN", "SVM", "ANN"],
-            store_path = vc.output_folder+"estimator.pkl")
-        vc.load_test(
-            file_path = "analysis/input/test.db",
-            file_date = date(2017, 4, 4),
-            label_config = "analysis/config/test_label.sql")
-        vc.score(cv=3, max_obs = None)
-        vc.save(
-            output_config = vc.output_folder+str(i)+'_record.txt',
-            output_results = vc.output_folder + str(i) +'_results.csv')
+def create_params(algorithm, pp_params, clf_params):
+    #TODO
+    return params
 
+def fit_model(X, y, params, pipe, cv_folds, search_iterations, verbosity, log_scores):
+    #TODO
+    return log
+
+def store_log(log, feature_slice, label_slice, cm, output_folder):
+    #TODO
+    return log
+
+def new():
+    cm = ConfigManager("analysis/config/experiments/5.yaml")
+    dataset_slices = generate_slices(cm.time_slices, cm.forecast_window, cm.master_start_date, cm.master_end_date)
+    for feature_slice, label_slice in dataset_slices:
+        X,y = generate_dataset(feature_slice, label_slice, cm.max_observations, cm.load_prev_files, cm.master_path,
+            cm.master_feature_config, cm.master_label_config, cm.master_merge_config, cm.output_folder)
+        for algorithm in cm.algorithms:
+            params = create_params(algorithm, cm.pp_params, cm.clf_params)
+            log = fit_model(X, y, params, cm.pipe, cm.cv_folds, cm.search_iterations, cm.verbosity, cm.log_scores)
+            store_log(log, feature_slice, label_slice, cm, cm.output_folder)
 
 if __name__ == "__main__":
-    experiment_3()
+    main()
