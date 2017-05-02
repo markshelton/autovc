@@ -5,23 +5,45 @@
 \label{chap:design}
 
 
-In this chapter, we explain the methodology used to fill the research gap identified in Chapter~2, thereby producing a system that identifies startup companies likely to receive additional funding or a liquidity event (exit) in a given forecast window. Figure [FIGURE] depicts the system architecture, which we describe in detail in the following sections.
+In this chapter, we explain the methodology used to fill the research gap identified in Chapter~\ref{chap:litreview}, thereby producing a system that identifies high-potential startup companies that are likely to receive additional funding or a exit in a given forecast window. Figure~\ref{fig:design:system_architecture} depicts the system architecture, which we describe in detail in the following sections.
+
+\begin{figure}[!htb]
+    \centering
+    \input{../figures/design/system_architecture.png} %NEEDS FIGURE
+    \caption{System architecture overview.}
+    \label{fig:design:system_architecture}
+\end{figure}
 
 \begin{enumerate}
 
-\item Data Collection: We collected data from the CrunchBase online database, with supplementation from PatentsView (US Patents Office). We collected two CSV dumps from CrunchBase in September 2016 and April 2017, for training and (final) testing respectively. We imported the CSV dumps into a relational database and performed aggregation queries to create features suitable for classification. We performed screening based on company developmental stage and age to ensure only relevant companies were included in the dataset.
+\item Data Collection. We collected startup company data from the CrunchBase online database, with supplementation from PatentsView (US Patents Office). We collected two CSV dumps from CrunchBase in September 2016 and April 2017, for training and testing respectively. We imported these CSV files into a relational database (SQLite) and performed aggregation queries to create features suitable for classification. We then performed screening based on each company’s developmental stage and age to ensure only relevant companies were included in the dataset. Finally, we explored the dataset and identified issues of sparsity, long-tailed distributions, imbalanced feature ranges, and non-orthogonality.
 
-\item Classification Pipeline: We developed a processing pipeline using the popular Python-based machine learning library Scikit-learn \cite{pedregosa2011}. The pipeline includes imputation, transformation and scaling, extraction and classification. We optimised these steps using cross-validated randomized hyperparameter search. Key dataset issues identified included extreme sparsity, long-tailed skewed distributions and non-orthogonal features. Classification evaluation revealed Random Forests and Logistic Regression are best suited to the problem.
+\item Pipeline Creation. In the previous step, we identified a range of issues with our dataset. In this step, we develop a processing pipeline that seeks to address these issues and produce accurate predictions. Our pipeline is developed using the popular Python-based machine learning library Scikit-learn \cite{pedregosa2011}. Pre-processing steps include imputation, transformation, scaling and extraction. Each pre-processing step has hyperparameters that can be tuned (e.g. imputation strategy, number of components to extract) that affect its performance. We also tested a number of common classification algorithms and their hyperparameters. We performed a randomised search across the pipeline’s hyperparameters to generate a selection of candidate pipelines. The hyperparameters that had the most significant effect on the final performance of the pipelines were related to the classification algorithms.
+
+\item Pipeline Selection. In the previous step, we generated a cross-section of candidate pipelines with different hyperparameters. In this step, we rank these candidate pipelines and test the best pipelines (finalist pipelines) over a number of different dataset slices. This process ensures that we select pipelines that are robust in their performance with respect to time. We aggregate the results for each finalist pipeline across these dataset slices and rank the finalist pipelines on their overall performance. Finally, we select the best pipeline.
+
+%TODO - What is the variance in performance over time in aggregate?
+%TODO - What is the variance over time between different classifiers?
+%TODO - How many finalists do we need to ensure we get the best pipeline?
+
+\item Pipeline Evaluation. In the previous step, we selected the best pipeline with respect to the robustness of its performance over time. In this step, we evaluate the best pipeline’s performance on a held-out test dataset. We use the pipeline to fit a model to a dataset sliced from the master database. We apply this model to another feature vector from the master database and make predictions. We score these predictions against truth values derived from the held-out test database (c. Apr-17). This process is performed multiple times to evaluate our three primary criteria: efficiency, robustness, and predictive power. The experiments are as follows: efficiency, the pipeline is fitted to datasets of various sample sizes; robustness, the pipeline is fitted to datasets from various time slices; and predictive power, the forecast window between the feature vector and outcome is varied. Results of these experiments are described in detail in Chapter~\ref{chap:evaluation}.
 
 \end{enumerate}
 
 \section{Data Collection}
 
-In the previous chapter, we reviewed the literature concerning data sources for entrepreneurship and VC investment. We concluded the most promising primary data sources for this project are CrunchBase and AngelList, for their size, comprehensiveness and ease of access. We suggested PatentsView (the online database of the US Patent Office) could be a useful secondary data source for structural capital features. In the following sections, we discuss how we collected data from CrunchBase and PatentsView, converted the relational databases into a format suitable for machine learning, performed preliminary screening to ensure we only included relevant companies, and finally, we provide an overview of the primary dataset.
+In the previous chapter, we reviewed the literature concerning data sources for entrepreneurship and VC investment. We concluded the most promising primary data sources for this project are CrunchBase and AngelList, for their size, comprehensiveness and ease of access. We suggested PatentsView (the online database of the US Patent Office) could be a useful secondary data source for structural capital features. In the following sections, we first discuss how we collected data from CrunchBase and PatentsView, converted the relational databases into a format suitable for machine learning, performed preliminary screening to ensure we only included relevant companies. This process is depicted in Figure~\ref{fig:design:data_collection}. Following our description of this process we describe the results of exploratory analysis on our dataset and identify dataset issues which will be addressed in later steps.
+
+\begin{figure}[!htb]
+    \centering
+    \input{../figures/design/data_collection.png} %NEEDS FIGURE
+    \caption{Data collection overview.}
+    \label{fig:design:data_collection}
+\end{figure}
 
 \subsection{CrunchBase}
 
-CrunchBase is an online, crowd-sourced repository of startup companies, individuals and investors with a focus on US high-tech sectors. CrunchBase is freely accessible for browsing but requires licenses to filter the dataset, use the API, and download Microsoft Excel and CSV-formatted dumps. For the purposes of this project, we were granted an Academic License. CrunchBase provides database access in a few formats that offer trade-offs in terms of accessibility and comprehensiveness. We intended to use CrunchBase’s API because it provides the most comprehensive access to their database. We developed a collector that downloaded a daily list of updated API endpoints from CrunchBase and queried nodes it needed to update. CrunchBase’s API provides JSON-formatted responses which the program recursively parsed and stored into a relational database. However, due to the time constraints of this research project, we abandoned this data collection method. CrunchBase also provides CSV-formatted dumps of their key endpoints (e.g. organizations, people, funding\_rounds). We downloaded two CSV-formatted dumps from Crunchbase on 09-Sep-2016 and 04-Apr-2017 which we loaded into relational databases (see Appendix D for the full database schema).
+CrunchBase is an online, crowd-sourced repository of startup companies, individuals and investors with a focus on US high-tech sectors. CrunchBase is freely accessible for browsing but requires licenses to filter the dataset, use the API, and download Microsoft Excel and CSV-formatted dumps. For the purposes of this project, we were granted an Academic License. CrunchBase provides database access in a few formats that offer trade-offs in terms of accessibility and comprehensiveness. We intended to use CrunchBase’s API because it provides the most comprehensive access to their database. We developed a collector that downloaded a daily list of updated API endpoints from CrunchBase and queried nodes it needed to update. CrunchBase’s API provides JSON-formatted responses which the program recursively parsed and stored into a relational database. However, due to the time constraints of this research project, we abandoned this data collection method. CrunchBase also provides CSV-formatted dumps of their key endpoints (e.g. organizations, people, funding_rounds). We downloaded two CSV-formatted dumps from Crunchbase on 09-Sep-2016 and 04-Apr-2017 which we loaded into relational databases (see Appendix\ref{chap:appendix:} for the full database schema).
 
 \subsection{PatentsView}
 

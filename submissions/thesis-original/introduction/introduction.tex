@@ -34,5 +34,8 @@ The following work is presented in three chapters:
 
 \end{enumerate}
 
-\ifcsdef{mainfile}{}{\printbibliography}
+\ifcsdef{mainfile}{}{
+    \appendix
+    \subfile{../appendices/introduction/appendices}
+    \printbibliography}
 \end{document}
