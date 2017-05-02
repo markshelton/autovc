@@ -36,6 +36,7 @@ $RECYCLE.BIN/
 *.json
 *.zip
 *.tar.gz
+*.pkl
 
 # Config files #
 *.conf
