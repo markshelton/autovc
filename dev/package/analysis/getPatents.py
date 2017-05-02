@@ -19,9 +19,9 @@ from logManager import logged
 
 
 input_path = "analysis/input/test.db"
-pickle_names_path = "analysis/output/PatentsView/names.pkl"
-pickle_patents_path = "analysis/output/PatentsView/patents.pkl"
-output_path = "analysis/output/PatentsView/patents.db"
+pickle_names_path = "analysis/input/PatentsView/names.pkl"
+pickle_patents_path = "analysis/input/PatentsView/patents.pkl"
+output_path = "analysis/input/PatentsView/patents.db"
 
 
 @logged
