@@ -1,3 +1,0 @@
-Project title: Predicting entrepreneurial success from online social networks
-Supervisor: Professor Amitava Datta
-Despite a documented association between social capital and entrepreneurial success, there is little evidence that venture capitalists analyse the social capital of the founding teams they invest in. The aim of this research project is to devise a tool that allows venture capitalists to use a founding team’s online social network data to evaluate the likelihood of their venture’s eventual success. The tool will incorporate data from a variety of online social networks and databases, and require minimal user input. If this project is successful, it could revolutionise the venture capital investment evaluation process.

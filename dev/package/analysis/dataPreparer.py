@@ -45,6 +45,11 @@ merge_config = "analysis/config/flatten/merge.sql"
 database_file = "analysis/output/combo.db"
 date_data_file = "analysis/output/temp/date_data.csv"
 
+codes = ["a","b","c","d","e","f","g","h"]
+types = ["angel","convertible_note","debt_financing","equity_crowdfunding","grant",
+    "non_equity_assistance","post_ipo_debt","post_ipo_equity","private_equity",
+    "product_crowdfunding","secondary_market","seed","undisclosed","venture"]
+
 #logger
 log = logging.getLogger(__name__)
 
@@ -102,6 +107,12 @@ def clean(df):
                 series = df.squeeze()
                 df = series.str.get_dummies(sep=sep)
             else: df = pd.get_dummies(series)
+            df = df.rename(columns=str.lower)
+            if "type" in series_name: sublist = types
+            elif "code" in series_name: sublist = codes
+            for x in sublist:
+                if x not in list(df): df[x] = np.nan
+            df = df[sublist]
             df = df.add_prefix(series_name+"_")
             return df
 
@@ -147,6 +158,12 @@ def clean(df):
             if series_name.endswith("date_pair"): series = series.apply(lambda x: suffix_keys(x))
             else: series = series.apply(lambda x: sum_dicts(x))
             df = pd.DataFrame.from_records(series.tolist(), index=series.index)
+            df = df.rename(columns=str.lower)
+            if "type" in series_name: sublist = types
+            elif "code" in series_name: sublist = codes
+            for x in sublist:
+                if x not in list(df): df[x] = np.nan
+            df = df[sublist]
             df = df.add_prefix(series_name+"_")
             df = df.add_suffix("_"+suffix)
             return df
@@ -191,17 +208,26 @@ def clean(df):
             return series
 
         column = column.split(":")[0]
-        print(column)
         if column.endswith("bool"): temp = df[column]
-        #elif column.endswith("date"): temp = go_dates(df[column], date_data=date_data)
-        #elif column.endswith("duration"): temp = df[column]
-        #elif column.endswith("dummy"): temp = make_dummies(df[column],topn=10)
-        #elif column.endswith("types_list"): temp = make_dummies(df[column],sep=";")
-        #elif column.endswith("codes_list"): temp = make_dummies(df[column],sep=";")
+        elif column.endswith("date"): temp = df[column] #go_dates(df[column], date_data=date_data)
+        elif column.endswith("duration"): temp = df[column]
+<<<<<<< HEAD
+        elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
+        elif column.endswith("types_list"): temp = make_dummies(df[column],sep=";")
+        elif column.endswith("codes_list"): temp = make_dummies(df[column],sep=";")
         #elif column.endswith("list"): temp = make_dummies(df[column],topn=10,sep=";")
+        #elif column.endswith("dummy"): temp = make_dummies(df[column],topn=10)
         #elif column.endswith("text"): temp = make_dummies(df[column],topn=10,sep=" ",text=True)
+        elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="coerce")
+=======
+        elif column.endswith("dummy"): temp = make_dummies(df[column],topn=10)
+        elif column.endswith("types_list"): temp = make_dummies(df[column],sep=";")
+        elif column.endswith("codes_list"): temp = make_dummies(df[column],sep=";")
+        elif column.endswith("list"): temp = make_dummies(df[column],topn=10,sep=";")
+        elif column.endswith("text"): temp = make_dummies(df[column],topn=10,sep=" ",text=True)
         elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
-        #elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
+        elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
+>>>>>>> master
         elif column.startswith("keys"): temp = df[column]
         else: temp = pd.DataFrame()
         return temp

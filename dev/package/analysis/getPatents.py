@@ -1,75 +1,128 @@
-import analysis.dataPreparer as dp
-import dbLoader as db
-from logManager import logged
-import numpy as np
-import pandas as pd
-import requests
+
+import string
 import json
 import os
+import sqlite3
+import pickle
+from collections import defaultdict
+
+import numpy as np
+import pandas as pd
 from unidecode import unidecode
+from cleanco import cleanco
+from datetime import date
+import distance
+import requests
+
+import analysis.dataPreparer as dp
+from logManager import logged
+
+
+input_path = "analysis/input/test.db"
+pickle_names_path = "analysis/output/PatentsView/names.pkl"
+pickle_patents_path = "analysis/output/PatentsView/patents.pkl"
+output_path = "analysis/output/PatentsView/patents.db"
+
 
 @logged
-def go_patents(df, df_old):
+def get_companies(path):
+    with sqlite3.connect(path) as conn:
+        query = "SELECT company_name, uuid FROM organizations WHERE primary_role = 'company';"
+        companies = pd.read_sql_query(query, conn, index_col="uuid")
+    return companies
 
-    def get_patents(company_name, index):
-        end_date = "2013-01-01"
-        q = '{"_and":[{"_begins":{"assignee_organization":"%s"}},{"_lte":{"patent_date":"%s"}}]}' % (company_name, end_date)
-        f = '["assignee_first_seen_date","patent_num_combined_citations","patent_num_cited_by_us_patents","patent_type","patent_date"]'
-        base = "http://www.patentsview.org/api/assignees/query?"
-        path = unidecode("{}q={}&f={}".format(base, q, f))
+def standardize_name(raw_name):
+    try:
+        std_name = unidecode(raw_name)
+        std_name = std_name.lower()
+        std_name = std_name.lstrip().strip()
+        std_name = cleanco(std_name).clean_name()
+        std_name.translate({ord(c):None for c in string.punctuation})
+    except: std_name = raw_name
+    finally: return std_name
+
+@logged
+def standardize_names(raw_names):
+    return raw_names.apply(standardize_name)
+
+@logged
+def store_patents(patents, path):
+    with sqlite3.connect(path) as conn:
+        patents.to_sql("patents", conn, if_exists="replace",index_label ="assignee_uuid")
+
+def names_are_similar(db_name, patents_name):
+    try:
+        patents_name = standardize_name(patents_name)
+        dist1 = distance.nlevenshtein(db_name, patents_name, method=1)
+        dist2 = distance.nlevenshtein(db_name, patents_name.split(" ")[0], method=1)
+        dist3 = distance.nlevenshtein(db_name.split(" ")[0], patents_name, method=1)
+        response = sum([dist1 < 0.2, dist2 < 0.2, dist3 < 0.2, (dist2 == 0)*2, (dist3==0)*2]) > 1
+        if response: print("--Matched:", patents_name)
+    except: response = False
+    finally: return response
+
+def request_patents(company_name):
+    company_name = company_name.split(" ")[0]
+    base = "http://www.patentsview.org/api/patents/query?"
+    q = '{"_begins":{"assignee_organization":"%s"}}' % (company_name)
+    f = '["assignee_organization", \
+        "patent_num_combined_citations", \
+        "patent_num_cited_by_us_patents", \
+        "patent_type", \
+        "patent_date"]'
+    o = '{"per_page":10000}'
+    path = "{}q={}&f={}&o={}".format(base, q, f, o)
+    try:
         response = requests.get(path).json()
-        if response["total_assignee_count"] == 0: return pd.DataFrame()
-        patents_ll = [v["patents"] for v in response["assignees"]]
-        patents = [item for sublist in patents_ll for item in sublist]
-        series = pd.Series(dict(
-            count_number = len(patents),
-            first_date = min([v["assignee_first_seen_date"] for v in response["assignees"]]),
-            citations_total_number = sum([int(v["patent_num_combined_citations"]) for v in patents]),
-            citations_average_number = np.mean([int(v["patent_num_combined_citations"]) for v in patents]),
-            cited_by_total_number = sum([int(v["patent_num_cited_by_us_patents"]) for v in patents]),
-            cited_by_average_number = np.mean([int(v["patent_num_cited_by_us_patents"]) for v in patents]),
-            type_list = ";".join([v["patent_type"] for v in patents])))
-        series.name = index
-        df = series.to_frame().T
-        new_names = [(i,"potential_structural_patents_"+i) for i in list(df)]
-        df.rename(columns = dict(new_names), inplace=True)
-        return df
+        if response["total_patent_count"] == 0: response = None
+    except: response = None
+    finally: return response
 
-    names = ["count_number", "first_date", "citations_total_number","citations_average_number","cited_by_total_number","cited_by_average_number","type_list"]
-    new_names = ["potential_structural_patents_"+i for i in names]
-    new = pd.DataFrame(columns = new_names)
-    for counter, (index, series) in enumerate(df.iterrows()):
-        try:
-            print(counter, series["keys_name_id"])
-            if series["keys_permalink_id"] in list(df_old.index): temp = df_old.loc[[series["keys_permalink_id"]]]
-            else: temp = get_patents(series["keys_name_id"], series["keys_permalink_id"])
-            if temp.empty: temp = pd.DataFrame(columns=new_names, index=[series["keys_permalink_id"]])
-            new = new.append(temp)
-            if counter % 500 == 5:
-                os.makedirs(os.path.dirname(output_file),exist_ok=True)
-                new.to_csv(output_file, mode="w+", index=True)
-                db.clear_files(output_database_file)
-                dp.load_file(output_database_file, output_file, output_table, index=True)
-        except: print("Error")
-    return new
+def parse_patents(company_name, response):
+    if response is None: return pd.DataFrame()
+    temp = []
+    similarity = {}
+    for patent in response["patents"]:
+        response_name = patent["assignees"][0]["assignee_organization"]
+        if response_name not in similarity:
+            similarity[response_name] = names_are_similar(company_name, response_name)
+        if similarity[response_name]:
+            del patent["assignees"]
+            temp.append(patent)
+    patents = pd.DataFrame(temp)
+    return patents
 
-source_database_file = "analysis/output/combo.db"
-source_table = "combo"
-output_file = "analysis/output/extra/patents.csv"
-output_database_file = "analysis/output/extra.db"
-output_table = "patents"
+def get_patents(index, company_name):
+    response = request_patents(company_name)
+    patents = parse_patents(company_name, response)
+    patents["index"] = index
+    patents.set_index("index", inplace=True)
+    return patents
+
+@logged
+def go_patents():
+    try: names = pd.read_pickle(pickle_names_path)
+    except:
+        names = get_companies(input_path)
+        names["std_name"] = standardize_names(names["company_name"])
+        pd.to_pickle(names, pickle_names_path)
+    try: patents = pd.read_pickle(pickle_patents_path)
+    except: patents = pd.DataFrame()
+    print(names.shape)
+    for i, (uuid, std_name) in enumerate(names["std_name"].iteritems()):
+        print("Request:", i, std_name)
+        if uuid not in patents.index.tolist():
+            temp = get_patents(uuid, std_name)
+            if temp.empty: names = names.drop(uuid)
+            patents = pd.concat([patents, temp],axis=0)
+            pd.to_pickle(patents, pickle_patents_path)
+        else: print("--Already Matched")
+        if i % 100 == 0:
+            pd.to_pickle(names, pickle_names_path)
+            store_patents(patents, output_path)
 
 def main():
-    if os.path.exists(output_database_file):
-        df_old = dp.export_dataframe(output_database_file, output_table, index=True)
-    else: df_old = pd.DataFrame()
-    df = dp.export_dataframe(source_database_file, source_table)
-    df = go_patents(df, df_old)
-    db.clear_files(output_file)
-    os.makedirs(os.path.dirname(output_file),exist_ok=True)
-    df.to_csv(output_file, mode="w+", index=True)
-    db.clear_files(output_database_file)
-    dp.load_file(output_database_file, output_file, output_table, index=True)
+    go_patents()
 
 if __name__ == "__main__":
     main()
