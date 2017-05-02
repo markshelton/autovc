@@ -1,8 +1,13 @@
 \documentclass[../thesis/thesis.tex]{subfiles}
 \begin{document}
+<<<<<<< HEAD
 
 \chapter{Design}
 \label{chap:design}
+=======
+ \chapter{Design}
+
+>>>>>>> 5bb38a86b451c7624ca43f48cbc41fa1767c1118
 
 In this chapter, we explain the methodology used to fill the research gap identified in Chapter~2, thereby producing a system that identifies startup companies likely to receive additional funding or a liquidity event (exit) in a given forecast window. Figure [FIGURE] depicts the system architecture, which we describe in detail in the following sections.
 
@@ -12,15 +17,22 @@ In this chapter, we explain the methodology used to fill the research gap identi
 
 \item Classification Pipeline: We developed a processing pipeline using the popular Python-based machine learning library Scikit-learn \cite{pedregosa2011}. The pipeline includes imputation, transformation and scaling, extraction and classification. We optimised these steps using cross-validated randomized hyperparameter search. Key dataset issues identified included extreme sparsity, long-tailed skewed distributions and non-orthogonal features. Classification evaluation revealed Random Forests and Logistic Regression are best suited to the problem.
 
+<<<<<<< HEAD
 \end{enumerate}
 
+=======
+>>>>>>> 5bb38a86b451c7624ca43f48cbc41fa1767c1118
 \section{Data Collection}
 
 In the previous chapter, we reviewed the literature concerning data sources for entrepreneurship and VC investment. We concluded the most promising primary data sources for this project are CrunchBase and AngelList, for their size, comprehensiveness and ease of access. We suggested PatentsView (the online database of the US Patent Office) could be a useful secondary data source for structural capital features. In the following sections, we discuss how we collected data from CrunchBase and PatentsView, converted the relational databases into a format suitable for machine learning, performed preliminary screening to ensure we only included relevant companies, and finally, we provide an overview of the primary dataset.
 
 \subsection{CrunchBase}
 
+<<<<<<< HEAD
 CrunchBase is an online, crowd-sourced repository of startup companies, individuals and investors with a focus on US high-tech sectors. CrunchBase is freely accessible for browsing but requires licenses to filter the dataset, use the API, and download Microsoft Excel and CSV-formatted dumps. For the purposes of this project, we were granted an Academic License. CrunchBase provides database access in a few formats that offer trade-offs in terms of accessibility and comprehensiveness. We intended to use CrunchBase’s API because it provides the most comprehensive access to their database. We developed a collector that downloaded a daily list of updated API endpoints from CrunchBase and queried nodes it needed to update. CrunchBase’s API provides JSON-formatted responses which the program recursively parsed and stored into a relational database. However, due to the time constraints of this research project, we abandoned this data collection method. CrunchBase also provides CSV-formatted dumps of their key endpoints (e.g. organizations, people, funding\_rounds). We downloaded two CSV-formatted dumps from Crunchbase on 09-Sep-2016 and 04-Apr-2017 which we loaded into relational databases (see Appendix D for the full database schema).
+=======
+CrunchBase is an online, crowd-sourced repository of startup companies, individuals and investors with a focus on US high-tech sectors. CrunchBase is freely accessible for browsing but requires licenses to filter the dataset, use the API, and download Microsoft Excel and CSV-formatted dumps. For the purposes of this project, we were granted an Academic License. CrunchBase provides database access in a few formats that offer trade-offs in terms of accessibility and comprehensiveness. We intended to use CrunchBase’s API because it provides the most comprehensive access to their database. We developed a collector that downloaded a daily list of updated API endpoints from CrunchBase and queried nodes it needed to update. CrunchBase’s API provides JSON-formatted responses which the program recursively parsed and stored into a relational database. However, due to the time constraints of this research project, we abandoned this data collection method. CrunchBase also provides CSV-formatted dumps of their key endpoints (e.g. organizations, people, funding_rounds). We downloaded two CSV-formatted dumps from Crunchbase on 09-Sep-2016 and 04-Apr-2017 which we loaded into relational databases (see Appendix D for the full database schema).
+>>>>>>> 5bb38a86b451c7624ca43f48cbc41fa1767c1118
 
 \subsection{PatentsView}
 
@@ -66,5 +78,9 @@ The literature review we performed in the previous chapter revealed seven common
 
 In the previous sections, we outlined the development and optimisation of a classification pipeline that includes imputation, transformation and scaling, extraction and classification. We evaluated the predictive power, interpretability, and time efficiency of the most promising candidate pipelines. The best candidate pipeline is depicted in Table 3.4. We adopted this pipeline configuration for the following experiments.
 
+<<<<<<< HEAD
 \ifcsdef{mainfile}{}{\printbibliography}
+=======
+ \ifcsdef{mainfile}{}{\bibliography{../references/primary}}
+>>>>>>> 5bb38a86b451c7624ca43f48cbc41fa1767c1118
 \end{document}

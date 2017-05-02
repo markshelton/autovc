@@ -1,0 +1,27 @@
+
+\begin{forest}
+    forked edges,
+    for tree={
+        grow=west,
+        align=center,
+        l sep = 2cm,
+        fork sep = 1cm,
+        child anchor=east,
+        anchor=base east,
+        tier/.pgfmath=level(),
+        edge={<-, thick},
+        every node={rectangle,draw=black}
+    }
+[Startup\\Investment,
+    [Startup\\Potential,
+        [Human Capital]
+        [Social Capital]
+        [Structural Capital]
+    ]
+    [Investment\\Confidence,
+        [Third Party Validation]
+        [Historical Performance]
+        [Contextual Cues]
+    ]
+]
+\end{forest}

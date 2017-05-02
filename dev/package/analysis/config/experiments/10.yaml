@@ -1,0 +1,125 @@
+
+build_identifier: &build 10
+
+#---------------------------------------------------------------------------
+#Program
+#---------------------------------------------------------------------------
+
+
+##Build
+load_prev_model: False
+load_prev_files: True
+log_scores: True
+cv_folds: 3
+search_iterations: 5
+max_observations: !!null
+n_jobs: 1
+verbosity: 1
+time_slices: 3 # Experiment - Robustness
+
+##Master
+master_path: "analysis/input/master.db"
+master_end_date: !!python/object/new:datetime.date [2016, 9, 9]
+master_start_date: !!python/object/new:datetime.date [2013, 1, 1]
+master_feature_config: "analysis/config/master_feature.sql"
+master_label_config: "analysis/config/master_label.sql"
+master_merge_config: "analysis/config/master_merge.sql"
+
+##Output
+output_folder: &output !join ["analysis/output/autoVC/",*build, "/"]
+output_model_path: !join [*output, "stored_model.pkl"]
+output_slices_path: !join [*output, "stored_slices.pkl"]
+output_config: !join [*output, "config_record.txt"]
+output_log: !join [*output, "log_results.csv"]
+output_results: !join [*output, "final_results.csv"]
+
+##Test
+final_score: False
+test_path: "analysis/input/test.db"
+test_date: !!python/object/new:datetime.date [2017, 4, 4]
+test_label_config: "analysis/config/test_label.sql"
+final_merge_config: "analysis/config/master_test_merge.sql"
+
+
+#---------------------------------------------------------------------------
+#Database
+#---------------------------------------------------------------------------
+
+
+forecast_windows: [1, 1.5, 2] # Experiment - Predictive Power
+
+
+#---------------------------------------------------------------------------
+#Classifiers
+#---------------------------------------------------------------------------
+
+
+algorithms: ["RF"]
+#["NB", "RF", "DT", "LR", "KNN", "SVM", "ANN"]
+
+
+#---------------------------------------------------------------------------
+#GridSearch
+#---------------------------------------------------------------------------
+
+
+pipe_steps:
+  - !!python/tuple ["imputer", !!python/object/apply:sklearn.preprocessing.Imputer {}]
+  - !!python/tuple ['absolute', !!python/object/apply:sklearn.preprocessing.FunctionTransformer {}]
+  - !!python/tuple ['transformer', !!python/object/apply:sklearn.preprocessing.FunctionTransformer {}]
+  - !!python/tuple ['scaler', !!python/object/apply:sklearn.preprocessing.StandardScaler {}]
+  - !!python/tuple ['extractor', !!python/object/apply:sklearn.decomposition.PCA {}]
+  - !!python/tuple ["clf", !!python/object/apply:sklearn.naive_bayes.GaussianNB {}]
+
+pp_params:
+  imputer__strategy:
+    - "mean"
+    - "median"
+    - "most_frequent"
+  absolute__func: [!!python/name:numpy.absolute ]
+  transformer__func:
+    - !!null
+    - !!python/name:numpy.log1p # X >= 0
+    - !!python/name:numpy.sqrt # X >= 0
+  scaler:
+    - !!null
+    - !!python/object/apply:sklearn.preprocessing.StandardScaler {}
+    - !!python/object/apply:sklearn.preprocessing.RobustScaler {}
+    - !!python/object/apply:sklearn.preprocessing.MinMaxScaler {}
+  extractor__n_components: !!python/object/apply:scipy.stats.randint [1, 100]
+
+clf_params:
+  NB:
+    clf: [!!python/object/apply:sklearn.naive_bayes.GaussianNB {}]
+  RF:
+    clf: [!!python/object/apply:sklearn.ensemble.RandomForestClassifier {}]
+    clf__n_estimators: !!python/object/apply:scipy.stats.randint [10, 100]
+    clf__max_depth: !!python/object/apply:scipy.stats.randint [5, 20]
+    clf__class_weight: ["balanced"]
+    clf__criterion: ["gini", "entropy"]
+  LR:
+    clf: [!!python/object/apply:sklearn.linear_model.LogisticRegression {}]
+    clf__C: !!python/object/apply:numpy.logspace [-3, 1, 6]
+    clf__class_weight: ["balanced"]
+    clf__penalty: ["l1", "l2"]
+  KNN:
+    clf: [!!python/object/apply:sklearn.neighbors.KNeighborsClassifier {}]
+    clf__n_neighbors: !!python/object/apply:scipy.stats.randint [5, 20]
+    clf__weights: ['uniform','distance']
+  DT:
+    clf: [!!python/object/apply:sklearn.tree.DecisionTreeClassifier {}]
+    clf__max_depth: !!python/object/apply:scipy.stats.randint [5, 20]
+    clf__class_weight: ["balanced"]
+    clf__criterion: ["gini", "entropy"]
+  SVM:
+    clf: [!!python/object/apply:sklearn.svm.SVC {}]
+    clf__kernel: ["rbf", "poly", "sigmoid"]
+    clf__probability: [True]
+    clf__class_weight: ["balanced"]
+    clf__C: !!python/object/apply:numpy.logspace [-5, 0, 6]
+  ANN:
+    clf: [!!python/object/apply:sklearn.neural_network.MLPClassifier {}]
+    clf__alpha: !!python/object/apply:numpy.logspace [-3, 1, 6]
+
+
+#---------------------------------------------------------------------------
