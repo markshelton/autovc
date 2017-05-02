@@ -50,13 +50,7 @@ flag_log_scores = False
 features_stage_info = dict(
     Age = 'confidence_context_broader_company_age_number',
     FundingRounds = 'confidence_validation_funding_rounds_number',
-    Convertible = 'confidence_validation_funding_round_types_list_convertible_note',
-    NonEquity = 'confidence_validation_funding_round_types_list_non_equity_assistance',
-    ProductCF = 'confidence_validation_funding_round_types_list_product_crowdfunding',
-    EquityCF = 'confidence_validation_funding_round_types_list_equity_crowdfunding',
-    Angel = 'confidence_validation_funding_round_types_list_angel',
-    Grant = 'confidence_validation_funding_round_types_list_grant',
-    Seed = "confidence_validation_funding_round_types_list_seed",
+    FundingRaised = 'confidence_validation_funding_raised_value_total_number',
     SeriesA = 'confidence_validation_funding_round_codes_list_a',
     SeriesB = 'confidence_validation_funding_round_codes_list_b',
     SeriesC = 'confidence_validation_funding_round_codes_list_c',
@@ -65,10 +59,6 @@ features_stage_info = dict(
     SeriesF = 'confidence_validation_funding_round_codes_list_f',
     SeriesG = 'confidence_validation_funding_round_codes_list_g',
     SeriesH = 'confidence_validation_funding_round_codes_list_h',
-    PE = 'confidence_validation_funding_round_types_list_private_equity',
-    Debt = 'confidence_validation_funding_round_types_list_debt_financing',
-    Secondary = 'confidence_validation_funding_round_types_list_secondary_market',
-    Undisclosed = 'confidence_validation_funding_round_types_list_undisclosed',
     Closed = "keys_company_status_closed_bool",
     Acquired = "keys_company_status_acquired_bool",
     IPO = "keys_company_status_ipo_bool"
@@ -77,13 +67,7 @@ features_stage_info = dict(
 label_stage_info = dict(
     Age = 'outcome_age_number',
     FundingRounds = 'outcome_funding_rounds_number',
-    Convertible = 'outcome_funding_round_types_list_convertible_note',
-    NonEquity = 'outcome_funding_round_types_list_non_equity_assistance',
-    ProductCF = 'outcome_funding_round_types_list_product_crowdfunding',
-    EquityCF = 'outcome_funding_round_types_list_equity_crowdfunding',
-    Angel = 'outcome_funding_round_types_list_angel',
-    Grant = 'outcome_funding_round_types_list_grant',
-    Seed = "outcome_funding_round_types_list_seed",
+    FundingRaised = 'outcome_funding_raised_value_total_number',
     SeriesA = 'outcome_funding_round_codes_list_a',
     SeriesB = 'outcome_funding_round_codes_list_b',
     SeriesC = 'outcome_funding_round_codes_list_c',
@@ -92,10 +76,6 @@ label_stage_info = dict(
     SeriesF = 'outcome_funding_round_codes_list_f',
     SeriesG = 'outcome_funding_round_codes_list_g',
     SeriesH = 'outcome_funding_round_codes_list_h',
-    PE = 'outcome_funding_round_types_list_private_equity',
-    Debt = 'outcome_funding_round_types_list_debt_financing',
-    Secondary = 'outcome_funding_round_types_list_secondary_market',
-    Undisclosed = 'outcome_funding_round_types_list_undisclosed',
     Closed = "outcome_closed_bool",
     Acquired = "outcome_acquired_bool",
     IPO = "outcome_ipo_bool"
@@ -104,12 +84,10 @@ label_stage_info = dict(
 
 class ConfigManager(object):
 
+    @logged
     def __init__(self, config_path):
-        log.info("Started config loading process")
         file_content = self.load_yaml(config_path)
         self.__dict__.update(file_content)
-        log.info("Completed config loading process")
-        #self.log_config()
 
     def load_yaml(self, path):
 
@@ -187,8 +165,8 @@ def get_slice(input_path, output_folder, feature_date, label_date, slice_type):
 @logged
 def apply_constraints(df):
     df = df.loc[df['keys_company_stage_group'] == "Included"]
-    df = df.loc[df["keys_company_stage"] != "Other"]
-    df = df.loc[df['confidence_context_broader_company_age_number'] <= 15]
+    age_old_cutoff = df["confidence_context_broader_company_age_number"][df["keys_company_stage"] == "Series D+"].quantile(0.75)
+    df = df.loc[df['confidence_context_broader_company_age_number'] <= age_old_cutoff]
     return df
 
 @logged

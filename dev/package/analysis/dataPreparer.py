@@ -211,7 +211,6 @@ def clean(df):
         if column.endswith("bool"): temp = df[column]
         elif column.endswith("date"): temp = df[column] #go_dates(df[column], date_data=date_data)
         elif column.endswith("duration"): temp = df[column]
-<<<<<<< HEAD
         elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
         elif column.endswith("types_list"): temp = make_dummies(df[column],sep=";")
         elif column.endswith("codes_list"): temp = make_dummies(df[column],sep=";")
@@ -219,15 +218,6 @@ def clean(df):
         #elif column.endswith("dummy"): temp = make_dummies(df[column],topn=10)
         #elif column.endswith("text"): temp = make_dummies(df[column],topn=10,sep=" ",text=True)
         elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="coerce")
-=======
-        elif column.endswith("dummy"): temp = make_dummies(df[column],topn=10)
-        elif column.endswith("types_list"): temp = make_dummies(df[column],sep=";")
-        elif column.endswith("codes_list"): temp = make_dummies(df[column],sep=";")
-        elif column.endswith("list"): temp = make_dummies(df[column],topn=10,sep=";")
-        elif column.endswith("text"): temp = make_dummies(df[column],topn=10,sep=" ",text=True)
-        elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="ignore").fillna(0)
-        elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
->>>>>>> master
         elif column.startswith("keys"): temp = df[column]
         else: temp = pd.DataFrame()
         return temp

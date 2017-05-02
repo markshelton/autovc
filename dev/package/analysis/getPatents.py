@@ -117,7 +117,7 @@ def go_patents():
             patents = pd.concat([patents, temp],axis=0)
             pd.to_pickle(patents, pickle_patents_path)
         else: print("--Already Matched")
-        if i % 100 == 0:
+        if i % 1000 == 0:
             pd.to_pickle(names, pickle_names_path)
             store_patents(patents, output_path)
 
