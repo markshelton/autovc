@@ -61,7 +61,6 @@ We performed preliminary screening on the primary dataset (N = 425,934) to ensur
     \label{fig:design:lifecycle}
 \end{figure}
 
-
 After attempting to place the companies into development stages we are left with a large group of companies (the majority of the dataset) that have not raised funding and so can not be classified on that basis. We assume that companies that have not raised funding fall into two groups - those that intend to raise funding but have not had time to yet, and those that have chosen not to pursue funding and are unlikely to do so. We separated these groups by applying a cutoff equal to the 90th percentile of the age of companies in the Seed category, and excluded the older group from further analyses (N = 227,162,  53.3\%). As we are only interested in companies that could theoretically seek investment, we also excluded Closed, Acquired and IPO groups from further analyses (N = 35,973, 8.4\%).
 
 Figure\ref{fig:design:stages_ages} depicts the ages of companies in the master dataset, grouped by developmental stage.  As we expected, there is a strong relationship between company stage and company age. Most pre-Series A companies are under five years old, and the majority of Series D+ funded companies are under 10 years old and the 75th percentile is at 15 years old. On this basis, we excluded companies that are over the 75th percentile of the age of companies in the Series D+ category (N =9,756, 2.2\%). Overall, our preliminary screening steps reduced the dataset from 425,934 companies to 153,043 companies, a reduction of 64.1\%.
@@ -69,7 +68,7 @@ Figure\ref{fig:design:stages_ages} depicts the ages of companies in the master d
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/stages_ages}
-    \caption{Company ages in years grouped by developmental stage. While there is significant variability in age for each developmental stage, there is a broad positive relationship between age and developmental stage. The dashed blue line represents the 75th percentile of the age of companies in the Series D\+ category (x = 15.7 years).}
+    \caption{Company ages in years grouped by developmental stage. While there is significant variability in age for each developmental stage, there is a broad positive relationship between age and developmental stage. The dashed blue line represents the 75th percentile of the age of companies in the Series D+ category (15.7 years).}
     \label{fig:design:stages_ages}
 \end{figure}
 
@@ -79,37 +78,78 @@ Figure\ref{fig:design:stages_ages} depicts the ages of companies in the master d
 
 Table~\ref{} presents the descriptive statistics for the dataset. The dataset is heavily skewed towards New companies (i.e. companies that were recently founded and have not raised any type of funding yet, 84.8\%). The interquartile ranges imply significant variability in all measures.
 
-%INCLUDE DESCRIPTIVE STATS TABLE
+%INCLUDE DESCRIPTIVE STATS TABLE - waiting for patents data
 
-CrunchBase's approach to industry classification is simplistic compared to other classification schemes (e.g., USSIC, NAICS, VentureSource) which generally have an industry hierarchy with tiers for broad industry sectors and sub-sectors providing further granularity. As a result, CrunchBase class labels include over represented and vague classes (e.g., ``Software'', ``Internet Services'') which could describe the majority of companies included in the database. In fact, ``Software'' and ``Internet Services'' account for 16.4\% and 13.4\% of all companies in the dataset respectively (see Figure~\ref{}). Despite these vague class labels, it is clear the dataset skews towards high technology startups, as opposed to biomedical, agricultural, or other technologies.
+CrunchBase's approach to industry classification is simplistic compared to other classification schemes (e.g., USSIC, NAICS, VentureSource) which generally have an industry hierarchy with tiers for broad industry sectors and sub-sectors providing further granularity. As a result, CrunchBase class labels include over represented and vague classes (e.g., ``Software'', ``Internet Services'') which could describe the majority of companies included in the database. In fact, ``Software'' and ``Internet Services'' account for 16.4\% and 13.4\% of all companies in the dataset respectively (see Figure~\ref{fig:design:industry_counts}). Despite these vague class labels, it is clear the dataset skews towards high technology startups, as opposed to biomedical, agricultural, or other technologies.
 
-%INCLUDE Industry sector bar plot
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/design/industry_counts}
+    \caption{Companies grouped by industry sector. The 10 most common sectors are displayed. Source: Master dataset (c. September 2016).}
+    \label{fig:design:industry_counts}
+\end{figure}
 
 \subsubsection{Sparsity}
 
-First, we explored missing data in the dataset. We expected the dataset to be highly sparse because it primarily came from CrunchBase, a crowd-sourced database. As profiles are entered into CrunchBase piece-meal, it is not clear at face-value whether data (e.g. records of funding rounds) is missing or didn't occur. Figure~\ref{} displays the distribution of missing data in the dataset, with respect to each company and each feature. The multi-modal peaks of Figure~\ref{} suggest that missing data across certain groups of features may be correlated with each other (e.g. all features derived from funding rounds). Figure~\ref{} shows that many features have no missing observations - these are probably core profile features and features where missing data is represented as zero-valued.
+First, we explored missing data in the dataset. We expected the dataset to be highly sparse because it primarily came from CrunchBase, a crowd-sourced database. As profiles are entered into CrunchBase piece-meal, it is not clear at face-value whether data (e.g. records of funding rounds) is missing or didn't occur. Figure~\ref{fig:design:sparsity} displays the distribution of missing data in the dataset, with respect to each feature and each feature. The multi-modal peaks of both distributions suggest that missing data across certain groups of features may be correlated with each other (e.g. all features derived from funding rounds).
 
-%INCLUDE Missing features histograms
+\begin{figure}[!htb]
+    \centering
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=\textwidth]{../figures/design/sparsity_features}
+        \caption{Distribution of missing data by company}
+        \label{fig:design:sparsity:features}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=\textwidth]{../figures/design/sparsity_observations}
+        \caption{Distribution of missing data by feature}
+        \label{fig:design:sparsity:observations}
+    \end{subfigure}
+    \caption{Distribution of missing data in master dataset (c. September 2016).}
+    \label{fig:design:sparsity}
+\end{figure}
 
 \subsubsection{Normality}
 
 Next, we explored the distributions of features. As we identified in the last section, the dataset is highly sparse. %TODO -
 
-%INCLUDE Skew KDE
-
-%INCLUDE Kurtosis KDE
+\begin{figure}[!htb]
+    \centering
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=\textwidth]{../figures/design/skew}
+        \caption{Distribution of skew by feature}
+        \label{fig:design:normality:skew}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=\textwidth]{../figures/design/kurtosis}
+        \caption{Distribution of kurtosis by feature}
+        \label{fig:design:normality:kurtosis}
+    \end{subfigure}
+    \caption{Distribution of features in master dataset (c. September 2016).}
+    \label{fig:design:normality}
+\end{figure}
 
 \subsubsection{Scale}
 
 %TODO - write para
 
-%INCLUDE IQR KDE
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/design/scaling}
+    \caption{Distribution of interquartile ranges (transformed by log1p) in master dataset (c. September 2016).}
+    \label{fig:design:scaling}
+\end{figure}
 
-\subsubsection{Covariance}
+\subsubsection{Orthogonality}
 
 %TODO - write para
 
-%INCLUDE Proportion of correlation matrix KDE
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/design/orthogonality}
+    \caption{Distribution of intercorrelations in master dataset (c. September 2016).}
+    \label{fig:design:orthogonality}
+\end{figure}
 
 \section{Pipeline Creation}
 
@@ -126,7 +166,12 @@ We developed a classification pipeline using the popular Python-based machine le
 
 After reviewing the distribution of missing data, we decided to perform further investigation into imputation methods. Common imputation strategies include replacing missing values with the mean, median or mode of each feature. Figure~\ref{} shows the distribution of mean, median and modes for each feature in the dataset. For the majority of features, all three measures of central tendency are equal to zero. This resolves the issue of distinguishing missing data from negative observations because, following imputation, all of these data points will map to zero. Figure~\ref{} shows the receiver-operating characteristics of the different imputation strategies. As expected, all three imputation strategies produce similar results (within the margin of error).
 
-%INCLUDE Mean, median, mode of features KDE
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/design/central_tendency}
+    \caption{Distribution of measures of central tendency (mean, median and mode) in master dataset (c. September 2016).}
+    \label{fig:design:central_tendency}
+\end{figure}
 
 %INCLUDE ROC curve for imputer strategies
 
@@ -170,7 +215,7 @@ The literature review we performed in the previous chapter revealed seven common
 
 %TODO
 
-\section{Pipeline Section}
+\section{Pipeline Selection}
 
 %TODO - section preamble
 

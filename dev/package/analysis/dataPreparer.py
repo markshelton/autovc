@@ -75,27 +75,10 @@ def clean(df):
                 total = pd.concat([total, temp])
             return total
 
-        def get_excluded():
-            stop_words = get_stop_words('english')
-            punctuation = list(string.punctuation)
-            excluded = stop_words + punctuation
-            return excluded
-
-        def prepare_text(series, topn, sep=None):
-            for punc in list(string.punctuation):
-                series = series.str.replace(punc, "")
-            series = series.replace(r'\s+', np.nan,regex=True)
-            series = series.dropna()
-            series = series.apply(lambda x: unidecode(str(x)))
-            excluded = go_filter(series, get_excluded(), mode="excluded")
-            series = series[series.index.difference(excluded.index)]
-            return series
-
         def make_dummies(series, topn=None, sep=None, text=False):
             series_name = series.name
             series = series.str.lower()
             if sep: series = series.str.split(sep,expand=True).stack()
-            if text: series = prepare_text(series, topn, sep)
             if topn:
                 counts = series.value_counts()
                 included = counts.nlargest(topn).index
@@ -110,9 +93,11 @@ def clean(df):
             df = df.rename(columns=str.lower)
             if "type" in series_name: sublist = types
             elif "code" in series_name: sublist = codes
-            for x in sublist:
-                if x not in list(df): df[x] = np.nan
-            df = df[sublist]
+            else: sublist = None
+            if sublist is not None:
+                for x in sublist:
+                    if x not in list(df): df[x] = np.nan
+                df = df[sublist]
             df = df.add_prefix(series_name+"_")
             return df
 
@@ -122,16 +107,11 @@ def clean(df):
         def suffix_keys(x):
             c = defaultdict(list)
             for d in x:
-                d = eval(d) # e.g. {'series-a: 2}
-                d = {k: int(v) for k,v in d.items()}
-                for k,v in d.items():
-                    c.update(d)
+                c.update({k: int(v) for k,v in eval(d).items()})
             b = {}
             for k, v in c.items():
                 if type(v) is list:
-                    input(v)
-                    v = sorted(v)
-                    for i, x in enumerate(v):
+                    for i, x in enumerate(sorted(v)):
                         b["{}_{}".format(k, i)] = x
                 else: b[k] = v
             return b
@@ -139,15 +119,11 @@ def clean(df):
         def sum_dicts(x):
             c = Counter()
             for d in x:
-                try:
-                    d = eval(d)
-                    d = {k: float(v) for k,v in d.items()}
-                    c.update(d)
+                try: c.update({k: float(v) for k,v in eval(d).items()})
                 except: pass
             c = dict(c)
             return c
 
-        #todo - [a 5; b 4; a 3] // index: dummy: value
         def combine_pairs(series, sep):
             series_name = series.name
             suffix = series_name.split("_")[-1]
@@ -161,55 +137,19 @@ def clean(df):
             df = df.rename(columns=str.lower)
             if "type" in series_name: sublist = types
             elif "code" in series_name: sublist = codes
-            for x in sublist:
-                if x not in list(df): df[x] = np.nan
-            df = df[sublist]
+            else: sublist = None
+            if sublist is not None:
+                for x in sublist:
+                    if x not in list(df): df[x] = np.nan
+                df = df[sublist]
             df = df.add_prefix(series_name+"_")
             df = df.add_suffix("_"+suffix)
             return df
 
-        def go_dates(series, date_data):
-
-            def match_date_data(date, date_data):
-                try:
-                    date = datetime.datetime.fromtimestamp(date).strftime("%Y-%m-%d")
-                    result = date_data["Close"].ix[date]
-                except: result = 0
-                return result
-
-            new = series.apply(lambda x: match_date_data(x, date_data))
-            new.name = "confidence_context_broader_" + series.name+"_"+"SP500"+"_"+"number"
-            df = pd.concat([series, new],axis=1)
-            return df
-
-        @logged
-        def go_gender(series, sep):
-
-            def get_gender(names, sep):
-                #input(names)
-                try:
-                    name_list = names.split(sep)
-                    c = Counter()
-                    for name in name_list:
-                        d = gender.Detector()
-                        sex = d.get_gender(name)
-                        if sex == "mostly_male": sex = "male"
-                        elif sex == "mostly_female": sex = "female"
-                        elif sex == "andy": sex = "unknown"
-                        c.update([sex])
-                    names = ["{} {}".format(k,v) for (k,v) in c.items()]
-                    names = ";".join(names)
-                except: pass
-                return names
-
-            series = series.apply(lambda x: get_gender(x, sep))
-            series.name = series.name + "_"+"number"
-            series = combine_pairs(series,sep=sep)
-            return series
-
         column = column.split(":")[0]
+        print(column)
         if column.endswith("bool"): temp = df[column]
-        elif column.endswith("date"): temp = df[column] #go_dates(df[column], date_data=date_data)
+        elif column.endswith("date"): temp = df[column]
         elif column.endswith("duration"): temp = df[column]
         elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
         elif column.endswith("types_list"): temp = make_dummies(df[column],sep=";")
@@ -221,17 +161,6 @@ def clean(df):
         elif column.startswith("keys"): temp = df[column]
         else: temp = pd.DataFrame()
         return temp
-
-    def get_date_data(ticker, start="19700101", end="20170301"):
-        try: df = pd.read_csv(date_data_file, index_col="Date")
-        except:
-            path = "https://stooq.com/q/d/l/?s={}&i=d&d1={}&d2={}".format(ticker, start, end)
-            response = requests.get(path)
-            os.makedirs(os.path.dirname(date_data_file), exist_ok=True)
-            with open(date_data_file, 'wb') as f:
-                f.write(response.content)
-            df = pd.read_csv(date_data_file, index_col="Date")
-        return df
 
     def create_durations(df):
         df = df.replace(to_replace = 0, value = np.nan)
@@ -245,27 +174,15 @@ def clean(df):
             temp = pd.concat([temp, new],axis=1)
         return temp
 
-    def create_null_dummies(df):
-        pass
-
     df_new = pd.DataFrame()
-    try: date_data = get_date_data("^spx")
-    except:
-        log.error("Error with Date Data")
-        date_data = None
     for column in df:
-        try: temp = handle_column(df, column, date_data=date_data)
+        try: temp = handle_column(df, column)
         except:
-            log.error("Error with Column: {0}".format(column))
+            log.error("Error with Column: {0}".format(column),exc_info=1)
             temp = df[column]
         if temp is not None and not temp.empty:
             df_new = pd.concat([df_new, temp],axis=1)
     df_new.columns = [unidecode(x).strip().replace(" ","-") for x in list(df_new)]
-    dates = [col for col in list(df_new) if col.endswith("date")]
-    temp = create_durations(df_new[dates])
-    df_new = pd.concat([df_new, temp], axis=1)
-    temp = create_null_dummies(df_new)
-    df_new = pd.concat([df_new, temp], axis=1)
     return df_new
 
 @logged
@@ -317,5 +234,18 @@ def main():
     #df = export_dataframe(database_file, output_table)
     #print(df)
 
+def test():
+    path = 'C:/Users/mark/Documents/GitHub/honours/dev/package/'
+    input_path = path+"analysis/input/master.db"
+    flatten_config = path+"analysis/config/master_feature.sql"
+    raw_flat_file = path+"analysis/output/temp/raw.csv"
+    clean_flat_file = path+"analysis/output/temp/clean.csv"
+    output_path = path+"analysis/output/temp/output.db"
+
+    #flatten_file(input_path, flatten_config, raw_flat_file, "feature")
+    clean_file(raw_flat_file, clean_flat_file)
+    load_file(output_path, clean_flat_file, "feature")
+    df = export_dataframe(output_path, "feature")
+
 if __name__ == "__main__":
-    main()
+    test()
