@@ -214,7 +214,7 @@ def clean(df):
         elif column.endswith("pair"): temp = combine_pairs(df[column],sep=";")
         elif column.endswith("types_list"): temp = make_dummies(df[column],sep=";")
         elif column.endswith("codes_list"): temp = make_dummies(df[column],sep=";")
-        #elif column.endswith("list"): temp = make_dummies(df[column],topn=10,sep=";")
+        elif column.endswith("list"): temp = make_dummies(df[column],topn=10,sep=";")
         #elif column.endswith("dummy"): temp = make_dummies(df[column],topn=10)
         #elif column.endswith("text"): temp = make_dummies(df[column],topn=10,sep=" ",text=True)
         elif column.endswith("number"): temp = pd.to_numeric(df[column], errors="coerce")

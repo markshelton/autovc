@@ -79,18 +79,19 @@ def request_patents(company_name):
     finally: return response
 
 def parse_patents(company_name, response):
-    if response is None: return pd.DataFrame()
-    temp = []
-    similarity = {}
-    for patent in response["patents"]:
-        response_name = patent["assignees"][0]["assignee_organization"]
-        if response_name not in similarity:
-            similarity[response_name] = names_are_similar(company_name, response_name)
-        if similarity[response_name]:
-            del patent["assignees"]
-            temp.append(patent)
-    patents = pd.DataFrame(temp)
-    return patents
+    try:
+        temp = []
+        similarity = {}
+        for patent in response["patents"]:
+            response_name = patent["assignees"][0]["assignee_organization"]
+            if response_name not in similarity:
+                similarity[response_name] = names_are_similar(company_name, response_name)
+            if similarity[response_name]:
+                del patent["assignees"]
+                temp.append(patent)
+        patents = pd.DataFrame(temp)
+    except: patents = pd.DataFrame()
+    finally: return patents
 
 def get_patents(index, company_name):
     response = request_patents(company_name)
