@@ -147,7 +147,6 @@ def clean(df):
             return df
 
         column = column.split(":")[0]
-        print(column)
         if column.endswith("bool"): temp = df[column]
         elif column.endswith("date"): temp = df[column]
         elif column.endswith("duration"): temp = df[column]

@@ -22,7 +22,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier
 from sklearn.svm import SVC, LinearSVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.externals import joblib
@@ -38,7 +38,6 @@ import sqlManager as sm
 import analysis.dataPreparer as dp
 from logManager import logged
 import dbLoader as db
-import analysis.getStages as gs
 
 log = logging.getLogger(__name__)
 #warnings.simplefilter("ignore")
@@ -130,16 +129,7 @@ def generate_dates(time_slices, forecast_windows, start_date, end_date, load_pre
         return dataset_slices
 
 @logged
-def get_slice(input_path, output_folder, feature_date, label_date, slice_type):
-    input_short_path = os.path.basename(input_path).split(".")[0]
-    start_path = "{0}{1}/{2}".format(output_folder, input_short_path,feature_date)
-    if slice_type == "feature":
-        slice_date = feature_date
-        output_path = "{0}/{1}.db".format(start_path, slice_type)
-    elif slice_type == "label":
-        slice_date = label_date
-        output_path = "{0}/{1}/{2}.db".format(start_path, label_date, slice_type)
-    else: raise ValueError("Wrong slice_type passed.")
+def get_slice(input_path, output_path, slice_date):
     slice_date = slice_date.strftime("%Y-%m-%d")
     tables = sm.get_tables(input_path)
     input_abs_path = os.path.abspath(input_path)
@@ -164,12 +154,11 @@ def get_slice(input_path, output_folder, feature_date, label_date, slice_type):
 
 @logged
 def apply_constraints(df):
-    df = df.loc[df['keys_company_stage_group'] == "Included"]
     age_old_cutoff = df["confidence_context_broader_company_age_number"][df["keys_company_stage"] == "Series D+"].quantile(0.75)
     df = df.loc[df['confidence_context_broader_company_age_number'] <= age_old_cutoff]
+    df = df.loc[df['keys_company_stage_group'] == "Included"]
     return df
 
-@logged
 def create_stages(df, **features):
     df2 = df.copy()
     df2["keys_company_stage"] = "Other"
@@ -177,7 +166,7 @@ def create_stages(df, **features):
     df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["Acquired"]] >= 1), "Acquired", df2["keys_company_stage"])
     df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["IPO"]] >= 1), "IPO", df2["keys_company_stage"])
     df2["keys_company_stage_series-d+"] = df2[[features["SeriesD"],features["SeriesE"],features["SeriesF"],features["SeriesG"],features["SeriesH"]]].sum(axis=1)
-    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2["keys_company_stage_series-d+"] >= 1), "Series D+/PE", df2["keys_company_stage"])
+    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2["keys_company_stage_series-d+"] >= 1), "Series D+", df2["keys_company_stage"])
     df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["SeriesC"]] >= 1), "Series C", df2["keys_company_stage"])
     df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["SeriesB"]] >= 1), "Series B", df2["keys_company_stage"])
     df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["SeriesA"]] >= 1), "Series A", df2["keys_company_stage"])
@@ -192,14 +181,14 @@ def create_stages(df, **features):
     return df2[["keys_company_stage_group", "keys_company_stage","keys_company_stage_number"]]
 
 @logged
-def add_stages(df):
-    feature_stages = create_stages(df, **features_stage_info)
-    label_stages = create_stages(df, **label_stage_info)
-    label_stages = label_stages.rename(columns={
+def add_stages(df, stage_info = features_stage_info, slice_type="feature"):
+    stages = create_stages(df, **stage_info)
+    if slice_type == "label":
+        stages = stages.rename(columns={
         "keys_company_stage_group": "outcome_stage_group",
         "keys_company_stage":"outcome_stage",
         "keys_company_stage_number":"outcome_stage_number"})
-    df = pd.concat([feature_stages, label_stages, df], axis=1)
+    df = pd.concat([stages, df], axis=1)
     return df
 
 @logged
@@ -223,7 +212,8 @@ def filter_features(df):
 
 @logged
 def finalise_dataset(df):
-    df = add_stages(df)
+    df = add_stages(df, features_stage_info, "feature")
+    df = add_stages(df, label_stage_info, "label")
     df = apply_constraints(df)
     y = make_label(df)
     keys = df[[col for col in list(df) if col.startswith(("key", "outcome"))]]
@@ -232,37 +222,46 @@ def finalise_dataset(df):
     return X, y, keys
 
 @logged
-def generate_dataset(feature_date, label_date, feature_input_path, label_input_path, feature_config, label_config,
-        merge_config, output_folder, max_observations, load_prev_files):
-    #create_slices
-    feature_path = get_slice(feature_input_path, output_folder, feature_date, label_date, slice_type = "feature")
-    label_path = get_slice(label_input_path, output_folder, feature_date, label_date, slice_type = "label")
+def prepare_dataset(input_path, slice_date, slice_config, slice_type, output_folder, max_observations = None, load_prev_files = True, alt=False):
+    slice_path = "{0}/{1}.db".format(output_folder[:-1], slice_date)
+    get_slice(input_path, slice_path, slice_date)
+    slice_raw_path = slice_path.replace(".db", "_{0}_raw.csv".format(slice_type))
+    if not load_prev_files or not os.path.isfile(slice_raw_path):
+        dp.flatten_file(slice_path, slice_config, slice_raw_path, slice_type)
+    slice_clean_path = slice_path.replace(".db", "_{0}_clean.csv".format(slice_type))
+    if not load_prev_files or not os.path.isfile(slice_clean_path):
+        dp.clean_file(slice_raw_path, slice_clean_path, nrows=max_observations)
+    if alt: return pd.read_csv(slice_clean_path, encoding="latin1")
+    else: return slice_clean_path
 
-    #flatten_slices
-    feature_raw_path = feature_path.replace(".db", "_raw.csv")
-    if not load_prev_files or not os.path.isfile(feature_raw_path): dp.flatten_file(feature_path, feature_config, feature_raw_path, "feature")
-    label_raw_path = label_path.replace(".db", "_raw.csv")
-    if not load_prev_files or not os.path.isfile(label_raw_path): dp.flatten_file(label_path, label_config, label_raw_path, "label")
-
-    #clean_slices
-    feature_clean_path = feature_path.replace(".db", "_clean.csv")
-    if not load_prev_files or not os.path.isfile(feature_clean_path):dp.clean_file(feature_raw_path, feature_clean_path, nrows=max_observations)
-    label_clean_path = label_path.replace(".db", "_clean.csv")
-    if not load_prev_files or not os.path.isfile(label_clean_path): dp.clean_file(label_raw_path, label_clean_path, nrows=max_observations)
-
-    #merge_slices
-    output_path = label_path.replace("label.db", "merge.db")
+@logged
+def merge_datasets(feature_date, label_date, output_folder, feature_clean_path, label_clean_path, merge_config, load_prev_files=True):
+    output_path = "{0}/{1}_{2}.db".format(output_folder[:-1], feature_date, label_date)
     if not load_prev_files or not os.path.isfile(output_path):
         dp.load_file(output_path, feature_clean_path, "feature")
         dp.load_file(output_path, label_clean_path, "label")
         dp.merge(output_path, merge_config)
+    export_path = output_path.replace(".db", ".csv")
+    if not load_prev_files or not os.path.isfile(export_path):
+        db.export_file(output_path, export_path, "merge")
+    return output_path
 
-    #export_merged
-    export_path = output_path.split(".")[0]+".csv"
-    if not load_prev_files or not os.path.isfile(export_path): db.export_file(output_path, export_path, "merge")
-
+@logged
+def generate_dataset(feature_date, label_date, feature_input_path, label_input_path, feature_config, label_config,
+        merge_config, output_folder, max_observations = None, load_prev_files = True):
+    #prepare_features
+    feature_clean_path = prepare_dataset(
+        feature_input_path, feature_date, feature_config, "feature",
+        output_folder, max_observations, load_prev_files)
+    #prepare_labels
+    label_clean_path = prepare_dataset(
+        label_input_path, label_date, label_config, "label",
+        output_folder,  max_observations, load_prev_files)
+    #merge_datasets
+    merge_path = merge_datasets(feature_date, label_date, output_folder,
+        feature_clean_path, label_clean_path, merge_config, load_prev_files)
     #finalise_merged
-    df = dp.export_dataframe(output_path, "merge")
+    df = dp.export_dataframe(merge_path, "merge")
     X, y, keys = finalise_dataset(df)
     return X, y, keys
 
@@ -285,31 +284,35 @@ def get_weights(clf):
     elif type(clf) in [LogisticRegression, LinearSVC]: return clf.coef_[0]
     else: return None
 
-def scorer(estimator, X, y_true):
+def scorer(estimator, X, y_true, model_scorer=None):
     global master_log
     y_pred = estimator.predict(X)
+    prc = metrics.average_precision_score(y_true, y_pred)
+    roc = metrics.roc_auc_score(y_true, y_pred)
     f1 = metrics.f1_score(y_true, y_pred)
-    auc = metrics.roc_auc_score(y_true, y_pred)
-    ck = metrics.cohen_kappa_score(y_true, y_pred)
     clf_type = type(estimator.named_steps["clf"]).__name__.split(".")[-1]
-    log.info("f1: {0:.3f} | auc: {1:.3f} | ck: {2:.3f} | clf: {3}".format(f1, auc, ck, clf_type))
+    log.info("prc: {0:.3f} | roc: {1:.3f} | f1: {2:.3f} | clf: {3}".format(prc, roc, f1, clf_type))
     if flag_log_scores:
         y_score = estimator.predict_proba(X)
-        mc = metrics.matthews_corrcoef(y_true, y_pred)
-        prc = metrics.average_precision_score(y_true, y_pred)
-        fpr, tpr, thresholds = metrics.roc_curve(y_true, y_score[:,1])
-        auc_scorer = metrics.make_scorer(metrics.roc_auc_score)
-        train_sizes, train_scores, test_scores = learning_curve(estimator, X, y_true, cv= 3, scoring = auc_scorer, train_sizes=np.linspace(0.1, 1.0, 10))
+        ck = metrics.cohen_kappa_score(y_true, y_pred)
+        mcc = metrics.matthews_corrcoef(y_true, y_pred)
+        fpr, tpr, roc_thresholds = metrics.roc_curve(y_true, y_score[:,1])
+        precision, recall, prc_thresholds = metrics.precision_recall_curve(y_true, y_score[:,1])
+        if model_scorer == "F1": scorer_type = metrics.make_scorer(metrics.f1_score)
+        else: scorer_type = metrics.make_scorer(metrics.average_precision_score)
+        train_sizes, train_scores, test_scores = learning_curve(estimator, X, y_true, cv= 3, scoring = scorer_type, train_sizes=np.linspace(0.1, 1.0, 10),verbose=10, n_jobs=-1)
         clf = estimator.named_steps["clf"]
         weights = get_weights(clf)
         params = estimator.get_params()
-        df = pd.DataFrame({"Classifier": [clf],"Params": [params], "Weights": [weights],
-            "AUC": [auc], "PRC": [prc], "F1": [f1], "MC": [mc],
-            "ROC_FPR": [fpr], "ROC_TPR": [tpr], "ROC_Thresholds": [thresholds],
+        df = pd.DataFrame({"Y_True": [y_true], "Y_Pred": [y_pred],
+            "Classifier": [clf],"Params": [params], "Weights": [weights],
+            "ROC": [roc], "PRC": [prc], "F1": [f1], "MCC": [mcc], "CK": [ck],
+            "ROC_FPR": [fpr], "ROC_TPR": [tpr], "ROC_Thresholds": [roc_thresholds],
+            "Precision": [precision], "Recall": [recall], "PRC_Thresholds": [prc_thresholds],
             "Train_Sizes": [train_sizes], "Train_Scores": [train_scores], "Test_Scores": [test_scores]})
         if master_log.empty: master_log = df
         else: master_log = pd.concat([master_log, df], axis=0)
-    return auc
+    return prc
 
 @log_scores
 def logged_fit(clf, *args, **kwargs):
@@ -331,7 +334,7 @@ def fit_score_model(X, y, params, pipe_steps, cv_folds, search_iterations, verbo
     return results
 
 @logged
-def store_log(feature_slice, label_slice, X, y, keys, cm, output_log, results=None):
+def store_log(feature_slice, label_slice, X, y, keys, cm, output_log, stage=None, results=None, pipeline=None):
     global master_log
     if master_log.empty: return False
     master_log["feature_slice"] = feature_slice
@@ -342,6 +345,8 @@ def store_log(feature_slice, label_slice, X, y, keys, cm, output_log, results=No
     master_log["feature_stage_number"] = [keys["keys_company_stage_number"]]  * len(master_log.index)
     master_log["label_stage"] = [keys["outcome_stage"]]  * len(master_log.index)
     master_log["label_stage_number"] = [keys["outcome_stage_number"]]  * len(master_log.index)
+    master_log["outcome_extra_stage_bool"] = [keys["outcome_extra_stage_bool"]]  * len(master_log.index)
+    if stage: master_log["rank_{}".format(stage)] = pipeline["rank_{}".format(stage)]
     for k, v in cm.__dict__.items():
         try: master_log[k] = v
         except: pass
@@ -369,20 +374,21 @@ def create_pipelines():
             results = fit_score_model(
                 X, y, params, cm.pipe_steps, cm.cv_folds_create, cm.search_iterations,
                 cm.verbosity, cm.n_jobs, cm.log_scores)
-            store_log(feature_date, label_date, X, y, keys, cm, cm.output_log_create, results)
+            store_log(feature_date, label_date, X, y, keys, cm, cm.output_log_create, stage=None, results=results)
     pipelines = pd.read_pickle(cm.output_log_create)
     return pipelines
 
-def rank_pipelines(pipelines, number_selected, criteria):
-    top_pipelines = pipelines.sort_values(by=criteria, ascending=False)[0:number_selected]
-    return top_pipelines
-
-def get_best_pipeline(pipelines, criteria):
+def rank_pipelines(pipelines, criteria, stage, top_n=1):
+    if stage == "select": pipelines = pipelines[~np.isnan(pipelines["rank_create"])]
     pipelines["Params_str"] = pipelines["Params"].astype(str)
-    best_params_str = pipelines.groupby("Params_str")[criteria].mean().sort_values(ascending=False).index[0]
-    best_pipeline = pipelines.loc[pipelines["Params_str"] == best_params_str].reset_index().ix[0]
-    return best_pipeline
-
+    unique_params = {v:k for k,v in dict(enumerate(pipelines["Params_str"].unique().tolist())).items()}
+    pipelines["Params_str_dummy"] = pipelines["Params_str"].replace(unique_params)
+    dummy_rank = pipelines.groupby("Params_str_dummy")[criteria].median().rank(ascending=False).to_dict()
+    pipelines["rank_{}".format(stage)] = pipelines["Params_str_dummy"].map(dummy_rank)
+    pipelines.set_index("rank_{}".format(stage), drop=False, inplace=True)
+    top_pipelines = pipelines.sort_index().ix[1:top_n]
+    top_pipelines = top_pipelines.drop_duplicates(subset="Params_str_dummy").squeeze()
+    return top_pipelines
 
 @log_scores
 def logged_cv_score(*args, **kwargs):
@@ -391,7 +397,7 @@ def logged_cv_score(*args, **kwargs):
 @logged
 def select_pipeline(pipelines = None):
     if pipelines is None: pipelines = pd.read_pickle(cm.output_log_create)
-    finalist_pipelines = rank_pipelines(pipelines, cm.top_pipelines_select, cm.pipeline_criteria_select)
+    finalist_pipelines = rank_pipelines(pipelines, cm.pipeline_criteria_select, stage="create", top_n = cm.top_pipelines_select)
     dataset_slices = generate_dates(
         cm.time_slices_select, cm.forecast_windows, cm.master_start_date,
         cm.master_end_date, cm.load_prev_files_select, cm.output_slices_path_select)
@@ -404,7 +410,7 @@ def select_pipeline(pipelines = None):
             pipe = Pipeline(steps=cm.pipe_steps).set_params(**pipeline["Params"])
             if cm.log_scores: logged_cv_score(pipe, X, y, scoring=scorer, cv=cm.cv_folds_select, verbose=cm.verbosity, n_jobs=cm.n_jobs)
             else: cross_val_score(pipe, X, y, scoring=scorer, cv=cm.cv_folds_select, verbose=cm.verbosity, n_jobs=cm.n_jobs)
-            store_log(feature_date, label_date, X, y, keys, cm, cm.output_log_select)
+            store_log(feature_date, label_date, X, y, keys, cm, cm.output_log_select, stage = "create", pipeline=pipeline)
     finalist_pipelines = pd.read_pickle(cm.output_log_select)
     best_pipeline = get_best_pipeline(finalist_pipelines, cm.pipeline_criteria_evaluate)
     return best_pipeline
@@ -413,7 +419,7 @@ def select_pipeline(pipelines = None):
 def evaluate_pipeline(best_pipeline = None):
     if best_pipeline is None:
         finalist_pipelines = pd.read_pickle(cm.output_log_select)
-        best_pipeline = get_best_pipeline(finalist_pipelines, cm.pipeline_criteria_evaluate)
+        best_pipeline = rank_pipelines(finalist_pipelines, cm.pipeline_criteria_evaluate, stage="select")
     train_slices = generate_dates(
         cm.time_slices_evaluate, cm.forecast_windows, cm.master_start_date,
         cm.master_end_date, cm.load_prev_files_evaluate, cm.output_slices_path_evaluate)
@@ -431,8 +437,8 @@ def evaluate_pipeline(best_pipeline = None):
             cm.master_path, cm.test_path,
             cm.master_feature_config, cm.test_label_config, cm.final_merge_config,
             cm.output_folder_evaluate, cm.max_observations_evaluate, cm.load_prev_files_evaluate)
-        scorer(pipe, X_test, y_test)
-        store_log(feature_date_train, label_date_train, X_test, y_test, keys, cm, cm.output_log_evaluate)
+        scorer(pipe, X_test, y_test, model_scorer=cm.model_criteria_evaluate)
+        store_log(feature_date_train, label_date_train, X_test, y_test, keys, cm, cm.output_log_evaluate, stage = "select", pipeline=best_pipeline)
     results = pd.read_pickle(cm.output_log_evaluate)
     return results
 

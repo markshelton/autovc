@@ -2,14 +2,14 @@
 Step            & Parameter             & Values                        \\ \midrule
 Imputer         & Strategy              & Mode                          \\
 Transformer     & Function              & SQRT                          \\
-Scaler          & Function              & StandardScaler                \\
-Extractor       & Components            & Range (1, 20)                 \\
+Scaler          & Function              & MinMaxScaler                  \\
+Extractor       & Components            & 27                            \\
 Random Forest   & Class Weight          & Balanced                      \\
 Random Forest   & Criterion             & Entropy                       \\
 Random Forest   & Boostrap              & True                          \\
-Random Forest   & Estimators            & Range (50, 100)               \\
-Random Forest   & Max Depth             & Range (5, 10)                 \\
-Random Forest   & Max Features          & SQRT(N_Features)              \\
+Random Forest   & Estimators            & 34                            \\
+Random Forest   & Max Depth             & 8                             \\
+Random Forest   & Max Features          & SQRT(N\_Features)             \\
 Random Forest   & Min Samples Split     & 2                             \\
 Random Forest   & Min Samples Leaf      & 1                             \\
 Random Forest   & Min Weight Leaf       & 0                             \\

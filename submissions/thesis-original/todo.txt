@@ -1,0 +1,35 @@
+Abstract
+Acknowledgements
+Introduction
+Literature Review
+-Criteria Selection --> VC Industry --> Fund Structure (Fig)
+
+Design
+-Pipeline Creation
+    -Imputation
+    -Transformation
+    -Scaling
+    -Extraction
+    -Classification Algorithms
+        --> %TODO - Write paragraph
+        --> %TODO - Write paragraph
+-Pipeline Selection
+    --> %TODO - section preamble
+    --> %TODO - What is the variance in performance over time in aggregate?
+    --> %TODO - What is the variance over time between different classifiers?
+    --> %TODO - How many finalists do we need to ensure we get the best?
+    --> %TODO - How do we choose the metrics to narrow down the pipelines?
+    --> %INCLUDE Hyperparameters of our final classification pipeline
+-Pipeline Evaluation
+    -Efficiency
+    -Robustness
+    -Predictive Power
+        --> %INCLUDE - Counts of merged obs from dataset slices of various ages (Heatmap)
+        --> %INCLUDE - Proportion of companies increased in development stage
+
+Evaluation
+    -Efficiency
+        -%INCLUDE - Learning curve - evaluate
+    -Robustness
+    -Predictive Power
+Discussion

@@ -2,6 +2,7 @@
 \usepackage{subfiles}
 \usepackage[hyphens]{url}
 \usepackage{graphics}
+\usepackage{graphicx}
 \usepackage{etoolbox}
 \usepackage{amsfonts}
 \usepackage{pdflscape}
@@ -27,13 +28,14 @@
 \usepackage{xspace}
 \usepackage{subcaption}
 \usepackage[acronym,shortcuts]{glossaries}
+\usepackage{makecell}
+\usepackage{verbatim}
 
-
-\newcommand{\thetitle}{Factors that influence startup investment}
+\newcommand{\thetitle}{Towards Automated Venture Capital Screening}
 \newcommand{\theauthor}{W.M.R. Shelton}
 
-\newcommand{\thekeywords}{keyword, keyword}
-\newcommand{\thecategories}{category, category}
+\newcommand{\thekeywords}{Venture Capital, Machine Learning, Investment Screening}
+\newcommand{\thecategories}{I.5, J.1, J.4}
 
 %%% BEGIN LATEX TWEAKS
 
@@ -69,11 +71,13 @@
 
 % Acronyms for common stuff
 \setacronymstyle{long-short}
-\newacronym{vc}{VC}{venture capital}
-\newacronym{roc}{ROC}{receiver operating characteristic}
-\newacronym{ipo}{IPO}{initial public offering}
-\newacronym{pca}{PCA}{principal component analysis}
+\newacronym{vc}{VC}{Venture Capital}
+\newacronym{roc}{ROC}{Receiver Operating Characteristic}
+\newacronym{pr}{PR}{Precision-Recall}
+\newacronym{ipo}{IPO}{Initial Public Offering}
+\newacronym{pca}{PCA}{Principal Component Analysis}
 \newacronym{uspto}{USPTO}{United States Patent and Trademark Office}
+\newacronym{iqr}{IQR}{Interquartile Range}
 
 % Fancyref support for subsections, source; https://github.com/openlilylib/tutorials/blob/master/aGervasoni/orchestralScores/example-materials/OLLbase.sty
 \newcommand*{\fancyrefsubseclabelprefix}{subsec}
@@ -113,9 +117,9 @@
 
 % Enable subsubsections
 \setcounter{secnumdepth}{3} % Enable level 4-5
-\setcounter{tocdepth}{3}    % Include level 4-5 in TOC
+\setcounter{tocdepth}{2}    % Include level 4-5 in TOC
 
-\appto\appendix{\addtocontents{toc}{\protect\setcounter{tocdepth}{0}}}
+%\appto\appendix{\addtocontents{toc}{\protect\setcounter{tocdepth}{0}}}
 
 % Reset acronym definitions in each section and chapter
 \preto\section\glsresetall
@@ -138,12 +142,18 @@
 %%% END LATEX TWEAKS
 
 \begin{document}
-\newcommand{\mainfile}{} % we use the existance of this command to see if we're compiling the whole thesis or just a chapter
+\newcommand{\mainfile}{}
 
 \maketitle
 
 \begin{abstract}
-This is the abstract.
+
+\Gls{vc} firms face the challenge of choosing a few outstanding investments from a sea of hundreds of thousands of potential opportunities. The \gls{vc} industry requires better systems and processes to efficiently manage labour-intensive tasks like investment screening. Existing approaches to address this challenge have had three common limitations: small sample size, a focus on early-stage investment, and incomplete feature sets. Although individual studies address some of these limitations, there is little evidence that this research has been translated into systems that assist investors. Mining online data sources may address previous limitations and make \gls{vc} investment screening more efficient and effective.
+
+To address the research problem, a multi-stage supervised classification system was developed. The system identifies startup companies that are likely to receive additional funding or have a liquidity event (exit) in a given period of time. A dataset is collected from the CrunchBase and PatentsView data sources. The dataset has issues of sparsity, long-tailed distributions, imbalanced feature ranges, and non-orthogonality. A processing pipeline framework is developed to address these issues. Search is performed across the pipeline's hyperparameters to generate candidate pipelines, which are tested and ranked. Finally, the best pipeline is used to generate models which are tested with respect to their performance across time, forecast period, and developmental stage.
+
+We evaluated our system against three criteria: efficiency, robustness and predictive power. We find that
+
 \end{abstract}
 
 \begin{acknowledgements}
@@ -152,8 +162,20 @@ These are the acknowledgements.
 % TODO: Any thesis, dissertation or other publication resulting from research undertaken by the recipient while in receipt of the UWA Fogarty Foundation Scholarship must acknowledge the support of the scholarship and carry the University by-line.
 \end{acknowledgements}
 
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Table of Contents}
+\renewcommand\contentsname{Table of Contents}
 \tableofcontents
+
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Tables}
 \listoftables
+
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Figures}
 \listoffigures
 
 \begin{refsection}
@@ -164,20 +186,25 @@ These are the acknowledgements.
   \subfile{../discussion/discussion}
   \appendix
   \subfile{../thesis/appendices}
+  \clearpage
+  \phantomsection
+  \addcontentsline{toc}{chapter}{Bibliography}
   \printbibliography
 \end{refsection}
 
-\begin{refsection}
-  \chapter{Original Honours Proposal}
-  \subfile{../proposal/original_proposal}
-  \printbibliography
-\end{refsection}
+\begin{comment}
+  \begin{refsection}
+    \chapter{Original Honours Proposal}
+    \subfile{../proposal/original_proposal}
+    \printbibliography
+  \end{refsection}
 
-\begin{refsection}
-  \chapter{Revised Honours Proposal}
-  \subfile{../proposal/revised_proposal}
-  \printbibliography
-\end{refsection}
+  \begin{refsection}
+    \chapter{Revised Honours Proposal}
+    \subfile{../proposal/revised_proposal}
+    \printbibliography
+  \end{refsection}
+\end{comment}
 
 \end{document}
 

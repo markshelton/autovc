@@ -1,11 +1,11 @@
-\begin{tabular}{lrrrrr} \toprule
-                            & ROC        & PRC        & F1         & MCC        & Time (s) \\
-Classifier                  & Max        & Max        & Max        & Max        & Median \midrule
-Random Forest               & \em{0.780} & \em{0.471} & \em{0.324} & \em{0.300} & 55.1
-Logistic Regression         & 0.766      & 0.445      & 0.286      & 0.293      & 14.9
-Decision Tree               & 0.753      & 0.456      & 0.265      & 0.249      & 15.9
-Naive Bayes                 & 0.713      & 0.383      & 0.297      & 0.259      & 26.5
-Support Vector Machine      & 0.605      & 0.525      & 0.266      & 0.300      & 746.2
-Artificial Neural Network   & 0.609      & 0.313      & 0.241      & 0.243      & 15.9
-K-Nearest Neighbors         & 0.545      & 0.340      & 0.157      & 0.203      & \em{10.0}
+\begin{tabular}{lrrrrrrrrrr} \toprule
+& \multicolumn{2}{c}{AUC PRC} & \multicolumn{2}{c}{AUC ROC} & \multicolumn{2}{c}{F1} & \multicolumn{2}{c}{Fit Time (s)} \\
+Classifier & Median & Max & Median & Max & Median & Max & Median & IQR \\ \midrule
+Logistic Regression       &   0.417 &  0.465 &   0.675 &  0.710 &  0.339 &  0.358 &  7.326 &  407.031 \\
+Random Forest             &   0.376 &  0.465 &   0.619 &  0.709 &  0.332 &  0.360 &  68.325 &   29.064 \\
+Decision Tree             &   0.388 &  0.429 &   0.651 &  0.659 &  0.305 &  0.314 &  15.329 &    6.747 \\
+Naive Bayes               &   0.354 &  0.367 &   0.623 &  0.638 &  0.303 &  0.321 &  8.589 &   19.131 \\
+K-Nearest Neighbors       &   0.335 &  0.353 &   0.532 &  0.565 &  0.131 &  0.226 &  8.537 &   12.316 \\
+Artificial Neural Network &   0.320 &  0.335 &   0.517 &  0.523 &  0.072 &  0.096 &  9.146 &   12.017 \\
+Support Vector Machine    &   0.233 &  0.244 &   0.503 &  0.504 &  0.014 &  0.017 &  29.015 &    0.000 \\
 \bottomrule \end{tabular}

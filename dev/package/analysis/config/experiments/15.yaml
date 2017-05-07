@@ -1,0 +1,152 @@
+#---------------------------------------------------------------------------
+#General
+#---------------------------------------------------------------------------
+
+
+##Build Properties
+build_identifier: &build 16
+log_scores: True
+n_jobs: 1
+verbosity: 1
+
+##Forecast
+forecast_windows: [2] # Evaluation - Predictive Power
+
+##Master Database
+master_path: "analysis/input/master.db"
+master_end_date: !!python/object/new:datetime.date [2016, 9, 9]
+master_start_date: !!python/object/new:datetime.date [2013, 1, 1]
+master_feature_config: "analysis/config/master_feature.sql"
+master_label_config: "analysis/config/master_label.sql"
+master_merge_config: "analysis/config/master_merge.sql"
+
+##Output Folder
+output_folder: &output !join ["analysis/output/autoVC/",*build, "/"]
+
+##Pipeline Structure
+pipe_steps:
+  - !!python/tuple ["imputer", !!python/object/apply:sklearn.preprocessing.Imputer {}]
+  - !!python/tuple ['absolute', !!python/object/apply:sklearn.preprocessing.FunctionTransformer {}]
+  - !!python/tuple ['transformer', !!python/object/apply:sklearn.preprocessing.FunctionTransformer {}]
+  - !!python/tuple ['scaler', !!python/object/apply:sklearn.preprocessing.StandardScaler {}]
+  - !!python/tuple ['extractor', !!python/object/apply:sklearn.decomposition.PCA {}]
+  - !!python/tuple ["clf", !!python/object/apply:sklearn.naive_bayes.GaussianNB {}]
+
+
+#---------------------------------------------------------------------------
+#Create Pipelines
+#---------------------------------------------------------------------------
+
+
+create_pipelines_flag: False
+
+##Custom
+cv_folds_create: 2
+time_slices_create: 1
+max_observations_create: !!null
+load_prev_files_create: True
+output_folder_create: &output_create !join [*output, "create/"]
+output_slices_path_create: !join [*output_create, "stored_slices.pkl"]
+output_log_create: !join [*output_create, "log_results.pkl"]
+
+##Specific
+algorithms: ["SVM"] # "RF","SVM",]
+search_iterations: 5
+pp_params:
+  imputer__strategy:
+    - "mean"
+    - "median"
+    - "most_frequent"
+  absolute__func: [!!python/name:numpy.absolute ]
+  transformer__func:
+    - !!null
+    - !!python/name:numpy.log1p # X >= 0
+    - !!python/name:numpy.sqrt # X >= 0
+  scaler:
+    - !!null
+    - !!python/object/apply:sklearn.preprocessing.StandardScaler {}
+    - !!python/object/apply:sklearn.preprocessing.RobustScaler {}
+    - !!python/object/apply:sklearn.preprocessing.MinMaxScaler {}
+  extractor__n_components: !!python/object/apply:scipy.stats.randint [1, 100]
+clf_params:
+  NB:
+    clf: [!!python/object/apply:sklearn.naive_bayes.GaussianNB {}]
+  RF:
+    clf: [!!python/object/apply:sklearn.ensemble.RandomForestClassifier {}]
+    clf__n_estimators: !!python/object/apply:scipy.stats.randint [10, 100]
+    clf__max_depth: !!python/object/apply:scipy.stats.randint [5, 20]
+    clf__class_weight: ["balanced"]
+    clf__criterion: ["gini", "entropy"]
+  LR:
+    clf: [!!python/object/apply:sklearn.linear_model.LogisticRegression {}]
+    clf__C: !!python/object/apply:numpy.logspace [-3, 1, 6]
+    clf__class_weight: ["balanced"]
+    clf__penalty: ["l1", "l2"]
+  KNN:
+    clf: [!!python/object/apply:sklearn.neighbors.KNeighborsClassifier {}]
+    clf__n_neighbors: !!python/object/apply:scipy.stats.randint [5, 20]
+    clf__weights: ['uniform','distance']
+  DT:
+    clf: [!!python/object/apply:sklearn.tree.DecisionTreeClassifier {}]
+    clf__max_depth: !!python/object/apply:scipy.stats.randint [5, 20]
+    clf__class_weight: ["balanced"]
+    clf__criterion: ["gini", "entropy"]
+  SVM:
+    clf: [!!python/object/apply:sklearn.svm.SVC {}]
+    clf__kernel: ["linear"]
+    clf__probability: [True]
+    clf__class_weight: ["balanced"]
+    clf__C: !!python/object/apply:numpy.logspace [-5, 0, 6]
+  ANN:
+    clf: [!!python/object/apply:sklearn.neural_network.MLPClassifier {}]
+    clf__activation: ["identity", "logistic", "tanh", "relu"]
+    clf__early_stopping: [True]
+    clf__alpha: !!python/object/apply:numpy.logspace [-3, 1, 6]
+
+
+#---------------------------------------------------------------------------
+#Select Pipeline
+#---------------------------------------------------------------------------
+
+
+select_pipeline_flag: True
+
+##Custom
+pipeline_criteria_select: "AUC"
+cv_folds_select: 3
+time_slices_select: 3 # Validation - Robustness
+max_observations_select: !!null
+load_prev_files_select: True
+output_folder_select: &output_select !join [*output, "select/"]
+output_slices_path_select: !join [*output_select, "stored_slices.pkl"]
+output_log_select: !join [*output_select, "log_results.pkl"]
+
+##Specific
+top_pipelines_select: 30
+
+#---------------------------------------------------------------------------
+#Evaluate Pipeline
+#---------------------------------------------------------------------------
+
+
+evaluate_pipeline_flag: False
+
+##Custom
+pipeline_criteria_evaluate: "F1"
+time_slices_evaluate: 3 # Evaluation - Robustness
+max_observations_evaluate: !!null #Evaluation - Efficiency
+load_prev_files_evaluate: True
+output_folder_evaluate: &output_evaluate !join [*output, "evaluate/"]
+output_slices_path_evaluate: !join [*output_evaluate, "stored_slices.pkl"]
+output_log_evaluate: !join [*output_evaluate, "log_results.pkl"]
+
+##Specific
+test_path: "analysis/input/test.db"
+test_date: !!python/object/new:datetime.date [2017, 4, 4]
+test_feature_config: "analysis/config/test_feature.sql"
+test_label_config: "analysis/config/test_label.sql"
+test_merge_config: "analysis/config/test_merge.sql"
+final_merge_config: "analysis/config/master_test_merge.sql"
+
+
+#---------------------------------------------------------------------------
