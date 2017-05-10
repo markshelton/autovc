@@ -14,6 +14,7 @@
 \usepackage{tabularx}
 \usepackage{accsupp}
 \usepackage{amssymb}
+\usepackage[toc,page]{appendix}
 \usepackage{pgf}
 \usepackage{tikz}
 \usepackage{tikzscale}
@@ -119,7 +120,9 @@
 \setcounter{secnumdepth}{3} % Enable level 4-5
 \setcounter{tocdepth}{2}    % Include level 4-5 in TOC
 
-%\appto\appendix{\addtocontents{toc}{\protect\setcounter{tocdepth}{0}}}
+\appto\appendix{\addtocontents{toc}{\protect\setcounter{tocdepth}{0}}}
+\appto\listoffigures{\addtocontents{lof}{\protect\setcounter{tocdepth}{1}}}
+\appto\listoftables{\addtocontents{lot}{\protect\setcounter{tocdepth}{1}}}
 
 % Reset acronym definitions in each section and chapter
 \preto\section\glsresetall
@@ -148,16 +151,22 @@
 
 \begin{abstract}
 
-\Gls{vc} firms face the challenge of choosing a few outstanding investments from a sea of hundreds of thousands of potential opportunities. The \gls{vc} industry requires better systems and processes to efficiently manage labour-intensive tasks like investment screening. Existing approaches to address this challenge have had three common limitations: small sample size, a focus on early-stage investment, and incomplete feature sets. Although individual studies address some of these limitations, there is little evidence that this research has been translated into systems that assist investors. Mining online data sources may address previous limitations and make \gls{vc} investment screening more efficient and effective.
+Venture Capital (VC) firms face the challenge of choosing a few outstanding investments from a sea of potential opportunities. The VC industry requires better systems and processes to efficiently manage labour-intensive tasks like investment screening. Approaches to address this challenge have had three common limitations: small sample size, a focus on early-stage investment, and incomplete feature sets. There is also little evidence that research has been translated into systems that assist investors. Applying machine learning techniques to new online startup data sources may address previous limitations and make VC investment screening more efficient and effective.
 
-To address the research problem, a multi-stage supervised classification system was developed. The system identifies startup companies that are likely to receive additional funding or have a liquidity event (exit) in a given period of time. A dataset is collected from the CrunchBase and PatentsView data sources. The dataset has issues of sparsity, long-tailed distributions, imbalanced feature ranges, and non-orthogonality. A processing pipeline framework is developed to address these issues. Search is performed across the pipeline's hyperparameters to generate candidate pipelines, which are tested and ranked. Finally, the best pipeline is used to generate models which are tested with respect to their performance across time, forecast period, and developmental stage.
+To address the research problem, a multi-stage supervised classification system was developed. The system identifies startup companies that are likely to receive additional funding or have a liquidity event (exit) in a given period of time. A dataset is collected from the CrunchBase and PatentsView data sources. A processing pipeline framework is developed and a randomized search is performed across the pipeline's hyperparameters to generate candidate pipelines, which are tested and ranked. Finally, the best pipeline is used to generate models which are tested with respect to their performance across time, forecast period, and developmental stage.
 
-We evaluated our system against three criteria: efficiency, robustness and predictive power. We find that
+The proposed system was evaluated against three criteria: efficiency, robustness and predictive power. The system satisfies each of these criteria. It makes predictions with an average F1 score (for the positive class) of 0.32-0.52 over forecast windows of 2-4 years, it is robust, with only minimal variance with respect to historical data, and it is efficient in that it is semi-autonomous and could be made fully autonomous with minimal development. Human capital, specifically the employment experience of advisors, executives and founders, is the greatest predictor of investment success. This project lays the groundwork for a production-ready VC investment screening tool.
 
 \end{abstract}
 
 \begin{acknowledgements}
 These are the acknowledgements.
+
+Supervisors
+\\ UWA / BPhil
+\\ Fogarty Foundation
+\\ St Catherine's
+\\ Bloom / Friends / Family
 
 % TODO: Any thesis, dissertation or other publication resulting from research undertaken by the recipient while in receipt of the UWA Fogarty Foundation Scholarship must acknowledge the support of the scholarship and carry the University by-line.
 \end{acknowledgements}
@@ -184,6 +193,7 @@ These are the acknowledgements.
   \subfile{../design/design}
   \subfile{../evaluation/evaluation}
   \subfile{../discussion/discussion}
+  \subfile{../conclusions/conclusions}
   \appendix
   \subfile{../thesis/appendices}
   \clearpage

@@ -48,7 +48,7 @@ def standardize_names(raw_names):
 @logged
 def store_patents(patents, path):
     with sqlite3.connect(path) as conn:
-        patents.to_sql("patents", conn, if_exists="replace",index_label ="assignee_uuid")
+        patents.to_sql("patents", conn, if_exists="append",index_label ="assignee_uuid")
 
 def names_are_similar(db_name, patents_name):
     try:
@@ -107,20 +107,25 @@ def go_patents():
         names = get_companies(input_path)
         names["std_name"] = standardize_names(names["company_name"])
         pd.to_pickle(names, pickle_names_path)
-    try: patents = pd.read_pickle(pickle_patents_path)
+    try:
+        with sqlite3.connect(output_path) as conn:
+            patents = pd.read_sql("SELECT * FROM patents;", conn, index_col="assignee_uuid")
     except: patents = pd.DataFrame()
-    print(names.shape)
+    new_patents = patents.copy()
     for i, (uuid, std_name) in enumerate(names["std_name"].iteritems()):
         print("Request:", i, std_name)
         if uuid not in patents.index.tolist():
             temp = get_patents(uuid, std_name)
             if temp.empty: names = names.drop(uuid)
-            patents = pd.concat([patents, temp],axis=0)
-            pd.to_pickle(patents, pickle_patents_path)
+            new_patents = pd.concat([new_patents, temp],axis=0)
+            pd.to_pickle(new_patents, pickle_patents_path)
         else: print("--Already Matched")
         if i % 1000 == 0:
             pd.to_pickle(names, pickle_names_path)
-            store_patents(patents, output_path)
+            store_patents(new_patents, output_path)
+            with sqlite3.connect(output_path) as conn:
+                patents = pd.read_sql("SELECT * FROM patents;", conn, index_col="assignee_uuid")
+            new_patents = pd.DataFrame()
 
 def main():
     go_patents()

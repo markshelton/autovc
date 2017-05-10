@@ -4,12 +4,12 @@
 \chapter{Design}
 \label{chap:design}
 
-In this chapter, we explain the methodology used to fill the research gap identified in Chapter~\ref{chap:litreview}, thereby producing a system that identifies high-potential startup companies that are likely to receive additional funding or a exit in a given forecast window. Figure~\ref{fig:design:system_architecture} depicts the overall system architecture. The first two steps are our designed system and will be described in this chapter. The following two steps are part of our system evaluation process and will be described in the next chapter, Chapter~\ref{chap:evaluation}.
+In this chapter, we explain the methodology used to fill the research gap identified in Chapter~\ref{chap:litreview}, thereby producing a system that identifies high-potential startup companies that are likely to receive additional funding or a exit in a given forecast window. Figure~\ref{fig:design:system_architecture} depicts the overall system architecture, which will be described in the following chapter. We will evaluate the perform of this system in the next chapter, Chapter~\ref{chap:evaluation}.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/system_architecture}
-    \caption[System architecture flowchart]{An overview of the system architecture proposed by this project, structured in four stages: data collection, pipeline creation, pipeline selection, and model evaluation. Green callouts: iterative processes / search spaces. Orange circles: linear systems. Blue squares: data structures / data stores.}
+    \caption[System architecture flowchart]{An overview of the system architecture proposed by this project, structured in three stages: data collection, pipeline creation, and pipeline selection. Green callouts: iterative processes / search spaces. Orange circles: linear systems. Blue squares: data structures / data stores.}
     \label{fig:design:system_architecture}
 \end{figure}
 
@@ -18,6 +18,8 @@ In this chapter, we explain the methodology used to fill the research gap identi
 \item Dataset Preparation. Our primary data source was the CrunchBase online database, which we supplemented with patent filing data from PatentsView. We collected two database dumps from CrunchBase in September 2016 and April 2017, for training and testing respectively. The database dumps were in the format of CSV files which we imported into a relational database (SQLite) and performed aggregation queries to create features suitable for classification. We then performed screening based on each company's developmental stage and age to ensure only relevant companies were included in the dataset. Finally, we explored the dataset and identified issues of sparsity, long-tailed distributions, imbalanced feature ranges, and non-orthogonality.
 
 \item Pipeline Creation. We developed a processing pipeline framework that seeks to address the dataset issues identified during data collection. Our pipeline is based on the popular Python machine learning library Scikit-learn \cite{pedregosa2011}. Pre-processing steps include imputation, transformation, scaling and feature extraction. Each pre-processing step has hyperparameters that can be tuned (e.g. imputation strategy, number of components to extract) that affect the pipeline's classification performance. We also tested a number of common classification algorithms and their hyperparameters, selected from our literature review in Chapter~\ref{chap:litreview}. We performed a search across the pipeline's hyperparameters to generate candidate pipelines. The hyperparameters that we found to have the most significant effect on the final performance of the pipelines were related to the classification algorithms.
+
+\item Pipeline Selection. In the previous step, we generated a cross-section of candidate pipelines with different hyperparameters. In this step, we use Area under the \gls{pr} curve to rank these candidate pipelines and test the best pipelines (finalist pipelines) over a number of different dataset slices. This process ensures we select pipelines that are robust with respect to time. We aggregate the results for each finalist pipeline across these dataset slices and rank the finalist pipelines on their overall performance, so we can select the best pipeline for further evaluation. We don't observe significant variance in the pipelines on aggregate against the dataset slices, but there is variance within the individual pipelines. Our results suggest that it is optimal to evaluate the top 3-5 candidate pipelines in this manner.
 
 \end{enumerate}
 
@@ -184,12 +186,12 @@ After reviewing the distribution of missing data, we decided to perform further 
 
 While the classification algorithms we identified in the previous chapter are relatively robust to violations of normality, it may be beneficial to transform the data if the feature distributions are extreme. Table~\ref{fig:design:funding_transformation} shows one of the key features, Total Funding Raised, under a number of different transformations. Like many features in our dataset, the distribution of Total Funding Raised is highly skewed. The log transformation reduces this skew (a normal distribution of non-zero values is apparent) and square root transformation also reduces this skew (to a lesser extent). The impact of these transformations is reduced by the extent of their zero-inflation. However, it is still reasonable to expect both of these transformations to improve the classification accuracy. Figure~\ref{fig:design:transformer} shows the \gls{roc} of these different transformation functions. Both functions provide a small performance improvement, with the square root function narrowly best.
 
-\begin{table}[!htb]
+\begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/funding_transformation}
-    \caption[Example feature under transformation functions]{}
+    \caption[Funding raised feature transformed by functions]{}
     \label{fig:design:funding_transformation}
-\end{table}
+\end{figure}
 
 \begin{figure}[!htb]
     \centering
@@ -262,6 +264,46 @@ We take a closer look at the \gls{pr} curves for each classifier in Figure~\ref{
     \caption[Learning curves by classification algorithms]{Learning curves.}
     \label{fig:design:create_learning_curves}
 \end{figure}
+
+\section{Pipeline Selection}
+
+In the previous chapter, we developed a system that generated a cross-section of candidate pipelines with different hyperparameters. In this step, we terank these candidate pipelines and evaluate the best pipelines (finalist pipelines) over a number of different dataset slices. This process, depicted in Figure~\ref{fig:evaluation:pipeline_selection}, ensures that our final pipeline is robust in their performance with respect to time. We aggregate the results for each finalist pipeline across these dataset slices and rank the finalist pipelines on their overall performance. Finally, we select the best pipeline.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/evaluation/pipeline_selection}
+    \caption[Pipeline selection flowchart]{Pipeline selection overview.}
+    \label{fig:evaluation:pipeline_selection}
+\end{figure}
+
+First, we need to decide how to narrow our candidate pipelines down to finalist pipelines that we can evaluate further. There are a number of different metrics used to evaluate binary classifiers in machine learning. The most simplistic metric is accuracy but this is rarely used in practice because it gives misleading results in the case of imbalanced classes. \Gls{roc} curves are perhaps the mostly commonly used evaluation tool in binary classification, and show how the number of correctly classified positive examples varies with the number of incorrectly classified negative examples. The area under these curves gives a standardised result across a spectrum of decision thresholds. \Gls{pr} curves are similar to \gls{roc} curves but instead map the trade-offs between precision and recall. They are less commonly used than \gls{roc} curves but have been shown to give a more informative picture of an algorithm’s performance under imbalanced classes than \gls{roc} curves \cite{Jesse Davis 2006}. Given our dataset is highly imbalanced (the positive class is approximately 10\%) we decided to proceed with \gls{pr} curves. We will also use this metric to determine which is ultimately the best of our finalist pipelines.
+
+Our hypothesis is that the performance of our classification pipelines may vary with respect to the date that the dataset was collected (in this case, sliced). To study this hypothesis, first we explored variance between the pipelines on aggregate against the slice dates, presented in Figure~\ref{fig:evaluation:selection_agg_slice}. We see little variance on this basis, and we don't observe a relationship between slice date and score.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/evaluation/selection_agg_slice}
+    \caption[Pipeline performance by slice date]{}
+    \label{fig:evaluation:selection_agg_slice}
+\end{figure}
+
+Next, we study the variance within the individual pipelines, presented in Figure~\ref{fig:evaluation:selection_agg_rank}. Here, we can see there is significantly more variance in the scores. Although there is still a strong positive correlation between the pipelines initial ranking and their scores, we can see that there are some individual deviations. Importantly, the top-ranked pipeline from the first stage actually has a lower median score than the second-ranked pipeline. These results suggest that the top 3-5 pipelines should be evaluated in this manner to ensure that the best pipeline is selected.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/evaluation/selection_agg_rank}
+    \caption[Overview of finalist pipeline performance]{}
+    \label{fig:evaluation:selection_agg_rank}
+\end{figure}
+
+The best candidate pipeline is depicted in Table~\ref{fig:evaluation:best_hyperparameters}. We adopted this pipeline configuration for our following experiments.
+
+\begin{table}[!htb]
+    \centering
+    \scalebox{0.8}{\input{../tables/evaluation/best_hyperparameters}}
+    \caption[Hyperparameters of best pipeline]{}
+    \label{fig:evaluation:best_hyperparameters}
+\end{table}
 
 \ifcsdef{mainfile}{}{\printbibliography}
 \end{document}

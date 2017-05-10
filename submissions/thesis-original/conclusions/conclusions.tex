@@ -1,0 +1,39 @@
+\documentclass[../thesis/thesis.tex]{subfiles}
+\begin{document}
+ \chapter{Conclusions}
+ \label{chap:conclusions}
+
+Our project’s aim was to produce a VC investment screening system that is efficient, robust and powerful. Our system uses online data sources and machine learning to identify startups that are likely to receive additional funding or have a liquidity event (exit) in a given forecast window. While this is a challenging problem even for experienced VC investors, we achieved good classification results that we think has practical applications for VC firms.
+
+\section{Evaluation of Criteria}
+
+\subsection{Efficiency}
+
+
+\subsection{Robustness}
+
+
+\subsection{Predictive Power}
+
+
+\section{Future Research}
+
+\subsection{Network Analysis}
+
+
+\subsection{Temporal Analysis}
+
+
+\subsection{Semantic Text Analysis}
+
+
+\subsection{Systems Integration}
+
+We originally developed a collector that connected to CrunchBase’s API, providing real-time and comprehensive access to their database. Although we ultimately abandoned this approach because of the time constraints of this research project, it deserves further investigation. In terms of producing a system that is truly practical for VC firms to use day-to-day, continuous data integration is an important feature.  The dataset could be continuously updated and incrementally fed into the classification pipeline to a) ensure that the dataset is up-to-date and b) provide more granular temporal analysis of trends in the dataset.
+
+\section{Summary}
+
+In this work, a methodology is presented that produces a VC investment screening system that is efficient, robust and predictive. Existing approaches in the literature to predict startup performance have three common limitations: small sample size, a focus on very early-stage investment, and incomplete use of features. In addition, there is little evidence that previous research has translated into systems that assist investors directly. This project addressed these issues and contributed groundwork for future investigation by researchers and investors towards greater automation of the VC industry.
+
+ \ifcsdef{mainfile}{}{\bibliography{../references/primary}}
+\end{document}
