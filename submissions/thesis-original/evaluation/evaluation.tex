@@ -34,9 +34,14 @@ For these reasons, we decided to investigate the learning curves for our classif
 
 \subsection{Time Profile}
 
-We will also investigate the time profiling of the system to determine whether the system is practical for use in the \gls{vc} industry. %TODO - Write paragraph
+We also investigated the time profiling of the system to determine whether the system is practical for use in the \gls{vc} industry. %TODO - Write paragraph
 
-%Figure Time by training_observations - ???
+\begin{table}[!htb]
+    \centering
+    \scalebox{0.9}{\input{../tables/evaluation/time_profile}}
+    \caption[System time profile]{}
+    \label{fig:evaluation:time_profile}
+\end{table}
 
 \section{Robustness}
 
@@ -108,6 +113,8 @@ We also looked at how investment success varies with respect to development stag
 
 \subsection{Forecast Windows}
 
+%TODO
+
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/predictive_window}
@@ -130,6 +137,8 @@ We also looked at how investment success varies with respect to development stag
 \end{figure}
 
 \subsection{Development Stage}
+
+%TODO
 
 \begin{figure}[!htb]
     \centering
@@ -166,20 +175,37 @@ We also looked at how investment success varies with respect to development stag
     \label{fig:evaluation:feature_groups_stage}
 \end{figure}
 
-\begin{table}[!htb]
-    \centering
-    \scalebox{0.9}{\input{../tables/evaluation/example_predictions}} %TODO
-    \caption[Three example company profiles and their predictions]{}
-    \label{fig:evaluation:example_predictions}
-\end{table}
-
 \subsection{Target Outcomes}
 
-% F1 by metric - Investment Successs vs. Exit vs. Additional Funding
+%TODO
 
-% F1 - Exit by forecast window
+\begin{figure}[!htb] %WIP
+    \centering
+    \includegraphics[width=\textwidth]{../figures/evaluation/f1_predictive_outcome}
+    \caption[F1 Scores by target outcome]{}
+    \label{fig:evaluation:f1_predictive_outcome}
+\end{figure}
 
-% F1 - Exit by developmental stage
+\begin{table}[!htb] %WIP
+    \centering
+    \scalebox{0.9}{\input{../tables/evaluation/clf_report_outcome}}
+    \caption[Classification report by target outcome]{}
+    \label{fig:evaluation:clf_report_outcome}
+\end{table}
+
+\begin{figure}[!htb] %WIP
+    \centering
+    \includegraphics[width=\textwidth]{../figures/evaluation/feature_groups_outcome}
+    \caption[Grouped feature weights by target outcome]{}
+    \label{fig:evaluation:feature_groups_outcome}
+\end{figure}
+
+\begin{table}[!htb]
+    \centering
+    \scalebox{0.9}{\input{../tables/evaluation/example_predictions}}
+    \caption[Example company profiles and their predictions]{}
+    \label{fig:evaluation:example_predictions}
+\end{table}
 
  \ifcsdef{mainfile}{}{\printbibliography}
 \end{document}

@@ -10,7 +10,7 @@ n_jobs: 1
 verbosity: 1
 
 ##Forecast
-forecast_windows: [2, 3] # Evaluation - Predictive Power
+forecast_windows: [2, 3, 4] # Evaluation - Predictive Power
 
 ##Master Database
 master_path: "analysis/input/master.db"
@@ -133,7 +133,7 @@ evaluate_pipeline_flag: True
 ##Custom
 pipeline_criteria_evaluate: "PRC"
 model_criteria_evaluate: "F1"
-time_slices_evaluate: 2 # Evaluation - Robustness
+time_slices_evaluate: 3 # Evaluation - Robustness
 max_observations_evaluate: !!null #Evaluation - Efficiency
 load_prev_files_evaluate: True
 output_folder_evaluate: &output_evaluate !join [*output, "evaluate/"]
@@ -143,7 +143,7 @@ output_log_evaluate: !join [*output_evaluate, "log_results.pkl"]
 ##Specific
 no_extractor: True
 feature_stages: [!!null ] #["Pre-Seed", "Seed", "Series A", "Series B", "Series C", "Series D+"]
-label_types: ["Acquisition", "IPO", "Exit", "Extra_Round", "Extra_Stage"]
+label_types: ["Extra_Stage" ] #["Acquisition", "IPO", "Exit", "Extra_Round", "Extra_Stage"]
 test_path: "analysis/input/test.db"
 test_date: !!python/object/new:datetime.date [2017, 4, 4]
 test_feature_config: "analysis/config/master_feature.sql"

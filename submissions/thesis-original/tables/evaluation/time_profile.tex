@@ -1,0 +1,25 @@
+\newcommand{\sub}[1]{\hspace{1em}#1}
+
+\begin{tabular}{lrrrrr} \toprule
+Function & Cycle (s) & Cycles (N) & Time (s)   & Time (m) & Time (h) \\ \midrule
+Generate Dataset (CV)             & 1,800 & 1 & 1,800 & 30 & 0.5 \\
+\sub{Prepare Feature Dataset}     & 1,200 & 1 & 1,200 & 20 & 0.3 \\
+\sub{Prepare Outcome Dataset}     & 180 & 1 & 180 & 3 & 0.1 \\
+\sub{Merge Datasets}              & 360 & 1 & 360 & 6 & 0.1 \\
+\sub{Finalise Dataset}            & 60 & 1 & 60 & 1 & 0.0 \\
+Fit and Score Model\textsuperscript{1} & 265 & 525 & 139,125 & 2,319 & 38.6 \\
+\sub{Fit Model}                   & 15 & 525 & 7,875 & 131 & 2.2 \\
+\sub{Score Model}                 & 250 & 525 & 131,250 & 2,188 & 36.5 \\ \midrule
+\multicolumn{3}{l}{Subtotal: Create Pipelines} & 140,925 & 2,349 & 39.1 \\ \midrule
+Get Finalist Pipelines            & 5 & 1 & 5 & 0 & 0.0 \\
+Generate Dataset (CV)             & 1,800 & 5 & 1,800 & 30 & 0.5 \\
+Fit and Score Model\textsuperscript{2} & 265 & 75 & 19,875 & 331 & 5.5 \\
+Select Best Pipeline              & 5 & 1 & 5 & 0 & 0.0 \\ \midrule
+\multicolumn{3}{l}{Subtotal: Select Best Pipeline} & 21,685 & 361 & 6.0 \\ \midrule
+Generate Dataset (Training)       & 1,800 & 1 & 1,800 & 30 & 0.5 \\
+Fit Model                         & 30 & 1 & 30 & 1 & 0.0 \\
+Generate Dataset (Test)           & 1,800 & 1 & 1,800 & 30 & 0.5 \\
+Make Predictions                  & 5 & 1 & 5 & 0 & 0.0 \\ \midrule
+\multicolumn{3}{l}{Subtotal: Fit and Make Predictions} & 3,635 & 61 & 1.0 \\ \midrule
+\multicolumn{3}{l}{Total}        & 166,245 & 2,771 & 46.2 \\
+\bottomrule \end{tabular}

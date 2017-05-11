@@ -308,8 +308,8 @@ def scorer(estimator, X, y_true, model_scorer=None):
         precision, recall, prc_thresholds = metrics.precision_recall_curve(y_true, y_score[:,1])
         if model_scorer == "F1": scorer_type = metrics.make_scorer(metrics.f1_score)
         else: scorer_type = metrics.make_scorer(metrics.average_precision_score)
-        #train_sizes, train_scores, test_scores = learning_curve(estimator, X, y_true, cv= 3, scoring = scorer_type, train_sizes=np.linspace(0.1, 1.0, 10))
-        train_sizes, train_scores, test_scores = None, None, None
+        train_sizes, train_scores, test_scores = learning_curve(estimator, X, y_true, cv= 3, scoring = scorer_type, train_sizes=np.linspace(0.1, 1.0, 10))
+        #train_sizes, train_scores, test_scores = None, None, None
         clf = estimator.named_steps["clf"]
         weights = get_weights(clf)
         params = estimator.get_params()
