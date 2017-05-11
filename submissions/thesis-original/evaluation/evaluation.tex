@@ -6,9 +6,9 @@
 
 We believe it is possible to produce a VC investment screening system that is efficient, robust and powerful. In the previous chapter, we describe the development and structure of such a system. Our system is based around identifying startup companies that are likely to receive additional funding or a liquidity event (exit) in a given forecast window. This system can generate statistics and make recommendations that may assist VC firms to efficiently and effectively screen investment candidates. In this chapter, we evaluate models developed by our system against criteria of efficiency, robustness and predictive power. We discuss our findings more broadly and their implications for investors and future research into startup investment and performance.
 
-In the previous chapter, we produced a classification pipeline which we optimised with respect to the robustness of its performance over time. In this chapter, we evaluate the performance of models produced by this pipeline against a held-out test dataset. This evaluation process is depicted in \ref{fig:evaluation:pipeline_evaluation}. We use the pipeline to fit a model to a dataset sliced from the master database. We apply this model to another feature vector from the master database and make predictions. We score these predictions against truth values derived from the held-out test database (c. Apr-17). This process is performed multiple times to evaluate our three primary criteria derived from our literature review: efficiency, robustness and predictive power. In this chapter, we evaluate our system against that criteria.The experiments are as follows: efficiency, the pipeline is fitted to datasets of various sample sizes; robustness, the pipeline is fitted to datasets from various time slices; and predictive power, the forecast window between the feature vector and outcome is varied.
+In the previous chapter, we produced a classification pipeline which we optimised with respect to the robustness of its performance over time. In this chapter, we evaluate the performance of models produced by this pipeline against a held-out test dataset. This evaluation process is depicted in \ref{fig:evaluation:pipeline_evaluation}. We use the pipeline to fit a model to a dataset sliced from the master database. We apply this model to another feature vector from the master database and make predictions. We score these predictions against truth values derived from the held-out test database (collected in April 2017). This process is performed multiple times to evaluate the three primary criteria derived from our literature review: efficiency, robustness and predictive power. In this chapter, we evaluate our system against that criteria. The experiments are as follows: efficiency, the pipeline is fitted to datasets of various sample sizes; robustness, the pipeline is fitted to datasets from various time slices; and predictive power, the forecast window between the feature vector and outcome is varied.
 
-Firstly, we evaluate efficiency by exploring the learning curves of our classification techniques and whether there is sufficient data to produce reliable statistics. We also evaluate efficiency with respect to accuracy at different levels of feature abstraction (e.g. feature grouping based on our conceptual framework). Secondly, we evaluate robustness by evaluating our models against multiple reverse-engineered historical datasets and measuring their variance. Thirdly, we evaluate predictive power by testing different forecast windows outcomes and evaluating our models’ accuracy for startups at different stages of their development lifecycle.
+Firstly, we evaluate efficiency by exploring the learning curves of our classification techniques and whether there is sufficient data to produce reliable statistics. We also epxlore the time profile of our system and whether it is reasonable for use in industry, and would be likely to reduce the time currently taken to perform similar analyses. Secondly, we evaluate robustness by evaluating our models against multiple reverse-engineered historical datasets and measuring their variance. Thirdly, we evaluate the system's predictive power across different forecast windows,  for startups at different stages of their development lifecycle, and for different potential target outcomes.
 
 \begin{figure}[!htb]
     \centering
@@ -19,22 +19,22 @@ Firstly, we evaluate efficiency by exploring the learning curves of our classifi
 
 \section{Efficiency}
 
-A rationale for this research project is the need for more efficient forms of \gls{vc} investment analysis which leverage technology, particularly in surfacing and screening. By its nature, our automated system should be more efficient than current manual methods but it's also important to determine how to most efficiently use the data that we have. %TODO - Write paragraph
+The gls\{vc} industry requires more efficient forms of \gls{vc} investment analysis, particularly in surfacing and screening. These processes are currently performed through referral, Google search, industry papers and manual search of startup databases. By its nature, our automated system should be more efficient than these methods. In this section, we assess how efficient our system is -- in terms of data consumed and time taken -- and look at whether we can further improve its efficiency.
 
 \subsection{Dataset Size}
 
-For these reasons, we decided to investigate the learning curves for our classification pipeline to determine whether we could use smaller samples from our dataset to achieve similar predictive power and reduce our need for computational power and time taken. We used cross-validation to split our dataset 10 times and used subsets of the training set with varying sizes to train the estimator and produce training and test scores for each subset size. The convergence or divergence of our training and cross-validation curves will imply whether our classification pipeline is over- or under-fitting our data for various sizes allowing us to select an optimal sample size. %TODO - Write paragraph
+Learning curves show how the bias and variance of a classification technique varies with respect to the amount of training data available. We decided to investigate the learning curves for our classification pipeline to determine whether we could use smaller samples from our dataset to achieve similar predictive power and reduce our need for computational power and time taken. We applied 10-fold stratified cross-validation to split our dataset into 10 subsets of different sizes which we used to train the estimator and produce training and test scores for each subset size. The convergence or divergence of our training and cross-validation curves will imply whether our classification pipeline is over- or under-fitting our data for various sizes allowing us to select an optimal sample size. Figure~\ref{fig:evaluation:efficiency_learning_curve} shows the learning curves for forecast windows of 2-4 years, aggregated over multiple time slices. The maximum number of training examples is negatively related to the length of the forecast window because newer datasets have more examples. Visually, all three sub-figures are similar in nature. %TODO
 
-\begin{figure}[!htb]
+\begin{figure}[!htb] %FUCKED UP - SHOULD CV ON FIT, NOT ON SCORE
     \centering
-    \includegraphics[width=\textwidth]{../figures/evaluation/efficiency_learning_curve} %TODO - Fix for different curves
+    \includegraphics[width=\textwidth]{../figures/evaluation/efficiency_learning_curve}
     \caption[Learning curve]{}
     \label{fig:evaluation:efficiency_learning_curve}
 \end{figure}
 
 \subsection{Time Profile}
 
-We also investigated the time profiling of the system to determine whether the system is practical for use in the \gls{vc} industry. %TODO - Write paragraph
+Unlike other forms of finance, like equity or derivatives trading, \gls{vc} operates on a much longer timeframe -- deals typically close over weeks, rather than minutes. This has two key disadvantages: \gls{vc} firms have higher management costs because they spend more time screening investments and startup founders waste precious time negotiating with investors when they could be building their businesses. Automated systems could significantly decrease the time taken to generate investment opportunities. We investigated the time profile of our system to determine whether it is practical for use in the \gls{vc} industry. The time profile of the system is shown in Figure~\ref{fig:evaulation:time_profile}. At the highest-level, the program takes approximately 46 hours to complete on a modern desktop PC. When we further break this time down by system component, it's clear that the vast majority of time (84.8\%) is taken up by the initial pipeline creation component. This time is due to the pipeline optimisation process - the model is fit and scored over 500 times on different classification algorithms and parameters. Scoring takes a particularly long time because, in this case, it also involves generating learning curves for reporting, which is another cross-validated process. However, when placed into production, this component could be run infrequently - perhaps once per year - to ensure that the pipelines being used are still optimally suited for the dataset. The next component of the system, selecting the most robust pipeline, could occur more frequently - perhaps once every month - and the final component of the pipeline, making up-to-date predictions, could be evaluated every time new data is fed into the system (perhaps once per day) because it only takes an hour.
 
 \begin{table}[!htb]
     \centering
@@ -45,66 +45,69 @@ We also investigated the time profiling of the system to determine whether the s
 
 \section{Robustness}
 
-It is critical that our system be robust with respect to time so investors can rely on its predictions based on historical models. CrunchBase provides created and last-updated timestamps for each record in their CSV-formatted dumps (and also in the JSON-formatted responses from their API). We took advantage of this to produce a system that reverse-engineers previous database states by filtering the current database by only records that were created by a given 'slice' date.
+It is critical that our system is robust in its performance with respect to time so investors can rely on its predictions based on historical models. This has been identified as a key barrier to the adoption of automated systems by the \gls{vc} industry \cite{stone2014}. CrunchBase provides created and last-updated timestamps for each record in their CSV-formatted dumps (and also in the JSON-formatted responses from their API). We took advantage of this to produce a system that reverse-engineers previous database states by filtering the current database by only records that were created by a given 'slice' date.
 
-We performed preliminary testing of this technique by comparing a historical CrunchBase database collected in December 2013 with a slice from our primary dataset collected in September 2016, as shown in Table~\ref{fig:evaluation:2013_slice_comparison}. While there are some differences in the records, particularly in the IPO relation, we consider this to be satisfactory variance considering the 3-year time period. The key relations for our purposes are Companies, Funding Rounds and People, all of which had minor differences considering the size of these datasets. Table~\ref{fig:evaluation:slice_counts_over_time} shows company counts by startup development stage from different dataset slices. We limited our experiments to dataset slices from 2012-onwards because prior to 2012 the datasets become too small to use to make predictions (particularly given the class imbalance).
+\subsection{Preliminary Analysis}
+
+We performed preliminary testing of this technique by comparing a historical CrunchBase database collected in December 2013 with a slice from our primary dataset collected in September 2016, as shown in Table~\ref{fig:evaluation:2013_slice_comparison}. While there are some differences, particularly in the IPO counts, we consider this to be satisfactory variance considering the 3-year time difference (i.e. perhaps some companies have been since removed from the database). The key relations for the purposes of our system are Companies, Funding Rounds and People, all of which had minor differences considering the size of these datasets. Table~\ref{fig:evaluation:slice_counts_over_time} shows company counts by startup development stage from different dataset slices. We limited our experiments to dataset slices from 2012-onwards because prior to 2012 the datasets become too small to use to make predictions (particularly given the class imbalance).
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/2013_slice_comparison}
-    \caption[Dataset slice compared with original dataset]{}
+    \caption[Dataset slice compared with original dataset]{} %Needs caption
     \label{fig:evaluation:2013_slice_comparison}
 \end{figure}
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/slice_counts_over_time}
-    \caption[Dataset counts over time]{}
+    \caption[Dataset counts over time]{} %Needs caption
     \label{fig:evaluation:slice_counts_over_time}
 \end{figure}
 
-%TODO
+\subsection{Dataset Slices}
 
-\begin{figure}[!htb]
+We fit our model to three datasets created from our training database from each year of 2012-2014 (i.e. features|outcome: 2012|2014, 2013|2015, 2014|2016), and evaluated the model for forecast windows of 2 years, against a dataset created from our test database (i.e. 2015|2017). We expect that if the factors that predict startup investment success through time are consistent, we would observe little difference between the performance and characteristics of these models. Figure~\ref{fig:evaluation:pr_curve_slice} shows the characteristics of the Precision-Recall curves for each model. There is very little difference in the characteristics of each curve. We observe slightly higher precision for low recall values for the 2014 dataset, <WHY?>. Overall, the area under each curve is within the margin of error. Figure~\ref{fig:evaluation:clf_report_slice} shows the classification report for each model. The F1-Scores (Positive Class) are identical across the models, at 0.32. Finally, we explore the feature weights for each model in Figure~\ref{fig:evaluation:feature_groups_slice}. While there are some slight differences, the general trend is very similar across all models. All of these results suggest that our system generates models that are robust with respect to time.
+
+\begin{figure}[!htb] %Labels might be reversed, figure too big
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/pr_curve_slice}
-    \caption[PR Curves by slice date]{}
+    \caption[PR Curves by slice date]{} %Needs caption
     \label{fig:evaluation:pr_curve_slice}
 \end{figure}
 
 \begin{table}[!htb]
     \centering
     \scalebox{0.9}{\input{../tables/evaluation/clf_report_slice}}
-    \caption[Classification report by slice date]{}
+    \caption[Classification report by slice date]{} %Needs caption
     \label{fig:evaluation:clf_report_slice}
 \end{table}
-
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/feature_groups_slice}
-    \caption[Grouped feature weights by slice date]{}
+    \caption[Grouped feature weights by slice date]{} %Needs caption
     \label{fig:evaluation:feature_groups_slice}
 \end{figure}
 
 \section{Predictive Power}
 
-Finally, we test our system's predictive power for making forecasts of different time periods. We use the same system of reverse-engineering time slices that we used in our previous experiment to robustness, but this time we vary the time difference between the slice that provides our features and the slice that provides our label.
 
 \subsection{Preliminary Analysis}
 
+Finally, we test our system's predictive power for making forecasts of different time periods. We use the same system of reverse-engineering time slices that we used in our previous experiment to robustness, but this time we vary the time difference between the slice that provides our features and the slice that provides our outcome.
 We performed preliminary testing by combining pair-wise datasets of each year from 2012-2016 inclusive and exploring the proportion of companies that raised additional funding or exited (for brevity, we will call this ``investment success''. Figure~\ref{fig:evaluation:outcome_forecast_window} shows how investment success varies with respect to the forecast window (time between the observed features and the measured outcome). Intuitively, we see a positive relationship between length of forecast window and investment success. In particular, very few companies appear to have investment success over a period of less than 2 years so we will focus our experimentation on forecast windows of 2--4 years.
 
-\begin{figure}[!htb]
+\begin{figure}[!htb] %Split by target outcome
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/outcome_forecast_window}
-    \caption[Investment success by forecast window]{}
+    \caption[Investment success by forecast window]{} 
     \label{fig:evaluation:outcome_forecast_window}
 \end{figure}
 
 We also looked at how investment success varies with respect to development stage, shown in Figure~\ref{fig:evaluation:outcome_stage}. We see a broad positive relationship between developmental stage and likelihood of investment success, which we would expect as at each stage there is higher market traction and scrutiny from investors. One exception is for companies at Series D+ stage, but this may reflect that these companies are aiming for an exit which likely takes longer than seeking additional funding rounds and so is less well shown in our dataset (which caps out at a forecast window of 4 years). The variance between the different developmental stages suggests that in our experimentation we should investigate how our system predicts each stage independently, as well as in aggregate.
 
-\begin{figure}[!htb]
+\begin{figure}[!htb]  %Split by target outcome
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/outcome_stage}
     \caption[Investment success by developmental stage]{}
