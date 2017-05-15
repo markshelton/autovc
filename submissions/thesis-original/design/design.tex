@@ -4,12 +4,12 @@
 \chapter{Design}
 \label{chap:design}
 
-In this chapter, we explain the methodology used to fill the research gap identified in Chapter~\ref{chap:litreview}, thereby producing a system that identifies high-potential startup companies that are likely to receive additional funding or a exit in a given forecast window. Figure~\ref{fig:design:system_architecture} depicts the overall system architecture, which will be described in the following chapter. We will evaluate the perform of this system in the next chapter, Chapter~\ref{chap:evaluation}.
+In this chapter, we explain the methodology used to fill the research gap identified in Chapter~\ref{chap:litreview}, thereby producing a system that identifies high-potential startup companies that are likely to receive additional funding or a exit in a given forecast window. Figure~\ref{fig:design:system_architecture} depicts the overall system architecture, which is described in the following chapter. We evaluate the performance of this system in the next chapter, Chapter~\ref{chap:evaluation}.
 
-\begin{figure}[!htb]
+\begin{figure}[!htb] %Requires legend
     \centering
-    \includegraphics[width=\textwidth]{../figures/design/system_architecture}
-    \caption[System architecture flowchart]{An overview of the system architecture proposed by this project, structured in three stages: data collection, pipeline creation, and pipeline selection. Green callouts: iterative processes / search spaces. Orange circles: linear systems. Blue squares: data structures / data stores.}
+    \includegraphics[width=\textwidth]{../figures/design/flowchart_overview}
+    \caption[System architecture flowchart]{An overview of the system architecture proposed by this project, structured in four stages: data collection, pipeline creation, pipeline selection and prediction.}
     \label{fig:design:system_architecture}
 \end{figure}
 
@@ -19,7 +19,9 @@ In this chapter, we explain the methodology used to fill the research gap identi
 
 \item Pipeline Creation. We developed a processing pipeline framework that seeks to address the dataset issues identified during data collection. Our pipeline is based on the popular Python machine learning library Scikit-learn \cite{pedregosa2011}. Pre-processing steps include imputation, transformation, scaling and feature extraction. Each pre-processing step has hyperparameters that can be tuned (e.g. imputation strategy, number of components to extract) that affect the pipeline's classification performance. We also tested a number of common classification algorithms and their hyperparameters, selected from our literature review in Chapter~\ref{chap:litreview}. We performed a search across the pipeline's hyperparameters to generate candidate pipelines. The hyperparameters that we found to have the most significant effect on the final performance of the pipelines were related to the classification algorithms.
 
-\item Pipeline Selection. In the previous step, we generated a cross-section of candidate pipelines with different hyperparameters. In this step, we use Area under the \gls{pr} curve to rank these candidate pipelines and test the best pipelines (finalist pipelines) over a number of different dataset slices. This process ensures we select pipelines that are robust with respect to time. We aggregate the results for each finalist pipeline across these dataset slices and rank the finalist pipelines on their overall performance, so we can select the best pipeline for further evaluation. We don't observe significant variance in the pipelines on aggregate against the dataset slices, but there is variance within the individual pipelines. Our results suggest that it is optimal to evaluate the top 3-5 candidate pipelines in this manner.
+\item Pipeline Selection. Our system evaluates and ranks the candidate pipelines and tests the best pipelines (finalist pipelines) over pseudo-historical datasets. This process ensures we select pipelines that are robust with respect to time. We prepared the dataset slices using a technique that filters records by their timestamps, effectively recreating historical datasets. We use Area under \gls{pr} Curve as our evaluation metric. We aggregate the results for each finalist pipeline across these dataset slices and rank the finalist pipelines on their overall performance, so we can select the best pipeline for further evaluation. We don't observe significant variance in the pipelines on aggregate against the dataset slices, but there is variance within the individual pipelines. Our results suggest that it is optimal to evaluate the top 3-5 candidate pipelines in this manner.
+
+\item Model Fit and Prediction. Finally, our system applies the best pipeline to a training dataset to produce a fitted model. The model is then applied to a feature vector from a held-out test database, which generates a set of predictions which could, in practice, then be used by \gls{vc} firms. We evaluate the accuracy of the models produced by our system with respect to a number of variables in the next chapter, Chapter~\ref{chap:evaluation}.
 
 \end{enumerate}
 
@@ -27,13 +29,12 @@ In this chapter, we explain the methodology used to fill the research gap identi
 
 In the previous chapter, we reviewed the literature concerning data sources for entrepreneurship and \gls{vc} investment. We concluded the most promising primary data sources for this project are CrunchBase and AngelList, for their size, comprehensiveness and ease of access. We suggested PatentsView (the online database of the US Patent Office) could be a useful secondary data source for structural capital features. In the following sections, we first discuss how we collected data from CrunchBase and PatentsView, converted the relational databases into a format suitable for machine learning, performed preliminary screening to ensure we only included relevant companies. This process is depicted in Figure~\ref{fig:design:data_collection}. Following our description of this process we describe the results of exploratory analysis on our dataset and identify dataset issues which will be addressed in later steps.
 
-\begin{figure}[!htb]
+\begin{figure}[!htb] %Requires legend
     \centering
-    \includegraphics[width=\textwidth]{../figures/design/data_collection}
+    \includegraphics[width=\textwidth]{../figures/design/flowchart_data_collection}
     \caption[Data collection flowchart]{Data collection overview.}
     \label{fig:design:data_collection}
 \end{figure}
-
 
 \subsection{Data Collection}
 
@@ -53,19 +54,19 @@ We performed preliminary screening on the primary dataset (N = 425,934) to ensur
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=\textwidth]{../figures/design/lifecycle}
-    \caption[Startup development lifecyle]{Idealised startup development lifecycle (adapted, \cite{}) with company counts from the master dataset (c. September 2016). Red line represents profitability over time. The chart is divided into three periods: an early period of unprofitability (``Valley of Death'') where seed capital supports the business, a period of growth sustained by rounds of venture capital, and a transition to stability and mature capital markets.}
+    \includegraphics[width=\textwidth]{../figures/design/descriptives_counts_stage}
+    \caption[Startup development lifecyle]{Idealised startup development lifecycle with company counts from the master dataset (c. September 2016).}
     \label{fig:design:lifecycle}
 \end{figure}
 
 After attempting to place the companies into development stages we are left with a large group of companies (the majority of the dataset) that have not raised funding and so can not be classified on that basis. We assume that companies that have not raised funding fall into two groups - those that intend to raise funding but have not had time to yet, and those that have chosen not to pursue funding and are unlikely to do so. We separated these groups by applying a cutoff equal to the 90th percentile of the age of companies in the Seed category, and excluded the older group from further analyses (N = 227,162,  53.3\%). As we are only interested in companies that could theoretically seek investment, we also excluded Closed, Acquired and IPO groups from further analyses (N = 35,973, 8.4\%).
 
-Figure\ref{fig:design:stages_ages} depicts the ages of companies in the master dataset, grouped by developmental stage.  As we expected, there is a strong relationship between company stage and company age. Most pre-Series A companies are under five years old, and the majority of Series D+ funded companies are under 10 years old and the 75th percentile is at 15 years old. On this basis, we excluded companies that are over the 75th percentile of the age of companies in the Series D+ category (N =9,756, 2.2\%). Overall, our preliminary screening steps reduced the dataset from 425,934 companies to 153,043 companies, a reduction of 64.1\%.
+Figure\ref{fig:design:stages_ages} depicts the ages of companies in the master dataset, grouped by developmental stage. While there is significant variability in age for each developmental stage, there is a broad positive relationship between age and developmental stage. Most pre-Series A companies are under five years old, and the majority of Series D+ funded companies are under 10 years old and the 75th percentile is at 15 years old. On this basis, we excluded companies that are over the 75th percentile of the age of companies in the Series D+ category (N =9,756, 2.2\%). Overall, our preliminary screening steps reduced the dataset from 425,934 companies to 153,043 companies, a reduction of 64.1\%.
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=\textwidth]{../figures/design/stages_ages}
-    \caption[Company age distribution]{Company ages in years grouped by developmental stage. While there is significant variability in age for each developmental stage, there is a broad positive relationship between age and developmental stage. The dashed blue line represents the 75th percentile of the age of companies in the Series D+ category (15.7 years).}
+    \includegraphics[width=\textwidth]{../figures/design/descriptives_ages_stage}
+    \caption[Company age distribution]{Company ages in years grouped by developmental stage. The dashed red line represents the 75th percentile of the age of companies in the Series D+ category (15.7 years).}
     \label{fig:design:stages_ages}
 \end{figure}
 
@@ -73,20 +74,20 @@ Figure\ref{fig:design:stages_ages} depicts the ages of companies in the master d
 
 \subsubsection{Descriptive Statistics}
 
-Table~\ref{fig:design:descriptive_statistics} presents the descriptive statistics for the dataset. The dataset is heavily skewed towards New companies (i.e. companies that were recently founded and have not raised any type of funding yet, 68.9\%). These companies have very few available features in comparison to companies at later developmental stages. We will investigate the impact of this sparsity on our predictions in Chapter~\ref{chap:evaluation}. We are presented with a fairly heterogenous dataset, the interquartile ranges imply significant variability in all measures. We do not believe that this implies that the data has not been cleaned effectively, but rather, reflects that startup companies naturally vary significantly in their traits.
+Table~\ref{tab:design:descriptive_statistics} presents the descriptive statistics for the dataset. The dataset is heavily skewed towards New companies (i.e. companies that were recently founded and have not raised any type of funding yet, 68.9\%). These companies have very few available features in comparison to companies at later developmental stages. We will investigate the impact of this sparsity on our predictions in Chapter~\ref{chap:evaluation}. We are presented with a fairly heterogenous dataset, the interquartile ranges imply significant variability in all measures. We do not believe that this implies that the data has not been cleaned effectively, but rather, reflects that startup companies naturally vary significantly in their traits.
 
 \begin{table}[!htb]
     \centering
-    \scalebox{0.9}{\input{../tables/design/descriptive_statistics}}
+    \scalebox{0.9}{\input{../tables/design/descriptives_overall_stage}}
     \caption[Descriptive statistics]{Descriptive statistics grouped by developmental stage. Source: Master dataset (c. Sep-16).}
-    \label{fig:design:descriptive_statistics}
+    \label{tab:design:descriptive_statistics}
 \end{table}
 
 CrunchBase's approach to industry classification is simplistic compared to other classification schemes (e.g., USSIC, NAICS, VentureSource) which generally have an industry hierarchy with tiers for broad industry sectors and sub-sectors providing further granularity. As a result, CrunchBase class labels include over represented and vague classes (e.g., ``Software'', ``Internet Services'') which could describe the majority of companies included in the database. In fact, ``Software'' and ``Internet Services'' account for 16.4\% and 13.4\% of all companies in the dataset respectively (see Figure~\ref{fig:design:industry_counts}). Despite these vague class labels, it is clear the dataset skews towards high technology startups, as opposed to biomedical, agricultural, or other technologies.
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=\textwidth]{../figures/design/industry_counts}
+    \includegraphics[width=\textwidth]{../figures/design/descriptives_counts_industry}
     \caption[Companies by industry sector]{Companies grouped by industry sector. The 10 most common sectors are displayed. Source: Master dataset (c. September 2016).}
     \label{fig:design:industry_counts}
 \end{figure}
@@ -119,12 +120,12 @@ Next, we explored the distributions of features. Figure~\ref{fig:design:normalit
     \centering
     \begin{subfigure}{\textwidth}
         \includegraphics[width=\textwidth]{../figures/design/skew}
-        \caption{Distribution of skew by feature}
+        \caption[Distribution of skew by feature]{}
         \label{fig:design:normality:skew}
     \end{subfigure}
     \begin{subfigure}{\textwidth}
         \includegraphics[width=\textwidth]{../figures/design/kurtosis}
-        \caption{Distribution of kurtosis by feature}
+        \caption[Distribution of kurtosis by feature]{}
         \label{fig:design:normality:kurtosis}
     \end{subfigure}
     \caption[Dataset normality]{Distribution of features in master dataset (c. September 2016).}
@@ -138,7 +139,7 @@ Next, we explored the scaling and range of each of our features. Figure~\ref{fig
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/scaling}
-    \caption[Dataset feature scaling]{Distribution of interquartile ranges (transformed by log1p) in master dataset (c. September 2016).}
+    \caption[Distribution of interquartile ranges]{Distribution of interquartile ranges (transformed by log1p) in master dataset (c. September 2016).}
     \label{fig:design:scaling}
 \end{figure}
 
@@ -149,7 +150,7 @@ Finally, we explored the orthogonality of our features: the extent to which the 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/orthogonality}
-    \caption[Dataset orthogonality]{Distribution of intercorrelations in master dataset (c. September 2016).}
+    \caption[Distribution of intercorrelations]{Distribution of intercorrelations in master dataset (c. September 2016).}
     \label{fig:design:orthogonality}
 \end{figure}
 
@@ -159,7 +160,7 @@ We developed a classification pipeline using the popular Python-based machine le
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=\textwidth]{../figures/design/pipeline_creation}
+    \includegraphics[width=\textwidth]{../figures/design/flowchart_pipeline_creation}
     \caption[Pipeline creation flowchart]{Pipeline creation overview.}
     \label{fig:design:pipeline_creation}
 \end{figure}
@@ -171,7 +172,7 @@ After reviewing the distribution of missing data, we decided to perform further 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/central_tendency}
-    \caption[Imputation replacement values]{Distribution of measures of central tendency (mean, median and mode) in master dataset (c. September 2016).}
+    \caption[Distribution of central tendency]{Distribution of measures of central tendency (mean, median and mode) in master dataset (c. September 2016).}
     \label{fig:design:central_tendency}
 \end{figure}
 
@@ -260,50 +261,87 @@ We take a closer look at the \gls{pr} curves for each classifier in Figure~\ref{
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=\textwidth]{../figures/design/create_learning_curves}
+    \includegraphics[width=\textwidth]{../figures/design/learning_curves_classifier}
     \caption[Learning curves by classification algorithms]{Learning curves.}
     \label{fig:design:create_learning_curves}
 \end{figure}
 
 \section{Pipeline Selection}
 
-In the previous chapter, we developed a system that generated a cross-section of candidate pipelines with different hyperparameters. In this step, we terank these candidate pipelines and evaluate the best pipelines (finalist pipelines) over a number of different dataset slices. This process, depicted in Figure~\ref{fig:evaluation:pipeline_selection}, ensures that our final pipeline is robust in their performance with respect to time. We aggregate the results for each finalist pipeline across these dataset slices and rank the finalist pipelines on their overall performance. Finally, we select the best pipeline.
+In the previous chapter, we developed a system that generated a cross-section of candidate pipelines with different hyperparameters. In this step, we terank these candidate pipelines and evaluate the best pipelines (finalist pipelines) over a number of different dataset slices. This process, depicted in Figure~\ref{fig:design:pipeline_selection}, ensures that our final pipeline is robust in their performance with respect to time. We aggregate the results for each finalist pipeline across these dataset slices and rank the finalist pipelines on their overall performance. Finally, we select the best pipeline.
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=\textwidth]{../figures/evaluation/pipeline_selection}
+    \includegraphics[width=\textwidth]{../figures/design/flowchart_pipeline_selection}
     \caption[Pipeline selection flowchart]{Pipeline selection overview.}
-    \label{fig:evaluation:pipeline_selection}
+    \label{fig:design:pipeline_selection}
 \end{figure}
 
-First, we need to decide how to narrow our candidate pipelines down to finalist pipelines that we can evaluate further. There are a number of different metrics used to evaluate binary classifiers in machine learning. The most simplistic metric is accuracy but this is rarely used in practice because it gives misleading results in the case of imbalanced classes. \Gls{roc} curves are perhaps the mostly commonly used evaluation tool in binary classification, and show how the number of correctly classified positive examples varies with the number of incorrectly classified negative examples. The area under these curves gives a standardised result across a spectrum of decision thresholds. \Gls{pr} curves are similar to \gls{roc} curves but instead map the trade-offs between precision and recall. They are less commonly used than \gls{roc} curves but have been shown to give a more informative picture of an algorithm’s performance under imbalanced classes than \gls{roc} curves \cite{Jesse Davis 2006}. Given our dataset is highly imbalanced (the positive class is approximately 10\%) we decided to proceed with \gls{pr} curves. We will also use this metric to determine which is ultimately the best of our finalist pipelines.
+\subsection{Dataset Slicing}
 
-Our hypothesis is that the performance of our classification pipelines may vary with respect to the date that the dataset was collected (in this case, sliced). To study this hypothesis, first we explored variance between the pipelines on aggregate against the slice dates, presented in Figure~\ref{fig:evaluation:selection_agg_slice}. We see little variance on this basis, and we don't observe a relationship between slice date and score.
+We developed a procedure for generating historical datasets from our CrunchBase and PatentsView data. CrunchBase provides created and last-updated timestamps for each record in their CSV-formatted dumps (and also in the JSON-formatted responses from their API). We took advantage of this to produce a system that reverse-engineers previous database states by filtering the current database by only records that were created by a given 'slice' date.
+
+We performed preliminary testing of our reverse-engineering technique by comparing a historical CrunchBase database collected in December 2013 with a slice from our primary dataset collected in September 2016, as shown in Figure~\ref{fig:design:2013_slice_comparison}. While there are some differences, particularly in the IPO counts, we consider this to be satisfactory variance considering the 3-year time difference (i.e. perhaps some companies have been since removed from the database). The key relations for the purposes of our system are Companies, Funding Rounds and People, all of which had minor differences considering the size of these datasets.
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=\textwidth]{../figures/evaluation/selection_agg_slice}
+    \includegraphics[width=\textwidth]{../figures/design/2013_slice_comparison}
+    \caption[Dataset slice compared with original dataset]{}
+    \label{fig:design:2013_slice_comparison}
+\end{figure}
+
+Figure~\ref{fig:design:slice_counts_over_time} shows company counts by startup development stage from different dataset slices. We limited our experiments to dataset slices from 2012-onwards because prior to 2012 the datasets become too small to use to make predictions (particularly given the class imbalance).
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/design/slice_counts_over_time}
+    \caption[Dataset counts over time]{}
+    \label{fig:design:slice_counts_over_time}
+\end{figure}
+
+\subsection{Evaluation Metrics}
+
+Next, we decided how to narrow our candidate pipelines down to finalist pipelines that we can evaluate further. There are a number of different metrics used to evaluate binary classifiers in machine learning. The most simplistic metric is accuracy but this is rarely used in practice because it gives misleading results in the case of imbalanced classes. \Gls{roc} curves are perhaps the mostly commonly used evaluation tool in binary classification, and show how the number of correctly classified positive examples varies with the number of incorrectly classified negative examples. The area under these curves gives a standardised result across a spectrum of decision thresholds. \Gls{pr} curves are similar to \gls{roc} curves but instead map the trade-offs between precision and recall. They are less commonly used than \gls{roc} curves but have been shown to produce more accruate results for imbalanced classes than \gls{roc} curves \cite{davis2006}. Given our dataset is highly imbalanced (the positive class is approximately 10\%) we decided to proceed with \gls{pr} curves. We will also use this metric to determine which is ultimately the best of our finalist pipelines.
+
+\subsection{Finalist Pipeline Evaluation}
+
+Our hypothesis is that the performance of our classification pipelines may vary with respect to the date that the dataset was collected (in this case, sliced). To study this hypothesis, first we explored variance between the pipelines on aggregate against the slice dates, presented in Figure~\ref{fig:design:selection_agg_slice}. We see little variance on this basis, and we don't observe a relationship between slice date and score.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/design/selection_agg_slice}
     \caption[Pipeline performance by slice date]{}
-    \label{fig:evaluation:selection_agg_slice}
+    \label{fig:design:selection_agg_slice}
 \end{figure}
 
-Next, we study the variance within the individual pipelines, presented in Figure~\ref{fig:evaluation:selection_agg_rank}. Here, we can see there is significantly more variance in the scores. Although there is still a strong positive correlation between the pipelines initial ranking and their scores, we can see that there are some individual deviations. Importantly, the top-ranked pipeline from the first stage actually has a lower median score than the second-ranked pipeline. These results suggest that the top 3-5 pipelines should be evaluated in this manner to ensure that the best pipeline is selected.
+Next, we study the variance within the individual pipelines, presented in Figure~\ref{fig:design:selection_agg_rank}. Here, we can see there is significantly more variance in the scores. Although there is still a strong positive correlation between the pipelines initial ranking and their scores, we can see that there are some individual deviations. Importantly, the top-ranked pipeline from the first stage actually has a lower median score than the second-ranked pipeline. These results suggest that the top 3-5 pipelines should be evaluated in this manner to ensure that the best pipeline is selected.
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=\textwidth]{../figures/evaluation/selection_agg_rank}
+    \includegraphics[width=\textwidth]{../figures/design/selection_agg_rank}
     \caption[Overview of finalist pipeline performance]{}
-    \label{fig:evaluation:selection_agg_rank}
+    \label{fig:design:selection_agg_rank}
 \end{figure}
 
-The best candidate pipeline is depicted in Table~\ref{fig:evaluation:best_hyperparameters}. We adopted this pipeline configuration for our following experiments.
+The best candidate pipeline is depicted in Table~\ref{fig:design:best_hyperparameters}. We adopted this pipeline configuration for our following experiments.
 
 \begin{table}[!htb]
     \centering
-    \scalebox{0.8}{\input{../tables/evaluation/best_hyperparameters}}
+    \scalebox{0.8}{\input{../tables/design/best_hyperparameters}}
     \caption[Hyperparameters of best pipeline]{}
-    \label{fig:evaluation:best_hyperparameters}
+    \label{fig:design:best_hyperparameters}
 \end{table}
+
+\section{Model Fit and Prediction}
+
+Finally, we use our optimised pipeline to produce a model and make predictions, as shown in Figure~\ref{fig:design:make_predictions}. Our system applies the best pipeline that was generated in the previous section to a training dataset, producing a fitted model. The model is then applied to a feature vector from a held-out test database, which generates a set of predictions which could, in practice, then be used by \gls{vc} firms. We evaluate the accuracy of the models produced by our system with respect to a number of variables in the next chapter, Chapter~\ref{chap:evaluation}.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/design/flowchart_make_predictions}
+    \caption[Model fit and prediction flowchart]{Model fit and prediction overview.}
+    \label{fig:design:make_predictions}
+\end{figure}
 
 \ifcsdef{mainfile}{}{\printbibliography}
 \end{document}

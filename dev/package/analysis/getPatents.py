@@ -109,12 +109,13 @@ def go_patents():
         pd.to_pickle(names, pickle_names_path)
     try:
         with sqlite3.connect(output_path) as conn:
-            patents = pd.read_sql("SELECT * FROM patents;", conn, index_col="assignee_uuid")
-    except: patents = pd.DataFrame()
-    new_patents = patents.copy()
+            patents = pd.read_sql("SELECT * FROM patents;", conn, index_col="assignee_uuid").index
+    except: patents = pd.DataFrame().index
+    names = names.drop(patents, errors="ignore")
+    new_patents = pd.DataFrame()
     for i, (uuid, std_name) in enumerate(names["std_name"].iteritems()):
         print("Request:", i, std_name)
-        if uuid not in patents.index.tolist():
+        if uuid not in patents.tolist():
             temp = get_patents(uuid, std_name)
             if temp.empty: names = names.drop(uuid)
             new_patents = pd.concat([new_patents, temp],axis=0)
@@ -124,7 +125,7 @@ def go_patents():
             pd.to_pickle(names, pickle_names_path)
             store_patents(new_patents, output_path)
             with sqlite3.connect(output_path) as conn:
-                patents = pd.read_sql("SELECT * FROM patents;", conn, index_col="assignee_uuid")
+                patents = pd.read_sql("SELECT * FROM patents;", conn, index_col="assignee_uuid").index
             new_patents = pd.DataFrame()
 
 def main():

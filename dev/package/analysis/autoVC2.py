@@ -206,9 +206,10 @@ def make_label(df, label_type = "Extra_Stage"):
         y = df["outcome_extra_stage_bool"]
     else: raise ValueError('Unknown label type given.')
     y = y.replace(np.nan, 0)
-    print("Feature:", df["keys_company_stage_number"].value_counts())
-    print("Outcome:", df["outcome_stage_number"].value_counts())
-    print("Label:", y.value_counts())
+    #print("Feature:", df["keys_company_stage_number"].value_counts())
+    #print("Outcome:", df["outcome_stage_number"].value_counts())
+    #print("Label:", y.value_counts())
+    y = y.rename(label_type)
     return y
 
 @logged
@@ -221,12 +222,9 @@ def filter_features(df):
     return X
 
 @logged
-def finalise_dataset(df, feature_stage = None, label_type=None):
-    df = add_stages(df, features_stage_info, "feature")
-    df = add_stages(df, label_stage_info, "label")
-    df = apply_constraints(df)
-    if feature_stage:
-        df = df.loc[df["keys_company_stage"] == feature_stage]
+def finalise_dataset(df, feature_stage = None, label_type=None, dataset_frac =None):
+    if dataset_frac: df = df.sample(frac=dataset_frac)
+    if feature_stage: df = df.loc[df["keys_company_stage"] == feature_stage]
     y = make_label(df, label_type=label_type)
     keys = df[[col for col in list(df) if col.startswith(("key", "outcome"))]]
     X = filter_features(df)
@@ -270,8 +268,10 @@ def generate_dataset(feature_date, label_date, feature_input_path, label_input_p
     merge_path = merge_datasets(feature_date, label_date, output_folder,
         feature_clean_path, label_clean_path, merge_config, load_prev_files)
     df = dp.export_dataframe(merge_path, "merge")
-    X, y, keys = finalise_dataset(df, feature_stage=feature_stage, label_type=label_type)
-    return X, y, keys
+    df = add_stages(df, features_stage_info, "feature")
+    df = add_stages(df, label_stage_info, "label")
+    df = apply_constraints(df)
+    return df
 
 @logged
 def create_params(algorithm, pp_params, clf_params):
@@ -308,8 +308,8 @@ def scorer(estimator, X, y_true, model_scorer=None):
         precision, recall, prc_thresholds = metrics.precision_recall_curve(y_true, y_score[:,1])
         if model_scorer == "F1": scorer_type = metrics.make_scorer(metrics.f1_score)
         else: scorer_type = metrics.make_scorer(metrics.average_precision_score)
-        train_sizes, train_scores, test_scores = learning_curve(estimator, X, y_true, cv= 3, scoring = scorer_type, train_sizes=np.linspace(0.1, 1.0, 10))
-        #train_sizes, train_scores, test_scores = None, None, None
+        train_sizes, train_scores, test_scores = None, None, None
+        #else: _,train_scores, test_scores = learning_curve(estimator, X, y_true, cv= 3, scoring = scorer_type, train_sizes=[1.])
         clf = estimator.named_steps["clf"]
         weights = get_weights(clf)
         params = estimator.get_params()
@@ -343,9 +343,11 @@ def fit_score_model(X, y, params, pipe_steps, cv_folds, search_iterations, verbo
     return results
 
 @logged
-def store_log(feature_slice, label_slice, X, y, keys, cm, output_log, stage=None, results=None, pipeline=None, label_type="Extra_Stage"):
+def store_log(feature_slice, label_slice, X, y, keys, cm, output_log, stage=None, results=None, pipeline=None, label_type="Extra_Stage", dataset_type="cv", dataset_size=None):
     global master_log
     if master_log.empty: return False
+    master_log["dataset_type"] = dataset_type
+    master_log["dataset_size"] = dataset_size
     master_log["label_type"] = label_type
     master_log["feature_slice"] = feature_slice
     master_log["label_slice"] = label_slice
@@ -388,7 +390,7 @@ def create_pipelines():
     return pipelines
 
 def rank_pipelines(pipelines, criteria, stage, top_n=1):
-    if stage == "select": pipelines = pipelines[~np.isnan(pipelines["rank_create"])]
+    if stage == "select": pipelines = pipelines.loc[~np.isnan(pipelines["rank_create"])]
     pipelines["Params_str"] = pipelines["Params"].astype(str)
     unique_params = {v:k for k,v in dict(enumerate(pipelines["Params_str"].unique().tolist())).items()}
     pipelines["Params_str_dummy"] = pipelines["Params_str"].replace(unique_params)
@@ -425,37 +427,43 @@ def select_pipeline(pipelines = None):
     return best_pipeline
 
 @logged
-def evaluate_pipeline(best_pipeline = None):
+def get_best_pipe(best_pipeline = None):
     if best_pipeline is None:
         finalist_pipelines = pd.read_pickle(cm.output_log_select)
         best_pipeline = rank_pipelines(finalist_pipelines, cm.pipeline_criteria_evaluate, stage="select")
     if cm.no_extractor:
         cm.pipe_steps.pop(-2)
         best_pipeline["Params"] = {k: v for k, v in best_pipeline["Params"].items() if not (k.startswith("extractor") or k=="steps")}
+    return best_pipeline
+
+@logged
+def evaluate_pipeline(best_pipeline = None):
+    best_pipeline = get_best_pipe(best_pipeline = best_pipeline)
+    pipe = Pipeline(steps=cm.pipe_steps).set_params(**best_pipeline["Params"])
     train_slices = generate_dates(
         cm.time_slices_evaluate, cm.forecast_windows, cm.master_start_date,
         cm.master_end_date, cm.load_prev_files_evaluate, cm.output_slices_path_evaluate)
     for feature_date_train, label_date_train in train_slices:
+        df_train = generate_dataset(
+            feature_date_train, label_date_train, cm.master_path, cm.master_path,
+            cm.master_feature_config, cm.master_label_config, cm.master_merge_config, cm.output_folder_evaluate, load_prev_files = cm.load_prev_files_evaluate)
+        df_test = generate_dataset(
+            cm.test_date - (label_date_train-feature_date_train) , cm.test_date, cm.master_path, cm.test_path,
+            cm.master_feature_config, cm.test_label_config, cm.final_merge_config, cm.output_folder_evaluate, load_prev_files = cm.load_prev_files_evaluate)
         for label_type in cm.label_types:
             for feature_stage in cm.feature_stages:
-                X_train, y_train, keys = generate_dataset(
-                    feature_date_train, label_date_train,
-                    cm.master_path, cm.master_path,
-                    cm.master_feature_config, cm.master_label_config, cm.master_merge_config,
-                    cm.output_folder_evaluate, max_observations = cm.max_observations_evaluate,
-                    load_prev_files = cm.load_prev_files_evaluate, feature_stage=feature_stage, label_type=label_type)
-                pipe = Pipeline(steps=cm.pipe_steps).set_params(**best_pipeline["Params"])
-                if log_scores: logged_fit(pipe, X_train, y_train)
-                else: pipe.fit(X_train, y_train)
-                X_test, y_test, keys = generate_dataset(
-                    cm.test_date - (label_date_train-feature_date_train) , cm.test_date,
-                    cm.master_path, cm.test_path,
-                    cm.master_feature_config, cm.test_label_config, cm.final_merge_config,
-                    cm.output_folder_evaluate, max_observations = cm.max_observations_evaluate,
-                    load_prev_files = cm.load_prev_files_evaluate, feature_stage=feature_stage, label_type=label_type)
-                scorer(pipe, X_test, y_test, model_scorer=cm.model_criteria_evaluate)
-                store_log(feature_date_train, label_date_train, X_test, y_test, keys, cm, cm.output_log_evaluate,
-                    stage = "select", pipeline=best_pipeline, label_type=label_type)
+                for dataset_frac in cm.max_observations_evaluate:
+                    X_train, y_train, keys = finalise_dataset(df_train, label_type=label_type, feature_stage=feature_stage, dataset_frac=dataset_frac)
+                    X_test, y_test, keys = finalise_dataset(df_test, label_type=label_type, feature_stage=feature_stage)
+                    if log_scores: logged_fit(pipe, X_train, y_train)
+                    else: pipe.fit(X_train, y_train)
+                    if dataset_frac:
+                        scorer(pipe, X_train, y_train, model_scorer=cm.model_criteria_evaluate)
+                        store_log(feature_date_train, label_date_train, X_train, y_train, keys, cm, cm.output_log_evaluate,
+                            dataset_type="train", stage = "select", pipeline=best_pipeline, label_type=label_type, dataset_size=len(y_train))
+                    scorer(pipe, X_test, y_test, model_scorer=cm.model_criteria_evaluate)
+                    store_log(feature_date_train, label_date_train, X_test, y_test, keys, cm, cm.output_log_evaluate,
+                        dataset_type="test", stage = "select", pipeline=best_pipeline, label_type=label_type, dataset_size=len(y_train))
     results = pd.read_pickle(cm.output_log_evaluate)
     return results
 

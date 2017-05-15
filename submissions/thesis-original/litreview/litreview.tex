@@ -52,7 +52,7 @@ Early-stage investment is characterised by a large number of investment candidat
 
 Despite evidence that \gls{vc} firms could benefit from increased use of data mining, it appears few are interested in advanced data analytics. Stone \cite{stone2014} interviewed Fred Wilson of Union Square Ventures who said: ``We have not been able to quantify [startup potential]. We haven’t even tried. Although I am sure someone could do it and they might be very successful with it. To us, the ideal founding team is one supremely talented product oriented founder and one, two, or three strong developers, and nothing else.'' Likewise, when asked, Chris Dixon of Andreessen Horowitz said: ``I’ve seen a few attempts to do it quantitatively but I think those are often flawed because the quantitatively measurable things are either obvious, irrelevant, or suffer from overfitting (finding patterns in the past that don’t carry forward in the future''.
 
-Similarly, while recently new software tools have been developed to assist \gls{vc} firm, there is limited evidence of their adoption.
+Similarly, while recently new software tools have been developed to assist \gls{vc} firm, there is limited evidence of their adoption. %TODO
 
 \subsection{Proposed Criteria}
 
@@ -76,16 +76,16 @@ Prior work focuses on basic company features (e.g. the headquarters' location, t
 
 We propose a conceptual framework that builds upon previous work to ensure that we include a comprehensive and relevant set of features in our investment screening system.  Ahlers et al. \cite{ahlers2015} developed a conceptual framework for funding success on equity crowdfunding platforms. Their framework has two factors: venture quality and level of uncertainty. The first factor is based on work by Baum and Silverman \cite{baum2004} that suggests key determinants of startup potential are human capital, alliance (social) capital, and intellectual (structural) capital. The second factor is based on investors' confidence in their estimation of startup potential.
 
-We seek to generalise Ahlers' framework~\cite{ahlers2015} beyond equity crowdfunding. While the first factor of Ahlers' framework (venture quality) applies to startups of all stages, Ahlers operationalise their second factor with respect to whether startups offer an equity share in their crowdfunding, and whether they provide financial projections. These features are specific to equity crowdfunding. We propose an extension of Ahlers' framework that generalises and develops this second factor. We describe investment confidence as a product of third party validation, historical performance and contextual cues. Our proposed framework is depicted in Figure~\ref{fig:litreview:theory:framework}.
+We seek to generalise Ahlers' framework~\cite{ahlers2015} beyond equity crowdfunding. While the first factor of Ahlers' framework (venture quality) applies to startups of all stages, Ahlers operationalise their second factor with respect to whether startups offer an equity share in their crowdfunding, and whether they provide financial projections. These features are specific to equity crowdfunding. We propose an extension of Ahlers' framework that generalises and develops this second factor. We describe investment confidence as a product of third party validation, historical performance and contextual cues. Our proposed framework is depicted in Figure~\ref{fig:litreview:features:framework_simple}.
 
 \begin{figure}[!htb]
     \centering
     \input{../figures/litreview/framework_simple}
-    \caption[Conceptual framework for startup investment.]{Proposed conceptual framework for startup investment. We adapt the framework proposed by Ahlers et al.~\cite{ahlers2015}, originally based on work by Baum and Silverman~\cite{baum2004}. For an extended version of this framework, please refer to Figure~\ref{fig:litreview:features:framework_details}.}
+    \caption[Conceptual framework for startup investment.]{Proposed conceptual framework for startup investment. We adapt the framework proposed by Ahlers et al.~\cite{ahlers2015}, originally based on work by Baum and Silverman~\cite{baum2004}. For an extended version of this framework, please refer to Figure~\ref{fig:appendix:features:framework_details}.}
     \label{fig:litreview:features:framework_simple}
 \end{figure}
 
-Next, we must operationalise this conceptual framework into features that we can incorporate into our machine learning model. Table~\ref{fig:litreview:features:summary} shows a review of features tested in previous studies of startup investment. In Appendix~\ref{appendix:feature_summary}, we describe each of these features and outline theoretical and empirical evidence that justify their inclusion in our conceptual framework.
+Next, we must operationalise this conceptual framework into features that we can incorporate into our machine learning model. Table~\ref{fig:litreview:features:summary} shows a review of features tested in previous studies of startup investment. In Appendix~\ref{appendix:feature_selection}, we describe each of these features and outline theoretical and empirical evidence that justify their inclusion in our conceptual framework.
 
 \begin{table}[!htb]
     \centering

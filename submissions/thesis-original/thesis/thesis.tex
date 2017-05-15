@@ -35,7 +35,7 @@
 \newcommand{\thetitle}{Towards Automated Venture Capital Screening}
 \newcommand{\theauthor}{W.M.R. Shelton}
 
-\newcommand{\thekeywords}{Venture Capital, Machine Learning, Investment Screening}
+\newcommand{\thekeywords}{Venture Capital, Investment Screening, Machine Learning}
 \newcommand{\thecategories}{I.5, J.1, J.4}
 
 %%% BEGIN LATEX TWEAKS
@@ -79,6 +79,8 @@
 \newacronym{pca}{PCA}{Principal Component Analysis}
 \newacronym{uspto}{USPTO}{United States Patent and Trademark Office}
 \newacronym{iqr}{IQR}{Interquartile Range}
+\newacronym{svm}{SVM}{Support Vector Machine}
+\newacronym{ann}{ANN}{Artificial Neural Network}
 
 % Fancyref support for subsections, source; https://github.com/openlilylib/tutorials/blob/master/aGervasoni/orchestralScores/example-materials/OLLbase.sty
 \newcommand*{\fancyrefsubseclabelprefix}{subsec}
@@ -151,24 +153,28 @@
 
 \begin{abstract}
 
-Venture Capital (VC) firms face the challenge of choosing a few outstanding investments from a sea of potential opportunities. The VC industry requires better systems and processes to efficiently manage labour-intensive tasks like investment screening. Approaches to address this challenge have had three common limitations: small sample size, a focus on early-stage investment, and incomplete feature sets. There is also little evidence that research has been translated into systems that assist investors. Applying machine learning techniques to new online startup data sources may address previous limitations and make VC investment screening more efficient and effective.
-
-To address the research problem, a multi-stage supervised classification system was developed. The system identifies startup companies that are likely to receive additional funding or have a liquidity event (exit) in a given period of time. A dataset is collected from the CrunchBase and PatentsView data sources. A processing pipeline framework is developed and a randomized search is performed across the pipeline's hyperparameters to generate candidate pipelines, which are tested and ranked. Finally, the best pipeline is used to generate models which are tested with respect to their performance across time, forecast period, developmental stage and target outcome.
-
-The proposed system was evaluated against three criteria: efficiency, robustness and predictive power. The system satisfies each of these criteria. It makes predictions with an average F1 score (for the positive class) of 0.32-0.52 over forecast windows of 2-4 years, it is robust, with only minimal variance with respect to historical data, and it is efficient in that it is semi-autonomous and could be made fully autonomous with minimal development. Human capital, specifically the prior experience of a startup's advisors, executives and founders, is the greatest predictor of investment success. This project lays the groundwork for a production-ready VC investment screening tool.
+Venture Capital (VC) firms face the challenge of identifying a few outstanding investments from a sea of opportunities. The VC industry requires better systems to manage labour-intensive tasks like investment screening. Previous approaches to improve VC investment screening have common limitations: small privately-collected datasets, a focus on early-stage investment, and limited practical application. A multi-stage supervised classification system was developed that identifies startup companies likely to receive additional funding or have a liquidity event (exit) in the future. The system produces an optimised classification pipeline which is applied to data collected from large, public online databases (CrunchBase and PatentsView). The system was evaluated against three criteria important to the VC industry: predictive power, robustness, and efficiency. The system satisfies each of these criteria. It makes predictions with an average F1 score (for the positive class) of 0.32-0.52 over forecast windows of 2-4 years, it is robust, with only minimal variance in performance when trained on different historical datasets, and it is efficient in that it is semi-autonomous and could be made fully autonomous with minimal development. The prior experience of a startup's advisors, executives and founders was found to be the greatest predictor of investment performance. This project lays the groundwork for an industry-ready VC investment screening tool.
 
 \end{abstract}
 
 \begin{acknowledgements}
-These are the acknowledgements.
 
-Supervisors
-\\ UWA / BPhil
-\\ Fogarty Foundation
-\\ St Catherine's
-\\ Bloom / Friends / Family
+\begin{comment}
 
-% TODO: Any thesis, dissertation or other publication resulting from research undertaken by the recipient while in receipt of the UWA Fogarty Foundation Scholarship must acknowledge the support of the scholarship and carry the University by-line.
+First and foremost I would like to thank my supervisors, Professor Melinda Hodkiewicz and Dr Tim French. Melinda and Tim are both fantastic academics and educators in their own right, and their strengths and talents perfectly complemented each other on this project. I am extremely grateful for Melinda and Tim's meticulous feedback and advice throughout the course of this year.
+
+My time at university has been an amazing educational experience and I primarily credit that to opportunities afforded to me by the The University of Western Australia, the Fogarty Foundation, and St Catherine's College.
+
+I would like to thank The University of Western Australia for guiding me through my, admittedly unorthodox, degree. Starting in Biomedical Sciences, I never imagined I would go on to complete a Double Major in Psychology and finally Honours in Computer Science. In particular, I'd like to acknowledge the fantastic Bachelor of Philosophy (Hons) program, and Professor Kathy Sanders and Professor Jenna Mead for their advice and support.
+
+I would like to thank the Fogarty Foundation. The Fogarty Foundation has provided support to me far beyond my UWA Fogarty Foundation Scholarship. The Fogarty Foundation was the catalyst that led to my involvement in Teach Learn Grow, encouraged me to start Bloom, and took me to Stanford University. In particular, I'd like to acknowledge Robyn King, Kathryn Clements, and Dr Annie Fogarty AM for their incredible support throughout my degree.
+
+I would like to thank St Catherine's College. In particular, Fiona Crowe and Mandy McFarland, who are truly inspiring leaders that have backed myself and Bloom 110\%. St Catherine's College is my extended family and I am incredibly grateful for their support. Go St Cat's!
+
+Finally, I would like to thank my friends and family who encouraged and supported me throughout my time at university.
+
+\end{comment}
+
 \end{acknowledgements}
 
 \clearpage
