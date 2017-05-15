@@ -1,12 +1,14 @@
-\documentclass[../thesis/thesis.tex]{subfiles}
+﻿\documentclass[../thesis/thesis.tex]{subfiles}
 \begin{document}
 
 \chapter{Evaluation}
 \label{chap:evaluation}
 
-We believe it is possible to produce a \gls{vc} investment screening system that is efficient, robust and powerful. In Chapter~\ref{chap:design}, we described the development and structure of such a system. Our system is based around identifying startup companies that are likely to receive additional funding or a liquidity event (exit) in a given forecast window. This system can generate statistics and make recommendations that may assist \gls{vc} firms to efficiently and effectively screen investment candidates. In this chapter, we evaluate models developed by our system against criteria of efficiency, robustness and predictive power. We discuss our findings more broadly and their implications for investors and future research into startup investment and performance.
+We believe it is possible to produce a \gls{vc} investment screening system that is efficient, robust and powerful. In Chapter~\ref{chap:design}, we described the development and structure of such a system. Our system is based around identifying startup companies that are likely to receive additional funding or a liquidity event (exit) in a given forecast window. This system can generate statistics and make recommendations that may assist \gls{vc} firms to efficiently and effectively screen investment candidates. In this chapter, we evaluate models developed by our system against criteria of efficiency, robustness and predictive power.
 
 We produced a classification pipeline which we optimised with respect to the robustness of its performance over time, and evaluated models produced by this pipeline against a held-out test dataset. This evaluation process is depicted in Figure~\ref{fig:evaluation:pipeline_evaluation}. We use the pipeline to fit a model to a dataset sliced from the master database. We apply this model to another feature vector from the master database and make predictions. We score these predictions against truth values derived from the held-out test database (collected in April 2017). This process is performed multiple times to evaluate the three primary criteria derived from our literature review: efficiency, robustness and predictive power.
+
+While we used Area under the \gls{pr} Curve to guide the development of our system during pipeline creation and selection, in evaluation of our system's performance we primarily focus on F1 Scores. An F1 score is the harmonic mean of recall and precision at any point on the \gls{pr} curve. In this sense, the \gls{auc} measure provides an overall evaluation of a classification system, whereas the F1 Score evaluates a specific set of predictions. For application to investment screening, we're much more interested in our classification performance for the positive class (companies that have been successful in raising further funding or achieving an exit), so we specifically look at the F1 Score for just this positive class. Finally, we also present \gls{mcc} in some of our analyses. \Gls{mcc} is a measure of the correlation between the observed and predicted binary classifications. It should produce similar results to a macro-averaged F1 Score, incorporating the performance of both classes.
 
 Firstly, we evaluated efficiency by exploring the learning curves of our classification techniques and whether there is sufficient data to produce reliable statistics. We also explored the time profile of our system and whether it is reasonable for use in industry, and would be likely to reduce the time currently taken to perform similar analyses. Secondly, we evaluated robustness by evaluating our models against multiple reverse-engineered historical datasets and measuring their variance. Thirdly, we evaluated the system's predictive power across different forecast windows, for startups at different stages of their development lifecycle, and for different potential target outcomes.
 
@@ -19,7 +21,7 @@ Firstly, we evaluated efficiency by exploring the learning curves of our classif
 
 \section{Efficiency}
 
-The \gls{vc} industry requires more efficient forms of \gls{vc} investment analysis, particularly in surfacing and screening. These processes are currently performed through referral, Google search, industry papers and manual search of startup databases. By its nature, our automated system should be more efficient than these methods. In this section, we assess how efficient our system is -- in terms of data consumed and time taken -- and look at whether we can further improve its efficiency.
+The \gls{vc} industry requires more efficient forms of investment analysis, particularly in surfacing and screening. These processes are currently performed through referral, Google search, industry papers and manual search of startup databases. By its nature, our automated system should be more efficient than these methods. In this section, we assess how efficient our system is -- in terms of data consumed and time taken -- and look at whether we can further improve its efficiency.
 
 \subsection{Dataset Size}
 
@@ -34,7 +36,7 @@ Figure~\ref{fig:evaluation:learning_window} shows the learning curves for foreca
     \label{fig:evaluation:learning_window}
 \end{figure}
 
-The plots in Figure~\ref{fig:evaluation:learning_window} are evaluated against our base target outcome of ``Extra Stage'' (i.e. whether a company raises an additional funding round, is aquired or has an IPO). When we split our learning curves further by the components of this target outcome, we see that the efficiency of our system varies considerably, as shown in Figure~\ref{fig:evaluation:learning_outcome_window}. We observe that predicting whether a company raises an extra round is the least data-intensive outcome, as it converges rapidly even over a forecast window of just 2 years. In comparison, predicting company exits does not converge, even over a forecast window of 4 years. Our model has most difficulty predicting IPO exits, which are rare events even in our large dataset. For these target outcomes, we would epxect our system would benefit from a larger dataset. It should be noted, however, that our pipeline was optimised for predicting our base target outcome, and if the entire system was performed on the different target outcomes we might find other classification pipelines provide better performance.
+The plots in Figure~\ref{fig:evaluation:learning_window} are evaluated against our base target outcome, which we term ``Extra Stage'' (i.e. whether a company raises an additional funding round, is aquired or has an IPO). When we split our learning curves further by the components of this target outcome, we see that the efficiency of our system varies considerably, as shown in Figure~\ref{fig:evaluation:learning_outcome_window}. We observe that predicting whether a company raises an extra round is the least data-intensive outcome, as it converges rapidly even over a forecast window of just 2 years. In comparison, predicting company exits does not converge, even over a forecast window of 4 years. Our model has most difficulty predicting IPO exits, which are rare events even in our large dataset. For these target outcomes, we would expect our system would benefit from a larger dataset. It should be noted, however, that our pipeline was optimised for predicting our base target outcome, and if the entire system was performed on the different target outcomes we might find other classification pipelines provide better performance.
 
 \begin{figure}[!htb]
     \centering
@@ -49,7 +51,7 @@ Unlike other forms of finance, like equity or derivatives trading, \gls{vc} oper
 
 An indicative time profile of the system is shown in Table~\ref{tab:evaluation:time_profile}. At the highest-level, this configuration of the program takes approximately 46 hours to complete on a modern desktop PC. When we further break this time down by system component, it's clear that the vast majority of time (84.8\%) is taken up by the initial pipeline creation component. This time is due to the pipeline optimisation process - the model is fit and scored over 500 times on different classification algorithms and parameters. Scoring takes a particularly long time because, in this case, it also involves generating learning curves for reporting, which is another cross-validated process. However, when placed into production, this component could be run infrequently - perhaps once per year - to ensure that the pipelines being used are still optimally suited for the dataset. The next component of the system, selecting the most robust pipeline, could occur more frequently - perhaps once every month - and the final component of the pipeline, making up-to-date predictions, could be evaluated every time new data is fed into the system (perhaps once per day) because it only takes an hour.
 
-\begin{table}[!htb]
+\begin{table}[!htb] %Should include data collection too? 
     \centering
     \scalebox{0.9}{\input{../tables/evaluation/time_profile}}
     \caption[System time profile]{System time profile.}
@@ -64,7 +66,7 @@ We generated three models from datasets created from our training database from 
 
 Figure~\ref{fig:evaluation:f1_robustness_slice} shows the coefficient of variation of models trained on dataset slices from different years, against key evaluation metrics. The coefficient of variance is the ratio of the biased standard deviation to the mean. This produces a standard measure of variance, so different evaluation metrics are comparable. We have also grouped by forecast windows as later dataset slices cannot be tested with long forecast windows which skews results along this dimension. Variance across all metrics is very low, with slightly more variance over shorter forecast windows, as one would expect.
 
-We explored the feature weights for each model in Figure~\ref{fig:evaluation:feature_groups_slice}. While there are some slight differences, the general trend is very similar across all models. We will discuss the distribution of these feature weights in more detail in a following section. All of these results suggest that our system generates models that are robust with respect to time.
+We explored the feature weights for each model in Figure~\ref{fig:evaluation:feature_groups_slice}. While there are some slight differences, the general trend is very similar across all models. We will discuss the distribution of these feature weights in more detail in a following section.
 
 \begin{figure}[!htb]
     \centering
@@ -73,7 +75,7 @@ We explored the feature weights for each model in Figure~\ref{fig:evaluation:fea
     \label{fig:evaluation:f1_robustness_slice}
 \end{figure}
 
-\begin{figure}[!htb]
+\begin{figure}[!htb] %Convert to coefficient of variation
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/features_slice}
     \caption[Feature weights by slice date]{Feature weights by slice date.}
@@ -82,13 +84,13 @@ We explored the feature weights for each model in Figure~\ref{fig:evaluation:fea
 
 \section{Predictive Power}
 
-Our system must be consistently accurate at identifying a variety of high-potential investment candidates. We evaluated the systems' predictive power based on its ability to predict over different forecast windows (e.g. 2-4 years), for target companies at different developmental stages (e.g. Seed, Series A etc.), and for different target outcomes (e.g. predicting additional funding rounds, being acquired, having an IPO, or some combination thereof).
+The system must be consistently accurate at identifying a variety of high-potential investment candidates. We evaluated the systems' predictive power based on its ability to predict over different forecast windows (e.g. 2-4 years), for target companies at different developmental stages (e.g. Seed, Series A etc.), and for different target outcomes (e.g. predicting additional funding rounds, being acquired, having an IPO, or some combination thereof).
 
-\subsection{Preliminary Analysis}
+\subsection{Baseline Analysis}
 
 Before we evaluated the predictive power of our system, we performed preliminary analyses to determine the baseline trends and distributions of company outcomes in our database.
 
-First, we looked at company outcomes by forecast window. We applied the same system of reverse-engineering time slices that we used in our previous experiment on robustness, but this time we vary the time difference between the slice that provides our features and the slice that provides our outcome. We combined pair-wise datasets of each year from 2012-2016 inclusive and explored the proportion of companies that raised additional funding or exited.
+First, we looked at company outcomes by forecast window. We applied the same system of reverse-engineering time slices that we used in previous experiments on robustness, but this time we varied the time difference between the slice that provides our features and the slice that provides our outcome. We combined pair-wise datasets of each year from 2012-2016 inclusive and explored the proportion of companies that raised additional funding or exited.
 
 Figure~\ref{fig:evaluation:outcome_forecast_window} shows how company outcome varies with respect to the forecast window (time between the observed features and the measured outcome). Intuitively, we see a positive relationship between length of forecast window and company outcome. In particular, very few companies appear to have exited or raised funds over a period of less than 2 years so we will focus our experimentation on forecast windows of 2-4 years.
 
@@ -108,15 +110,11 @@ We also looked at how company outcomes vary with respect to development stage, s
     \label{fig:evaluation:outcome_stage}
 \end{figure}
 
-\subsection{Evaluation Metrics}
-
-%TODO - F1 Score (Positive)
-
 \subsection{Forecast Windows}
 
 %TODO
 
-%TODO
+Figure~\ref{fig:evaluation:performance_window} shows model performance across a range of metrics, grouped by forecast window. As discussed previously, we do not expect Area under the \gls{roc} curve to accurately reflect the performance of our model because it is not sensitive to our bias towards the positive class. We see that there is very little difference in Area under the \gls{roc} curve across the forecast windows. However, across all three other metrics, there is a clear positive relationship between length of forecast window and model performance. In particular, the F1 Score shows the greatest improvement in performance over time (52.7\%), compared to Area under the \gls{prc} curve (34.1\%) and \gls{mcc} (11.6\%), which probably reflects that our F1 Score here purely captures the positive class. 
 
 \begin{figure}[!htb]
     \centering
@@ -125,42 +123,42 @@ We also looked at how company outcomes vary with respect to development stage, s
     \label{fig:evaluation:performance_window}
 \end{figure}
 
-%TODO
+Figure~\ref{fig:evaluation:features_window} shows the standardised weights of features grouped using the conceptual framework proposed earlier in this paper, grouped by forecast window. First, we discuss the baseline distribution and then examine the variation in weightings with respect to forecast window. Advisors, somewhat surprisingly, are the best predictor of startup investment success. This may reflect that exceptional startups are more effective at attracting influential advisors. Executives and founders are also important factors, and round out measures of human capital. The quality of investors that invest in a startup (assessed by their prior investments) is found to be more important than the quantum of investment raised by a startup. Local economy and industry factors are weak predictors, as are customers and social influence (in this case measured through participation at events). In fairness, these factors are sparsely represented in the CrunchBase database. There is little difference between the weightings of each feature group with respect to forecast window. However, there are a few small trends to point out. The importance of advisors increases over time, and the importance of executives and the broader economy decreases over time.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/features_window}
     \caption[Feature weights by forecast window]{Feature weights by forecast window.}
-    \label{fig:evaluation:feature_groups_window}
+    \label{fig:evaluation:features_window}
 \end{figure}
 
 \subsection{Development Stage}
 
 %TODO
 
-%TODO
+Figure~\ref{fig:evaluation:performance_stage} shows F1 Scores grouped by developmental stage and fit method. First, we exmaine the baseline distribution and then the variation in performance by fit method. Model performance has a generally positive relationship with developmental stage. This may be a product of later stage companies having more complete feature vectors. The only deviation from this positive relationship is at Series D+, where there is a dip in performance. This may be because we consider Series D+ to be the highest stage of funding, so the model is effectively only predicting exits at this stage. To understand this phenomenon better, we decided to split the datasets into their developmental stages and fit the model onto each of these sub-datasets individually. Across the board, this results in a performance improvement. Pre-Seed companies make up most of our original dataset (X\%) so we see the smallest difference between methods for this stage. However, for Series D+ we see a significant difference in performance, suggesting that the features that predict Series D+ performance are likely different to those for earlier stages. 
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/performance_stage}
     \caption[Performance by developmental stage]{Performance by developmental stage.}
-    \label{fig:evaluation:f1_predictive_stage}
+    \label{fig:evaluation:performance_stage}
 \end{figure}
 
-%TODO
+Figure~\ref{fig:evaluation:features_stage} shows the standardised weights of features grouped using the conceptual framework proposed earlier in this paper, grouped by developmental stage. While the same trend is clear, there is significantly more varation in weights than was observed when grouped by forecast window in Figure\ref{fig:evaluation:features_window}. Advisors are more important to earlier stage companies than late stage companies, investor track record and reputation becomes important as companies approach an exit (Series D+), executive and founder experience are very important in pre-seed companies, as is the broader economic outlook.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/features_stage}
     \caption[Feature weights by developmental stage]{Feature weights by developmental stage.}
-    \label{fig:evaluation:feature_groups_stage}
+    \label{fig:evaluation:features_stage}
 \end{figure}
 
 \subsection{Target Outcomes}
 
 %TODO
 
-%TODO
+Figure~\ref{fig:evaluation:performance_stage} shows F1 Scores grouped by target outcome and forecast window. First, we examine the baseline distribution and then the variation in performance by forecast window. Our model is most accurate at predicting extra funding rounds and performs badly at predicting IPOs, though these are rare events in our dataset. As we observed in Figure~\ref{fig:evaluation:performance_window}, there is a clear positive relationship between length of forecast window and model performance. We observe fairly similar performance improvements across the target outcomes except for in the case of IPOs, which improve dramatically from a forecast window of more than 2 years. This may be because there are non-performance related factors that affect IPO timing, so predicting the timing of an IPO is difficult for our model to achieve.
 
 \begin{figure}[!htb]
     \centering
@@ -171,25 +169,13 @@ We also looked at how company outcomes vary with respect to development stage, s
 
 %TODO
 
-\begin{figure}[!htb]
+\begin{figure}[!htb] %TODO
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/features_outcome}
     \caption[Feature weights by target outcome]{Feature weights by target outcome.}
     \label{fig:evaluation:feature_groups_outcome}
 \end{figure}
 
-\subsection{Conclusions}
-
-%TODO
-
-%TODO
-
-\begin{table}[!htb]
-    \centering
-    \scalebox{0.9}{\input{../tables/evaluation/example_predictions}}
-    \caption[Company profiles and predictions]{Company profiles and predictions.}
-    \label{fig:evaluation:example_predictions}
-\end{table}
-
  \ifcsdef{mainfile}{}{\printbibliography}
 \end{document}
+
