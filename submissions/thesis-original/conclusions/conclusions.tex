@@ -3,17 +3,28 @@
  \chapter{Conclusions}
  \label{chap:conclusions}
 
-Our project’s aim was to produce a VC investment screening system that is efficient, robust and powerful. Our system uses online data sources and machine learning to identify startups that are likely to receive additional funding or have a liquidity event (exit) in a given forecast window. While this is a challenging problem even for experienced VC investors, we achieved good classification results that we think has practical applications for VC firms.
+Our project's aim was to produce a \gls{vc} investment screening system that is efficient, robust and powerful. Our system uses online data sources and machine learning to identify startups that are likely to receive additional funding or exit in a given forecast window. While this is a challenging problem even for experienced \gls{vc} investors, we achieved classification results that have practical applications for \gls{vc} firms.
 
 \section{Evaluation of Criteria}
 
 \subsection{Efficiency}
 
+Our system intends to replace investment screening processes that currently involve referral, Google search, industry papers, and manual search of startup databases. These are inefficient processes when applied to screening for a small number of highly promising investment opportunities amongst thousands of potential candidates. By its nature, our automated system should be more efficient than these methods, because it requires less human input. We also evaluated the efficiency of our system on two facets: dataset size and time profile. 
+
+Our system is relatively robust to dataset size, because it optimises the classification pipeline based on the datasets available. In some cases, our system could use smaller training sets without significant reduction in predictive power. However, our system's ability to use smaller training sets was strongly related to the length of the desired forecast window, and the breadth of the target outcome. 
+
+We found that an indicative implementation of our system (data collection excluded) takes 46 hours to run, which is reasonable for a process that is not time-sensitive in this industry. The majority of this time is due to the pipeline creation process, followed by pipeline selection. However, the time taken by these processes is positively related to the stability of their results with respect to time. When placed into production, system components with longer durations could be run less frequently without a reduction in performance.
 
 \subsection{Robustness}
 
+The \gls{vc} industry is concerned that predictive models trained on historical data will not accurately predict future trends and activity. This has been identified as a key barrier to the adoption of automated systems by the \gls{vc} industry \cite{stone2014}. Therefore, it is critical that our system is shown to be robust in its performance with respect to time so investors can rely on its predictions. 
+
+We evaluated our system across a number of historical datasets, forecast windows, and even multiple evaluation metrics. We found variance across all evaluation metrics to be very low, with slightly more variance over shorter forecast windows. When we explored the feature weights for each model developed on different historical datasets, we found only slight variance. This suggests that our system produces highly robust models, suitable for forward-looking investment screening.
 
 \subsection{Predictive Power}
+
+Our system must be consistently accurate at identifying a variety of high-potential investment candidates. We evaluated the systems' predictive power based on its ability to predict over different forecast windows (e.g. 2-4 years), for target companies at different developmental stages (e.g. Seed, Series A etc.), and for different target outcomes (e.g. predicting additional funding rounds, being acquired, having an IPO, or some combination thereof).
+
 
 
 \section{Future Research}
@@ -29,11 +40,11 @@ Our project’s aim was to produce a VC investment screening system that is effi
 
 \subsection{Systems Integration}
 
-We originally developed a collector that connected to CrunchBase’s API, providing real-time and comprehensive access to their database. Although we ultimately abandoned this approach because of the time constraints of this research project, it deserves further investigation. In terms of producing a system that is truly practical for VC firms to use day-to-day, continuous data integration is an important feature.  The dataset could be continuously updated and incrementally fed into the classification pipeline to a) ensure that the dataset is up-to-date and b) provide more granular temporal analysis of trends in the dataset.
+We originally developed a collector that connected to CrunchBase’s API, providing real-time and comprehensive access to their database. Although we ultimately abandoned this approach because of the time constraints of this research project, it deserves further investigation. In terms of producing a system that is truly practical for \gls{vc} firms to use day-to-day, continuous data integration is an important feature.  The dataset could be continuously updated and incrementally fed into the classification pipeline to a) ensure that the dataset is up-to-date and b) provide more granular temporal analysis of trends in the dataset.
 
 \section{Summary}
 
-In this work, a methodology is presented that produces a VC investment screening system that is efficient, robust and predictive. Existing approaches in the literature to predict startup performance have three common limitations: small sample size, a focus on very early-stage investment, and incomplete use of features. In addition, there is little evidence that previous research has translated into systems that assist investors directly. This project addressed these issues and contributed groundwork for future investigation by researchers and investors towards greater automation of the VC industry.
+In this work, a methodology is presented that produces a \gls{vc} investment screening system that is efficient, robust and predictive. Existing approaches in the literature to predict startup performance have three common limitations: small sample size, a focus on very early-stage investment, and incomplete use of features. In addition, there is little evidence that previous research has translated into systems that assist investors directly. This project addressed these issues and contributed groundwork for future investigation by researchers and investors towards greater automation of the \gls{vc} industry.
 
  \ifcsdef{mainfile}{}{\bibliography{../references/primary}}
 \end{document}
