@@ -1,14 +1,21 @@
-﻿\documentclass[../thesis/thesis.tex]{subfiles}
+\documentclass[../thesis/thesis.tex]{subfiles}
 \begin{document}
+
 \chapter{Discussion}
 \label{chap:discussion}
+
+%TODO
 
 \section{Design}
 
 \subsection{Criteria Selection}
 \subsection{Feature Selection}
 \subsection{Data Sources}
+%CrunchBase
+%PatentsView
 \subsection{Classification Algorithms}
+%Good - Random Forests / Logistic Regression
+%Bad - SVM, ANN, KNN
 
 \section{Theory}
 
@@ -20,7 +27,7 @@
 
 \subsubsection{Case Studies}
 
-We present four case studies to highlight the nuances of our system's performance, as shown in Table~\ref{tab:evaluation:example_predictions}. 
+We present four case studies to highlight the nuances of our system's performance, as shown in Table~\ref{tab:evaluation:example_predictions}.
 
 \begin{table}[!htb]
     \centering
@@ -31,15 +38,15 @@ We present four case studies to highlight the nuances of our system's performanc
 
 \begin{enumerate}
 
-\item ChaCha is an Indiana-based mobile Q\&A service, launched in 2005. ChaCha has a long and convoluted investment history. It raised its Series A round in 2006 backed by Jeff Bezos of Amazon, before raising Series B-F rounds in 2007-10 to total funds of \$92m. However, ChaCha took on additional rounds at lower valuations in 2011 and 2013. Our system predicted that ChaCha would raise funds or exit within the period of April 2013-2017. ChaCha did not take on any additional rounds and eventually closed in 2016. Our system did not predict this outcome accurately. As our publicly-sourced dataset has little information about valuations at funding rounds (valuation is considered more sensitive than quantum raised), our system has little ability to distinguish between succesful funding rounds and down-rounds (where valuation drops). 
+\item ChaCha is an Indiana-based mobile Q\&A service, launched in 2005. ChaCha has a long and convoluted investment history. It raised its Series A round in 2006 backed by Jeff Bezos of Amazon, before raising Series B-F rounds in 2007-10 to total funds of \$92m. However, ChaCha took on additional rounds at lower valuations in 2011 and 2013. Our system predicted that ChaCha would raise funds or exit within the period of April 2013-2017. ChaCha did not take on any additional rounds and eventually closed in 2016. Our system did not predict this outcome accurately. As our publicly-sourced dataset has little information about valuations at funding rounds (valuation is considered more sensitive than quantum raised), our system has little ability to distinguish between succesful funding rounds and down-rounds (where valuation drops).
 
-\item Doctor.com is a New York-based marketing automation platform for medical practices, launched in 2012. Doctor.com entered a three-year health-tech startup accelerator run by GE and StartUp Health in mid-2013. Our system did not predict that Doctor.com would raise funds or exit within the period of April 2013-2017. However, Doctor.com raised a \$5m Series A round from Spring Mountain Capital in Feb 2017. This was a difficult prediction problem for our system. There was very little information about Doctor.com in 2013 and the Series A funding round came very late in the forecast window. 
+\item Doctor.com is a New York-based marketing automation platform for medical practices, launched in 2012. Doctor.com entered a three-year health-tech startup accelerator run by GE and StartUp Health in mid-2013. Our system did not predict that Doctor.com would raise funds or exit within the period of April 2013-2017. However, Doctor.com raised a \$5m Series A round from Spring Mountain Capital in Feb 2017. This was a difficult prediction problem for our system. There was very little information about Doctor.com in 2013 and the Series A funding round came very late in the forecast window.
 
 \item Fab is a New York-based e-commerce startup, launched in 2009. Fab raised \$171m according to CrunchBase records, from reputable investors like Andreessen Horowitz, Mayfield Fund and First Round Capital, and once was reportedly valued at more than \$1 billion. Our system predicted that Fab would raise funds or exit within the period of April 2013-2017. Later in 2013, Fab completed a Series D round for \$150m. In 2015, Fab was acquired by PCH, reportedly for only a sum of \~\$20m. In this case, our system was technically accurate: Fab both raised funds and completed an exit. However, this exit was not a success for investors.
 
-\item Mixpanel is a California-based consumer analytics platform, launched in 2009. Mixpanel came out of famed startup accelerator Y-Combinator and raised \$12m from Seed - Series A rounds up to 2012, from reputable \gls{vc} firms and angels like Sequoia Capital, Andreessen Horowitz and Max Levchin. Our system predicted that Mixpanel would raise funds or exit within the period of April 2013-2017.  Mixpanel went on to raise a \$65m Series B round from Andreessen Horowitz in December 2014 that valued the ccompany at \$865m. Despite some stumbles in 2016, where MixPanel had to cut 20 staff (primarily in sales), it still appears to have a generally positive outlook. This was a good prediction by our system. 
+\item Mixpanel is a California-based consumer analytics platform, launched in 2009. Mixpanel came out of famed startup accelerator Y-Combinator and raised \$12m from Seed - Series A rounds up to 2012, from reputable \gls{vc} firms and angels like Sequoia Capital, Andreessen Horowitz and Max Levchin. Our system predicted that Mixpanel would raise funds or exit within the period of April 2013-2017.  Mixpanel went on to raise a \$65m Series B round from Andreessen Horowitz in December 2014 that valued the ccompany at \$865m. Despite some stumbles in 2016, where MixPanel had to cut 20 staff (primarily in sales), it still appears to have a generally positive outlook. This was a good prediction by our system.
 
 \end{enumerate}
 
- \ifcsdef{mainfile}{}{\bibliography{../references/primary}}
+ \ifcsdef{mainfile}{}{\printbibliography}
 \end{document}
