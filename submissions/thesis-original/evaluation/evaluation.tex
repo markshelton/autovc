@@ -8,16 +8,24 @@ We believe it is possible to produce a \gls{vc} investment screening system that
 
 We produced a classification pipeline optimised with respect to its robustness over time, and evaluated models produced by this pipeline against a held-out test dataset. This evaluation process is depicted in Figure~\ref{fig:evaluation:pipeline_evaluation}. The pipeline is fit to a training dataset. The model is applied to a test feature vector to produce predictions. We score these predictions against truth values derived from the held-out test database (collected in April 2017). This process is performed multiple times to evaluate the three primary criteria derived from our literature review: efficiency, robustness and predictive power.
 
-While Area under the \gls{pr} Curve were used to guide the development of our system during pipeline creation and selection, in evaluation of our system's performance we primarily use F1 Scores. An F1 score is the harmonic mean of recall and precision at points on the \gls{pr} curve. In this sense, the \gls{auc} measure provides an overall evaluation of a classification system, whereas the F1 Score evaluates a set of predictions. For investment screening, we're more sensitive to classification performance for the positive class (companies that have been successful in raising further funding or achieving an exit), so thereafter, when we refer to F1 Score, we refer to the F1 Score for this class alone. We also present \gls{mcc} in some of our analyses. \Gls{mcc} is a measure of the correlation between the observed and predicted binary classifications. It should produce similar results to a macro-averaged F1 Score, incorporating the performance of both classes.
-
-Firstly, we evaluated efficiency by exploring the learning curves of our classification techniques and whether there is sufficient data to produce reliable statistics. We also explored the time profile of our system and whether it is reasonable for use in industry, and would be likely to reduce the time currently taken to perform similar analyses. Secondly, we evaluated robustness by evaluating our models against multiple reverse-engineered historical datasets and measuring their variance. Thirdly, we evaluated the system's predictive power across different forecast windows, for startups at different stages of their development lifecycle, and for different potential target outcomes.
-
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/flowchart_evaluation}
     \caption[Pipeline evaluation flowchart]{Pipeline evaluation overview.}
     \label{fig:evaluation:pipeline_evaluation}
 \end{figure}
+
+\begin{enumerate}
+
+\item Efficiency. We evaluated efficiency by exploring the learning curves of our classification techniques and whether there is sufficient data to produce reliable statistics. In some cases, our system could use smaller training sets without significant reduction in predictive power. We also explored the time profile of our system. An indicative implementation of our system takes 46 hours to run.
+
+\item Robustness. We evaluated robustness by evaluating our models against multiple reverse-engineered historical datasets and measuring their variance. We found variance evaluated across all metrics to be very low, with slightly more variance over shorter forecast windows. When we explored the feature weights for each model developed on different historical datasets, we found only slight variance.
+
+\item Predictive Power. We evaluated our system's predictive power across different forecast windows, for startups at different stages of their development lifecycle, and for different potential target outcomes. We find that our system's performance is positively related to longer forecast window (for 2-4 years), later developmental stage (e.g. Seed, Series A), and breadth of target outcome (e.g. Exit, Acquisition).
+
+\end{enumerate}
+
+While Area under the \gls{pr} Curve was used to guide the development of our system during pipeline creation and selection, in evaluation of our system's performance we primarily use F1 Scores. An F1 score is the harmonic mean of recall and precision at points on the \gls{pr} curve. In this sense, the \gls{auc} measure provides an overall evaluation of a classification system, whereas the F1 Score evaluates a set of predictions. For investment screening, we're more sensitive to classification performance for the positive class (companies that have been successful in raising further funding or achieving an exit), so thereafter, when we refer to F1 Score, we refer to the F1 Score for this class alone. We also present \gls{mcc} in some of our analyses. \Gls{mcc} is a measure of the correlation between the observed and predicted binary classifications. It should produce similar results to a macro-averaged F1 Score, incorporating the performance of both classes.
 
 \section{Efficiency}
 
@@ -64,22 +72,22 @@ The \gls{vc} industry is concerned that predictive models trained on historical 
 
 We generated three models from datasets created from our training database from each year of 2012-2014 for forecast windows of 2 years (i.e. [2012, 2014], [2013, 2015], and [2014, 2016]) and evaluated each model against a dataset created from our test database (i.e. [2015, 2017]). We expected that if the factors that predict startup investment success through time are consistent, we would observe little difference between the performance and characteristics of these models.
 
-Figure~\ref{fig:evaluation:f1_robustness_slice} shows the coefficient of variation of models trained on dataset slices from different years, against key evaluation metrics. The coefficient of variance is the ratio of the biased standard deviation to the mean. This produces a standard measure of variance, so different evaluation metrics are comparable. We have also grouped by forecast windows as later dataset slices cannot be tested with long forecast windows which skews results along this dimension. Variance across all metrics is very low, with slightly more variance over shorter forecast windows, as one would expect.
+Figure~\ref{fig:evaluation:performance_slice} shows the coefficient of variation of models trained on dataset slices from different years, against key evaluation metrics. The coefficient of variance is the ratio of the biased standard deviation to the mean. This produces a standard measure of variance, so different evaluation metrics are comparable. We have also grouped by forecast windows as later dataset slices cannot be tested with long forecast windows which skews results along this dimension. Variance across all metrics is very low, with slightly more variance over shorter forecast windows, as one would expect.
 
-We explored the feature weights for each model in Figure~\ref{fig:evaluation:feature_groups_slice}. While there are some slight differences, the general trend is very similar across all models. We will discuss the distribution of these feature weights in more detail in a following section.
+We explored the feature weights for each model in Figure~\ref{fig:evaluation:features_slice}. While there are some slight differences, the general trend is very similar across all models. We will discuss the distribution of these feature weights in more detail in a following section.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/performance_slice}
     \caption[Performance variation by slice date]{Performance variation by slice date.}
-    \label{fig:evaluation:f1_robustness_slice}
+    \label{fig:evaluation:performance_slice}
 \end{figure}
 
-\begin{figure}[!htb] %Convert to coefficient of variation
+\begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/features_slice}
-    \caption[Feature weights by slice date]{Feature weights by slice date.}
-    \label{fig:evaluation:feature_groups_slice}
+    \caption[Feature weight variation by slice date]{Feature weight variation by slice date.}
+    \label{fig:evaluation:features_slice}
 \end{figure}
 
 \section{Predictive Power}
@@ -112,7 +120,7 @@ We also looked at how company outcomes vary with respect to development stage, s
 
 \subsection{Forecast Windows}
 
-A forecast window is the period of time between when a prediction is made and when that prediction is evaluated (i.e. a prediction made in 2014 on whether a company would exit by 2017 is a forecast window of 3 years.) The \gls{vc} industry raises funds with fixed investment horizons (generally 3--8 years), so time to payback is a key component of \gls{vc} investment decision-making and portfolio management. It is important we understand how the models and predictions produced by a \gls{vc} investment screening system varies with respect to the length of these forecast windows. 
+A forecast window is the period of time between when a prediction is made and when that prediction is evaluated (i.e. a prediction made in 2014 on whether a company would exit by 2017 is a forecast window of 3 years.) The \gls{vc} industry raises funds with fixed investment horizons (generally 3--8 years), so time to payback is a key component of \gls{vc} investment decision-making and portfolio management. It is important we understand how the models and predictions produced by a \gls{vc} investment screening system varies with respect to the length of these forecast windows.
 
 Figure~\ref{fig:evaluation:performance_window} shows model performance across a range of metrics, grouped by forecast window. As discussed previously, we do not expect Area under the \gls{roc} curve to accurately reflect the performance of our model because it is not sensitive to our bias towards the positive class. We see that there is very little difference in Area under the \gls{roc} curve across the forecast windows. However, across all three other metrics, there is a clear positive relationship between length of forecast window and model performance. In particular, the F1 Score shows the greatest improvement in performance over time (52.7\%), compared to Area under the \gls{pr} curve (34.1\%) and \gls{mcc} (11.6\%), which probably reflects that our F1 Score here purely captures the positive class.
 

@@ -61,7 +61,7 @@ def names_are_similar(db_name, patents_name):
     except: response = False
     finally: return response
 
-def request_patents(company_name):
+def request_patents_old(company_name):
     company_name = company_name.split(" ")[0]
     base = "http://www.patentsview.org/api/patents/query?"
     q = '{"_begins":{"assignee_organization":"%s"}}' % (company_name)
@@ -77,6 +77,22 @@ def request_patents(company_name):
         if response["total_patent_count"] == 0: response = None
     except: response = None
     finally: return response
+
+def prepare_url(company_name):
+    company_name = company_name.split(" ")[0]
+    base = "http://www.patentsview.org/api/patents/query?"
+    q = '{"_begins":{"assignee_organization":"%s"}}' % (company_name)
+    f = '["assignee_organization", \
+        "patent_num_combined_citations", \
+        "patent_num_cited_by_us_patents", \
+        "patent_type", \
+        "patent_date"]'
+    o = '{"per_page":10000}'
+    path = "{}q={}&f={}&o={}".format(base, q, f, o)
+    return path
+
+def prepare_urls(company_names):
+    return [prepare_url(company_name) for company_name in company_names]
 
 def parse_patents(company_name, response):
     try:
@@ -101,7 +117,7 @@ def get_patents(index, company_name):
     return patents
 
 @logged
-def go_patents():
+def go_patents_old():
     try: names = pd.read_pickle(pickle_names_path)
     except:
         names = get_companies(input_path)
@@ -126,10 +142,38 @@ def go_patents():
             store_patents(new_patents, output_path)
             with sqlite3.connect(output_path) as conn:
                 patents = pd.read_sql("SELECT * FROM patents;", conn, index_col="assignee_uuid").index
+            names = names.drop(patents, errors="ignore")
             new_patents = pd.DataFrame()
+
+def go_patents():
+    try: names = pd.read_pickle(pickle_names_path)
+    except:
+        names = get_companies(input_path)
+        names["std_name"] = standardize_names(names["company_name"])
+        pd.to_pickle(names, pickle_names_path)
+    try:
+        with sqlite3.connect(output_path) as conn:
+            patents = pd.read_sql("SELECT * FROM patents;", conn, index_col="assignee_uuid").index
+    except: patents = pd.DataFrame().index
+    names = names.drop(patents, errors="ignore")
+    new_patents = pd.DataFrame()
+    urls = prepare_urls(names["std_name"])
 
 def main():
     go_patents()
 
 if __name__ == "__main__":
     main()
+
+from ratelimit import *
+
+def load_url(session, url):
+    return session.get(url, headers=cm.headers)
+
+urls = prepare_urls(names)
+session = rq.Session()
+futures = [ex.submit(load_url, session, url) for url in urls]
+ex = cf.ThreadPoolExecutor(max_workers=max_workers)
+for tally, future in enumerate(cf.as_completed(futures)):
+    response = future.result()
+    if response["total_patent_count"] == 0: response = None

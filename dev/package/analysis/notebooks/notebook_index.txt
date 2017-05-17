@@ -1,0 +1,55 @@
+Descriptives
+    Company counts by developmental stage
+    Company counts by industry sector
+    Company age distribution by developmental stage
+    Summary statistics by developmental stage
+
+Distributions
+    Distribution of missing values by company
+    Distribution of missing values by feature
+    Distribution of skew by feature
+    Distribution of kurtosis by feature
+    Distribution of interquartile ranges
+    Distribution of intercorrelations
+    Distribution of central tendency
+
+AU-PRC Scores
+    AU-PRC by imputation strategy
+    AU-PRC by transformation function
+    AU-PRC by scaling function
+    AU-PRC by PCA techniques
+    AU-PRC by classification algorithms
+
+Learning Curves
+    Learning curves by forecast window
+    Learning curves by developmental stage
+    Learning curves by target outcome
+    Learning curves by classification algorithms
+
+F1 Scores
+    F1 Scores by slice date
+    F1 Scores by forecast window
+    F1 Scores by developmental stage
+    F1 Scores by target outcome
+    F1 Scores by developmental stage and forecast window
+    F1 Scores by developmental stage and target outcome
+    F1 Scores by forecast window and target outcome
+    Example company profiles and their predictions
+
+Feature Weights
+    Grouped feature weights by slice date
+    Grouped feature weights by forecast window
+    Grouped feature weights by developmental stage
+    Grouped feature weights by target outcome
+
+Pipeline Evaluation
+    PCA scree plot
+    Inter-correlations of factors from framework
+    Overview of classification algorithm performance
+    Pipeline performance by slice date
+    Overview of finalist pipeline performance
+
+Baselines
+    Investment success by forecast window
+    Investment success by developmental stage
+    Dataset counts over time
