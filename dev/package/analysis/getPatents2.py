@@ -56,7 +56,8 @@ def load_progress(pickle_names_path, input_path, output_path):
     patents = load_patents(output_path)
     names = names.drop(patents, errors="ignore")
     new_patents =  pd.DataFrame()
-    return names, patents, new_patents
+    tested_uuids = []
+    return names, patents, new_patents, tested_uuids
 
 def prepare_url(company_name):
     company_name = company_name.split(" ")[0]
@@ -117,16 +118,17 @@ def save_progress(names, new_patents, pickle_names_path, output_path):
     pd.to_pickle(names, pickle_names_path)
     store_patents(new_patents, output_path)
 
-def go_patents():
-    names, patents, new_patents = load_progress(pickle_names_path, input_path, output_path)
+def main():
+    names, patents, new_patents, tested_uuids = load_progress(pickle_names_path, input_path, output_path)
     url_map = prepare_urls(names)
     ex = cf.ThreadPoolExecutor(max_workers=10)
     session = rq.Session()
     future_map = {ex.submit(load_url, session, url):uuid for (uuid, url) in url_map.items()}
     for tally, future in enumerate(cf.as_completed(future_map)):
         if tally % 5000 == 50:
+            names = names.drop(tested_uuids)
             save_progress(names, new_patents, pickle_names_path, output_path)
-            names, patents, new_patents = load_progress(pickle_names_path, input_path, output_path)
+            names, patents, new_patents, tested_uuids = load_progress(pickle_names_path, input_path, output_path)
         response = future.result()
         status = response.status_code
         uuid = future_map[future]
@@ -134,21 +136,28 @@ def go_patents():
         try:
             content = response.json()
             iterator = iter(content["patents"])
-        except json.decoder.JSONDecodeError: msg = "JSON error"; continue
-        except TypeError: msg ="No patents found"; continue
-        except: msg = "Unknown error"; continue
+        except Exception as e:
+            if type(e) == ValueError: msg = "JSON error"
+            elif type(e) == TypeError: msg ="No patents"
+            else: msg = "Unknown error"
+            continue
         else:
             msg = "OK"
             temp = parse_patents(company_name, content)
-            if temp.empty: names = names.drop(uuid)
-            else:
+            if not temp.empty:
                 temp["assignee_uuid"] = uuid
                 new_patents = pd.concat([new_patents, temp], ignore_index=True)
-        finally: log.info("{} | {} | {} | {}".format(tally, status, company_name, msg))
+        finally:
+            tested_uuids.append(uuid)
+            log.info("{} | {} | {} | {}".format(tally, status, company_name, msg))
 
-def main():
-    go_patents()
+def loop():
+    while True:
+        try: main()
+        except Exception as e:
+            log.error(e,exc_info=True)
+            save_progress(names, new_patents, pickle_names_path, output_path)
 
 if __name__ == "__main__":
-    main()
+    loop()
 
