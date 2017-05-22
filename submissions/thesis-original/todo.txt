@@ -1,35 +1,51 @@
-Abstract
-Acknowledgements
-Introduction
-Literature Review
--Criteria Selection --> VC Industry --> Fund Structure (Fig)
 
-Design
--Pipeline Creation
-    -Imputation
-    -Transformation
-    -Scaling
-    -Extraction
-    -Classification Algorithms
-        --> %TODO - Write paragraph
-        --> %TODO - Write paragraph
--Pipeline Selection
-    --> %TODO - section preamble
-    --> %TODO - What is the variance in performance over time in aggregate?
-    --> %TODO - What is the variance over time between different classifiers?
-    --> %TODO - How many finalists do we need to ensure we get the best?
-    --> %TODO - How do we choose the metrics to narrow down the pipelines?
-    --> %INCLUDE Hyperparameters of our final classification pipeline
--Pipeline Evaluation
-    -Efficiency
-    -Robustness
-    -Predictive Power
-        --> %INCLUDE - Counts of merged obs from dataset slices of various ages (Heatmap)
-        --> %INCLUDE - Proportion of companies increased in development stage
+Writing:
 
-Evaluation
-    -Efficiency
-        -%INCLUDE - Learning curve - evaluate
-    -Robustness
-    -Predictive Power
-Discussion
+Abstract - DONE
+Introduction - DONE
+Literature Review - DONE
+Design - DONE
+Evaluation - DONE
+Discussion - DONE
+Conclusions - DONE
+
+Appendix A (Feature Selection) - WIP
+    - Events - added
+Appendix B (Database Schema) - DONE
+Appendix C (Pipeline Hyperparameters) - TODO
+Appendix D (Experimental Configuration) - TODO
+Appendix E (Classification Reports) - DONE
+Appendix F (Case Studies) - DONE
+
+Other:
+
+Table of Contents
+    - Appendices > Chapter-level
+    - Appendix X > Section-level
+Figures & Tables
+    - Re-run all with patent data include (ouch!)
+    - Add legends where necessary
+    - Add decent captions
+References
+    - Add relevant citations
+    - Check bibliography style
+
+
+Abstract - 228
+Body - 18,503
+    Introduction - 1,224
+    Literature Review - 5,682
+    Design - 3,616
+    Evaluation - 2,485
+    Discussion - 4,435
+    Conclusions - 1,061
+Appendices - 1,959
+Total - 20,690
+
+Appendix A (Feature Selection) - WIP
+    - Events - added
+Appendix B (Database Schema) - DONE
+Appendix C (Pipeline Hyperparameters) - TODO
+Appendix D (Experimental Configuration) - TODO
+Appendix E (Classification Reports) - DONE
+Appendix F (Case Studies) - DONE

@@ -1,4 +1,70 @@
-\chapter{Pipeline Hyperparameters}
+\chapter{Pipeline Hyper-parameters}
 \label{appendix:pipeline_hyperparameters}
 
 %TODO
+\begin{comment}
+
+Pipeline Creation
+- CV Folds: 3
+- Search Iterations: 30
+- Pre-Processing:
+    - Imputer Strategy: [Mean, Median, Most Frequent]
+    - Transformer Function: [None, Log1P, SQRT]
+    - Scaler Function: [None, StandardScaler, RobustScaler, MinMaxScaler]
+    - Extractor: [None, PCA [1, 100]]
+- Classifiers:
+    - GaussianNB (Naive Bayes)
+    - KNeighborsClassifier (K-Nearest Neighbours):
+        - Neighbors: [5,20]
+        - Weights: [Uniform, Distance]
+    - LogisticRegression (Logistic Regression)
+        - C: [1e-3, 1e6]
+        - Penalty: [L1, L2]
+        - Classes: Balanced
+    - DecisionTreeClassifier (Decision Tree):
+        - Max Depth: [5, 20]
+        - Classes: Balanced
+        - Criterion: [Gini, Entropy]
+    - RandomForestClassifier (Random Forest):
+        - Estimators: [10,100]
+        - Max Depth: [5,20]
+        - Criterion: [Gini, Entropy]
+        - Classes: Balanced
+    - SVC (Support Vector Machine):
+        - Kernel: [Linear, Poly, RBF]
+        - C: [1e-5, 1e6]
+        - Probability: True
+        - Classes: Balanced
+    - MLPClassifier (Artificial Neural Networks):
+        - Activation: [Identity, Logistic, Tanh, Relu]
+        - Alpha: [1e-3, 1e6]
+
+Pipeline Selection:
+- Finalist Pipelines: 10
+- Finalist Criterion: Area under the Precision-Recall Curve
+- Best Criterion: Area under the Precision-Recall Curve
+- Training Set Dates (Feature --> Outcome):
+    - (2012, 11, 04) --> (2014, 11, 04)
+    - (2013, 01, 19) --> (2015, 01, 17)
+    - (2013, 04, 15) --> (2015, 04, 15)
+    - (2013, 06, 07) --> (2015, 06, 06)
+    - (2014, 01, 22) --> (2016, 01, 21)
+    - (2014, 03, 08) --> (2016, 03, 06)
+    - (2014, 07, 20) --> (2016, 07, 18)
+- CV Folds: 3
+
+Model Evaluation:
+- Training Set Dates (Feature --> Outcome):
+    - (2012, 09, 09) --> (2016, 09, 09)
+    - (2013, 09, 09) --> (2016, 09, 09)
+    - (2014, 09, 09) --> (2016, 09, 09)
+- Testing Set Dates (Feature --> Outcome):
+    - (2013, 04, 04) --> (2017, 04, 04)
+    - (2014, 04, 04) --> (2017, 04, 04)
+    - (2015, 04, 04) --> (2017, 04, 04)
+- Criterion: F1 Score (positive class only)
+- Extractor: [None, PCA]
+- Feature Stages: [None, [Pre-Seed, Seed, Series A, Series B, Series C, Series D+]]
+- Label Types: [Extra Stage, Extra Round, Exit, Acquisition, IPO]
+
+\end{comment}

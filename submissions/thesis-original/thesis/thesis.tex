@@ -31,6 +31,7 @@
 \usepackage[acronym,shortcuts]{glossaries}
 \usepackage{makecell}
 \usepackage{verbatim}
+\usepackage{tabulary}
 
 \newcommand{\thetitle}{Towards Automated Venture Capital Screening}
 \newcommand{\theauthor}{W.M.R. Shelton}
@@ -156,7 +157,7 @@
 
 \begin{abstract}
 
-Venture Capital (VC) firms face the challenge of identifying a few outstanding investments from a sea of opportunities. The VC industry requires better systems to manage labour-intensive tasks like investment screening. Previous approaches to improve VC investment screening have common limitations: small privately-collected datasets, a focus on early-stage investment, and limited practical application. A multi-stage supervised classification system was developed that identifies startup companies likely to receive additional funding, be acquired or have an IPO in the future. The system produces an optimised classification pipeline which is applied to data collected from large, public online databases (CrunchBase and PatentsView). The system was evaluated against three criteria important to the VC industry: predictive power, robustness, and efficiency. The system satisfies each of these criteria. It makes predictions with an average F1 score (for the positive class) of 0.36-0.55 over forecast windows of 2-4 years, it is robust, with only minimal variance in performance when trained on different historical datasets, and it is efficient in that it is semi-autonomous and could be made fully autonomous with minimal development. The prior experience of a startup's advisors, executives and founders was found to be the greatest predictor of investment performance. This project lays the groundwork for an industry-ready VC investment screening tool.
+Venture Capital (VC) firms face the challenge of identifying a few outstanding investments from a sea of opportunities. The VC industry requires better systems to manage labour-intensive tasks like investment screening. Previous approaches to improve VC investment screening have common limitations: small, private datasets, a focus on early-stage investment, and limited feature sets. To address these limitations, a multi-stage VC investment screening system is presented. The core of the system is an optimisation process that generates a supervised learning classifier which is applied to data collected from large, public online databases (CrunchBase and PatentsView). The system is evaluated against three criteria: predictive power, robustness, and efficiency. The system satisfies each of these criteria. The system makes predictions with better or comparable performance to previous studies, while addressing a far larger domain of investment prediction tasks with respect to forecast window, developmental stage and target outcome. The system is robust, with only minimal variance in performance when trained on different historical datasets. The system is efficient in that it is near-autonomous and automatically adapts to changes in dataset and prediction task. This project also contributes a comprehensive empirical study of models of startup investment performance. The prior experience of a startup's advisors, executives and founders is found to be the greatest predictor of startup investment performance. Ultimately, this project makes significant steps towards further automation in the VC industry.
 
 \end{abstract}
 

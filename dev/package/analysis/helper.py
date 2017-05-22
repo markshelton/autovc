@@ -1,23 +1,23 @@
+#standard imports
+import sys
+import numpy as np
+import scipy.stats as stats
+import pandas as pd
+from datetime import date, timedelta
+import math
+from itertools import chain
+
+#third party imports
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib import rcParams
+import matplotlib.ticker as tkr
+import seaborn as sns
+from sklearn import metrics
+
 SYS_PATH = r'C:/Users/mark/Documents/GitHub/honours/dev/package/'
 SAVE_PATH = r"C:/Users/mark/Documents/GitHub/honours/submissions/thesis-original"
 LOAD_PATH = r"C:/Users/mark/Documents/GitHub/honours/dev/package/analysis/output/temp/output.db"
-
-TINY_SIZE, SMALL_SIZE, MEDIUM_SIZE, BIGGER_SIZE  = 12, 16, 20, 30
-plt.style.use(['seaborn-white', 'seaborn-paper'])
-sns.set_palette("colorblind")
-rcParams['font.family'] = 'serif' 
-rcParams['font.serif'] = 'CMU Serif' 
-rcParams['font.weight'] = 'bold'
-rcParams['font.size'] = SMALL_SIZE #default font size
-rcParams['axes.titlesize'] =SMALL_SIZE   # fontsize of the axes title
-rcParams['axes.labelsize'] =MEDIUM_SIZE    # fontsize of the x and y labels
-rcParams['xtick.labelsize'] =SMALL_SIZE    # fontsize of the tick labels
-rcParams['ytick.labelsize'] =SMALL_SIZE   # fontsize of the tick labels
-rcParams['legend.fontsize'] =SMALL_SIZE    # legend fontsize
-rcParams['figure.titlesize'] =BIGGER_SIZE  # fontsize of the figure title
-rcParams['figure.figsize'] = (8,3)
-pd.set_option('precision',3)
-outline_bars = dict(linewidth = 1.25, edgecolor = '.15')
 
 def get_results(build, stage):
 
@@ -46,11 +46,14 @@ def get_results(build, stage):
         df["feature_date_str"] = df["feature_date"].astype(str)
         df["forecast_window"] =  df["label_date"] - df["feature_date"]
         df["forecast_window_years"] = df["forecast_window"].apply(lambda x: x.days // 30) / 12
+        df["forecast_window_years"] = df["forecast_window_years"].astype(int).astype(str).apply(lambda x: x + " Years")
     except: print("Error: Dates")
     try: df["dataset_type"] = df["dataset_type"].map({"train":"Training Score","test":"Test Score"})
     except: print("Error: Learning Curve")
     try: df["label_type"] = df["label_type"].apply(lambda x: x.replace("_", " "))
     except: print("Error: Target Outcome")
+    try: df["feature_stage_single"] = df["feature_stage"].apply(lambda x: x.value_counts().index[0])
+    except: print("Error: Feature Stage")
     try:
         df["outcome_chance"] = df["label_name"].apply(lambda x: pd.Series(x).value_counts(normalize=True)[1])
     except: print("Error: Outcome")
@@ -90,7 +93,7 @@ def divide_groups(x, totals):
 
 #FORMATTING
 
-def auto_label(ax, fmt='{:,.0f}', adjust=0):
+def auto_label(ax, fmt='{:,.0f}', adjust=0, size=10):
     ymax_old = ax.get_ylim()[1]
     ax.set_ylim(ymax= ax.get_ylim()[1] * 1.1)
     for p in ax.patches:
@@ -99,7 +102,7 @@ def auto_label(ax, fmt='{:,.0f}', adjust=0):
             x=p.get_x()+p.get_width()/2.,
             y=np.nanmax([height,0]) + ymax_old * 0.02 + adjust,
             s=fmt.format(np.nanmax([height,0])),
-            ha="center")
+            ha="center", fontsize=size)
     ax.yaxis.set_ticks([])
 
 def add_vertical_line(ax, value, label, color, linestyle="dashed"):

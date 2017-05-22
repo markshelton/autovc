@@ -28,6 +28,8 @@ pickle_patents_path = "analysis/input/PatentsView/patents.pkl"
 output_path = "analysis/input/PatentsView/patents.db"
 headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'}
 log = logging.getLogger(__name__)
+names = None
+new_patents = None
 
 def get_companies(path):
     with sqlite3.connect(path) as conn:
@@ -36,6 +38,7 @@ def get_companies(path):
     return companies
 
 def load_names(pickle_names_path, input_path):
+    global names
     try: names = pd.read_pickle(pickle_names_path)
     except:
         names = get_companies(input_path)
@@ -46,12 +49,14 @@ def load_names(pickle_names_path, input_path):
 def load_patents(path):
     try:
         with sqlite3.connect(path) as conn:
-            patents = pd.read_sql("SELECT * FROM patents;", conn, index_col="assignee_uuid")
+            patents = pd.read_sql("SELECT assignee_uuid FROM patents;", conn, index_col="assignee_uuid")
     except: patents = pd.DataFrame()
     finally: return patents.index
 
 @logged
 def load_progress(pickle_names_path, input_path, output_path):
+    global names
+    global new_patents
     names = load_names(pickle_names_path, input_path)
     patents = load_patents(output_path)
     names = names.drop(patents, errors="ignore")
@@ -119,13 +124,15 @@ def save_progress(names, new_patents, pickle_names_path, output_path):
     store_patents(new_patents, output_path)
 
 def main():
+    global names
+    global new_patents
     names, patents, new_patents, tested_uuids = load_progress(pickle_names_path, input_path, output_path)
     url_map = prepare_urls(names)
     ex = cf.ThreadPoolExecutor(max_workers=10)
     session = rq.Session()
     future_map = {ex.submit(load_url, session, url):uuid for (uuid, url) in url_map.items()}
     for tally, future in enumerate(cf.as_completed(future_map)):
-        if tally % 5000 == 50:
+        if tally % 5000 == 500:
             names = names.drop(tested_uuids)
             save_progress(names, new_patents, pickle_names_path, output_path)
             names, patents, new_patents, tested_uuids = load_progress(pickle_names_path, input_path, output_path)
@@ -151,6 +158,13 @@ def main():
             tested_uuids.append(uuid)
             log.info("{} | {} | {} | {}".format(tally, status, company_name, msg))
 
+def remove_duplicates(path):
+     with sqlite3.connect(path) as conn:
+        patents = pd.read_sql("SELECT * FROM patents;", conn)
+        patents = patents.drop_duplicates()
+        patents.to_sql("patents", conn, if_exists="replace",index=False)
+        return patents
+
 def loop():
     while True:
         try: main()
@@ -159,5 +173,6 @@ def loop():
             save_progress(names, new_patents, pickle_names_path, output_path)
 
 if __name__ == "__main__":
-    loop()
-
+    main()
+    #loop()
+    #remove_duplicates(output_path)

@@ -17,7 +17,7 @@ In this chapter, we explain the methodology used to fill the research gap identi
 
 \item Dataset Preparation. Our primary data source was the CrunchBase online database, which we supplemented with patent filing data from PatentsView. We collected two database dumps from CrunchBase in September 2016 and April 2017, for training and testing respectively. The database dumps were in the format of CSV files which we imported into a relational database (SQLite) and performed aggregation queries to create features suitable for classification. We then performed screening based on each company's developmental stage and age to ensure only relevant companies were included in the dataset. Finally, we explored the dataset and identified issues of sparsity, long-tailed distributions, imbalanced feature ranges, and non-orthogonality.
 
-\item Pipeline Creation. We developed a processing pipeline framework that seeks to address the dataset issues identified during data collection. Our pipeline is based on the popular Python machine learning library Scikit-learn \cite{pedregosa2011}. Pre-processing steps include imputation, transformation, scaling and feature extraction. Each pre-processing step has hyperparameters that can be tuned (e.g. imputation strategy, number of components to extract) that affect the pipeline's classification performance. We also tested a number of common classification algorithms and their hyperparameters, selected from our literature review in Chapter~\ref{chap:litreview}. We performed a search across the pipeline's hyperparameters to generate candidate pipelines. The hyperparameters that we found to have the most significant effect on the final performance of the pipelines were related to the classification algorithms.
+\item Pipeline Creation. We developed a processing pipeline framework that seeks to address the dataset issues identified during data collection. Our pipeline is based on the popular Python machine learning library Scikit-learn \cite{pedregosa2011}. Pre-processing steps include imputation, transformation, scaling and feature extraction. Each pre-processing step has hyper-parameters that can be tuned (e.g. imputation strategy, number of components to extract) that affect the pipeline's classification performance. We also tested a number of common classification algorithms and their hyper-parameters, selected from our literature review in Chapter~\ref{chap:litreview}. We performed a search across the pipeline's hyper-parameters to generate candidate pipelines. The hyper-parameters that we found to have the most significant effect on the final performance of the pipelines were related to the classification algorithms.
 
 \item Pipeline Selection. Our system evaluates and ranks the candidate pipelines and tests the best pipelines (finalist pipelines) over pseudo-historical datasets. This process ensures we select pipelines that are robust with respect to time. We prepared the dataset slices using a technique that filters records by their timestamps, effectively recreating historical datasets. We use Area under \gls{pr} Curve as our evaluation metric. We aggregate the results for each finalist pipeline across these dataset slices and rank the finalist pipelines on their overall performance, so we can select the best pipeline for further evaluation. We don't observe significant variance in the pipelines on aggregate against the dataset slices, but there is variance within the individual pipelines. Our results suggest that it is optimal to evaluate the top 3-5 candidate pipelines in this manner.
 
@@ -40,7 +40,7 @@ In the previous chapter, we reviewed the literature concerning data sources for 
 
 \subsubsection{CrunchBase}
 
-CrunchBase is an online, crowd-sourced repository of startup companies, individuals and investors with a focus on US high-tech sectors. CrunchBase is freely accessible for browsing but requires licenses to filter the dataset, use the API, and download Microsoft Excel and CSV-formatted dumps. For the purposes of this project, we were granted an Academic License. CrunchBase provides database access in a few formats that offer trade-offs in terms of accessibility and comprehensiveness. We intended to use CrunchBase's API because it provides the most comprehensive access to their database. We developed a collector that downloaded a daily list of updated API endpoints from CrunchBase and queried nodes it needed to update. CrunchBase's API provides JSON-formatted responses which the program recursively parsed and stored into a relational database. However, due to the time constraints of this research project, we abandoned this data collection method. CrunchBase also provides CSV-formatted dumps of their key endpoints (e.g. organizations, people, funding rounds). We downloaded two CSV-formatted dumps from Crunchbase on 09 September 2016 and 04 April 2017 which we loaded into relational databases (see Appendix~\ref{appendix:database_schema} for the full database schema).
+CrunchBase is an online, crowd-sourced repository of startup companies, individuals and investors with a focus on US high-tech sectors. CrunchBase is freely accessible for browsing but requires licenses to filter the dataset, use the API, and download Microsoft Excel and CSV-formatted dumps. For the purposes of this project, we were granted an Academic License. CrunchBase provides database access in a few formats that offer trade-offs in terms of accessibility and comprehensiveness. We intended to use CrunchBase's API because it provides the most comprehensive access to their database. We developed a collector that downloaded a daily list of updated API endpoints from CrunchBase and queried nodes it needed to update. CrunchBase's API provides JSON-formatted responses which the program recursively parsed and stored into a relational database. However, due to the time constraints of this research project, we abandoned this data collection method. CrunchBase also provides CSV-formatted dumps of their key endpoints (e.g. organizations, people, funding rounds). We downloaded two CSV-formatted dumps from CrunchBase on 09 September 2016 and 04 April 2017 which we loaded into relational databases (see Appendix~\ref{appendix:database_schema} for the full database schema).
 
 \subsubsection{PatentsView}
 
@@ -55,18 +55,18 @@ We performed preliminary screening on the primary dataset (N = 425,934) to ensur
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/descriptives_counts_stage}
-    \caption[Startup development lifecyle]{Idealised startup development lifecycle with company counts from the master dataset (c. September 2016).}
+    \caption[Startup development life-cycle]{Idealised startup development life-cycle with company counts from the master dataset (c. September 2016).}
     \label{fig:design:lifecycle}
 \end{figure}
 
-After attempting to place the companies into development stages we are left with a large group of companies (the majority of the dataset) that have not raised funding and so can not be classified on that basis. We assume that companies that have not raised funding fall into two groups - those that intend to raise funding but have not had time to yet, and those that have chosen not to pursue funding and are unlikely to do so. We separated these groups by applying a cutoff equal to the 90th percentile of the age of companies in the Seed category, and excluded the older group from further analyses (N = 227,162,  53.3\%). As we are only interested in companies that could theoretically seek investment, we also excluded Closed, Acquired and IPO groups from further analyses (N = 35,973, 8.4\%).
+After attempting to place the companies into development stages we are left with a large group of companies (the majority of the dataset) that have not raised funding and so can not be classified on that basis. We assume that companies that have not raised funding fall into two groups - those that intend to raise funding but have not had time to yet, and those that have chosen not to pursue funding and are unlikely to do so. We separated these groups by applying a cut-off equal to the 90th percentile of the age of companies in the Seed category, and excluded the older group from further analyses (N = 227,162,  53.3\%). As we are only interested in companies that could theoretically seek investment, we also excluded Closed, Acquired and IPO groups from further analyses (N = 35,973, 8.4\%).
 
 Figure\ref{fig:design:stages_ages} depicts the ages of companies in the master dataset, grouped by developmental stage. While there is significant variability in age for each developmental stage, there is a broad positive relationship between age and developmental stage. Most pre-Series A companies are under five years old, and the majority of Series D+ funded companies are under 10 years old and the 75th percentile is at 15 years old. On this basis, we excluded companies that are over the 75th percentile of the age of companies in the Series D+ category (N =9,756, 2.2\%). Overall, our preliminary screening steps reduced the dataset from 425,934 companies to 153,043 companies, a reduction of 64.1\%.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/descriptives_ages_stage}
-    \caption[Company age distribution]{Company ages in years grouped by developmental stage. The dashed red line represents the 75th percentile of the age of companies in the Series D+ category (15.7 years).}
+    \caption[Company ages by developmental stage]{Company ages in years grouped by developmental stage. The dashed red line represents the 75th percentile of the age of companies in the Series D+ category (15.7 years).}
     \label{fig:design:stages_ages}
 \end{figure}
 
@@ -74,12 +74,12 @@ Figure\ref{fig:design:stages_ages} depicts the ages of companies in the master d
 
 \subsubsection{Descriptive Statistics}
 
-Table~\ref{tab:design:descriptive_statistics} presents the descriptive statistics for the dataset. The dataset is heavily skewed towards New companies (i.e. companies that were recently founded and have not raised any type of funding yet, 68.9\%). These companies have very few available features in comparison to companies at later developmental stages. We will investigate the impact of this sparsity on our predictions in Chapter~\ref{chap:evaluation}. We are presented with a fairly heterogenous dataset, the interquartile ranges imply significant variability in all measures. We do not believe that this implies that the data has not been cleaned effectively, but rather, reflects that startup companies naturally vary significantly in their traits.
+Table~\ref{tab:design:descriptive_statistics} presents the descriptive statistics for the dataset. The dataset is heavily skewed towards New companies (i.e. companies that were recently founded and have not raised any type of funding yet, 68.9\%). These companies have few available features in comparison to companies at later developmental stages. We will investigate the impact of this sparsity on our predictions in Chapter~\ref{chap:evaluation}. We are presented with a fairly heterogeneous dataset, the interquartile ranges imply significant variability in all measures. We do not believe that this implies that the data has not been cleaned effectively, but rather, reflects that startup companies naturally vary significantly in their traits.
 
-\begin{table}[!htb]
+\begin{table}[!htb] %Include patents statistics
     \centering
     \scalebox{0.9}{\input{../tables/design/descriptives_overall_stage}}
-    \caption[Descriptive statistics]{Descriptive statistics grouped by developmental stage. Source: Master dataset (c. Sep-16).}
+    \caption[Descriptive statistics by developmental stage]{Descriptive statistics grouped by developmental stage. Source: Master dataset (c. Sep-16).}
     \label{tab:design:descriptive_statistics}
 \end{table}
 
@@ -88,7 +88,7 @@ CrunchBase's approach to industry classification is simplistic compared to other
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/descriptives_counts_industry}
-    \caption[Companies by industry sector]{Companies grouped by industry sector. The 10 most common sectors are displayed. Source: Master dataset (c. September 2016).}
+    \caption[Company counts by industry sector]{Companies grouped by industry sector. The 10 most common sectors are displayed. Source: Master dataset (c. September 2016).}
     \label{fig:design:industry_counts}
 \end{figure}
 
@@ -108,33 +108,33 @@ First, we explored missing data in the dataset. We expected the dataset to be hi
         \caption[Sparsity by feature]{Distribution of missing data by feature}
         \label{fig:design:sparsity:observations}
     \end{subfigure}
-    \caption[Dataset sparsity]{Distribution of missing data in master dataset (c. September 2016).}
+    \caption[Distribution of missing data]{Distribution of missing data in master dataset (c. September 2016).}
     \label{fig:design:sparsity}
 \end{figure}
 
 \subsubsection{Normality}
 
-Next, we explored the distributions of features. Figure~\ref{fig:design:normality} shows the skewness and kurtosis of the features in our dataset. A feature is considered horizontally symmetrical if it has a skewness of 0 and generally considered highly skewed if its absolute skewness is above 1 \cite{bulmer1979}. The vast majority of our features are more skewed than this cutoff. Kurtosis is a measure of the distribution of variance in a feature. We use Fisher's measure of kurtosis, which has a normal value of 0. Our dataset has consistently higher kurtosis than normal which suggests that we have many extreme values in our dataset. These results in concert suggest that our dataset has many features that are positively skewed with long-tail distributions. This is intuitively what we might expect for features like ``amount of funding raised''.
+Next, we explored the distributions of features. Figure~\ref{fig:design:normality} shows the skewness and kurtosis of the features in our dataset. A feature is considered horizontally symmetrical if it has a skewness of 0 and generally considered highly skewed if its absolute skewness is above 1 \cite{bulmer1979}. The vast majority of our features are more skewed than this cut-off. Kurtosis is a measure of the distribution of variance in a feature. We use Fisher's measure of kurtosis, which has a normal value of 0. Our dataset has consistently higher kurtosis than normal which suggests that we have many extreme values in our dataset. These results in concert suggest that our dataset has many features that are positively skewed with long-tail distributions. This is intuitively what we might expect for features like ``amount of funding raised''.
 
 \begin{figure}[!htb]
     \centering
     \begin{subfigure}{\textwidth}
         \includegraphics[width=\textwidth]{../figures/design/skew}
-        \caption[Distribution of skew by feature]{}
+        \caption[Distribution of skewness by feature]{Skewness.}
         \label{fig:design:normality:skew}
     \end{subfigure}
     \begin{subfigure}{\textwidth}
         \includegraphics[width=\textwidth]{../figures/design/kurtosis}
-        \caption[Distribution of kurtosis by feature]{}
+        \caption[Distribution of kurtosis by feature]{Kurtosis.}
         \label{fig:design:normality:kurtosis}
     \end{subfigure}
-    \caption[Dataset normality]{Distribution of features in master dataset (c. September 2016).}
+    \caption[Distribution of skewness and kurtosis]{Distribution of features in master dataset (c. September 2016).}
     \label{fig:design:normality}
 \end{figure}
 
 \subsubsection{Scale}
 
-Next, we explored the scaling and range of each of our features. Figure~\ref{fig:design:scaling} shows the \gls{iqr} of each feature (transformed by log1p for ease of viewing). The distribution is extremely skewed, which shows that our features have very different scaling. This may be an issue for our machine learning estimators and feature extractors, so we address this by applying a scaler in our pipeline.
+Next, we explored the scaling and range of each of our features. Figure~\ref{fig:design:scaling} shows the \gls{iqr} of each feature (transformed by log1p for ease of viewing). The distribution is extremely skewed, which shows that our features have a wide range of magnitudes. This may be an issue for our machine learning estimators and feature extractors, so we address this by applying a scaler in our pipeline.
 
 \begin{figure}[!htb]
     \centering
@@ -145,18 +145,18 @@ Next, we explored the scaling and range of each of our features. Figure~\ref{fig
 
 \subsubsection{Orthogonality}
 
-Finally, we explored the orthogonality of our features: the extent to which the variance of our features is unrelated. This is a less straight-forward measure. We explore pair-wise inter-correlations between our features and evaluate how many of the inter-correlations are above a particular correlation cutoff, as depicted in Figure~\ref{fig:design:orthogonality}. We use two correlation metrics: Pearson and Spearman. Pearson is more commonly used but Spearman is a ranked metric and may more accurately reflect our non-normal feature distributions. Although most features have relatively low inter-correlations (\~60\% below 0.2) there are still a considerable number that are highly correlated, so it might be efficient to remove these features using an unsupervised feature extracter prior to estimation.
+Finally, we explored the orthogonality of our features: the extent to which the variance of our features is unrelated. This is a less straight-forward measure. We explore pair-wise inter-correlations between our features and evaluate how many of the inter-correlations are above a particular correlation cut-off, as depicted in Figure~\ref{fig:design:orthogonality}. We use two correlation metrics: Pearson and Spearman. Pearson is more commonly used but Spearman is a ranked metric and may more accurately reflect our non-normal feature distributions. Although most features have relatively low inter-correlations (\~60\% below 0.2) there are still a considerable number that are highly correlated, so it might be efficient to remove these features using an unsupervised feature extractor prior to estimation.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/orthogonality}
-    \caption[Distribution of intercorrelations]{Distribution of intercorrelations in master dataset (c. September 2016).}
+    \caption[Distribution of inter-correlations]{Distribution of inter-correlations in master dataset (c. September 2016).}
     \label{fig:design:orthogonality}
 \end{figure}
 
 \section{Pipeline Creation}
 
-We developed a classification pipeline using the popular Python-based machine learning library Scikit-learn \cite{pedregosa2011}. The classification pipeline construct allows us to easily search across hyperparameters at each step in the pipeline (see Appendix~\ref{appendix:pipeline_hyperparameters} for hyperparameter list). The following sections explore the testing of each hyperparameter decision, and the selection of primary classifiers for the following steps. This process is depicted in Figure~\ref{fig:design:pipeline_creation}.
+We developed a classification pipeline using the popular Python-based machine learning library Scikit-learn \cite{pedregosa2011}. The classification pipeline construct allows us to easily search across hyper-parameters at each step in the pipeline (see Appendix~\ref{appendix:pipeline_hyperparameters} for hyper-parameter list). The following sections explore the testing of each hyper-parameter decision, and the selection of primary classifiers for the following steps. This process is depicted in Figure~\ref{fig:design:pipeline_creation}.
 
 \begin{figure}[!htb]
     \centering
@@ -179,58 +179,58 @@ After reviewing the distribution of missing data, we decided to perform further 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/imputer}
-    \caption[Area under PR Curves by imputation strategy]{Area under \gls{roc} for different imputation strategies. Imputation strategies include replacing missing values with the most frequent (mode), median and mean value of each respective feature. Results presented are aggregated from hyperparameter optimisation performed over entire classification pipeline (including all classifiers).Source: Features (Apr-12) and labels (Apr-14, 2 year forecast window) derived from Master dataset (c. Sep-16).}
+    \caption[Area under PR Curves by imputation strategy]{Area under \gls{roc} for different imputation strategies. Imputation strategies include replacing missing values with the most frequent (mode), median and mean value of each respective feature. Results presented are aggregated from hyper-parameter optimisation performed over entire classification pipeline (including all classifiers).Source: Features (Apr-12) and labels (Apr-14, 2 year forecast window) derived from Master dataset (c. Sep-16).}
     \label{fig:design:imputer}
 \end{figure}
 
 \subsection{Transformation}
 
-While the classification algorithms we identified in the previous chapter are relatively robust to violations of normality, it may be beneficial to transform the data if the feature distributions are extreme. Table~\ref{fig:design:funding_transformation} shows one of the key features, Total Funding Raised, under a number of different transformations. Like many features in our dataset, the distribution of Total Funding Raised is highly skewed. The log transformation reduces this skew (a normal distribution of non-zero values is apparent) and square root transformation also reduces this skew (to a lesser extent). The impact of these transformations is reduced by the extent of their zero-inflation. However, it is still reasonable to expect both of these transformations to improve the classification accuracy. Figure~\ref{fig:design:transformer} shows the \gls{roc} of these different transformation functions. Both functions provide a small performance improvement, with the square root function narrowly best.
+While the classification algorithms we identified in the previous chapter are relatively robust to violations of normality, it may be beneficial to transform the data if the feature distributions are extreme. Table~\ref{fig:design:funding_transformation} shows one of the key features, Total Funding Raised, under a number of different transformations. Like many features in our dataset, the distribution of Total Funding Raised is highly skewed. The log transformation reduces this skewness (a normal distribution of non-zero values becomes visible) and square root transformation also reduces this skewness (to a lesser extent). The impact of these transformations is reduced by the extent of their zero-inflation. However, it is still reasonable to expect both of these transformations to improve the classification accuracy. Figure~\ref{fig:design:transformer} shows the \gls{roc} of these different transformation functions. Both functions provide a small performance improvement, with the square root function narrowly best.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/funding_transformation}
-    \caption[Funding raised feature transformed by functions]{}
+    \caption[Funding raised transformed by functions]{Funding raised transformed by functions.}
     \label{fig:design:funding_transformation}
 \end{figure}
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/transformer}
-    \caption[Area under PR Curves by transformation function]{Area under \gls{roc} for different transformation functions. Transformations include: None (identity transformation), Log1p (natural logarithm of one plus the input array, element-wise), and Sqrt (the square root of the input array, element-wise). Results presented are aggregated from hyperparameter optimisation performed over entire classification pipeline (including all classifiers).Source: Features (Apr-12) and labels (Apr-14, 2 year forecast window) derived from Master dataset (c. Sep-16).}
+    \caption[Area under PR Curves by transformation function]{Area under \gls{roc} for different transformation functions. Transformations include: None (identity transformation), Log1p (natural logarithm of one plus the input array, element-wise), and Sqrt (the square root of the input array, element-wise). Results presented are aggregated from hyper-parameter optimisation performed over entire classification pipeline (including all classifiers).Source: Features (Apr-12) and labels (Apr-14, 2 year forecast window) derived from Master dataset (c. Sep-16).}
     \label{fig:design:transformer}
 \end{figure}
 
 \subsection{Scaling}
 
-Standardisation of datasets is a common requirement for many feature extraction methods and machine learning estimators. Sci-kit learn provides three primary scaling functions: StandardScaler, RobustScaler and MinMaxScaler. RobustScaler is intended to alleviate the effect of outliers while MinMaxScaler is intended to preserve zero entries in sparse data - both of these are relevant properties for the dataset. Figure~\ref{fig:design:scaler} shows the receiver-operating characteristics of the different scaling functions. MinMaxScaler and RobustScaler actually underperform the null condition while StandardScaler only performs on par with the null condition. This is unexpected but may be caused by the previously applied transformations.
+Standardisation of datasets is a common requirement for many feature extraction methods and machine learning estimators. Sci-kit learn provides three primary scaling functions: StandardScaler, RobustScaler and MinMaxScaler. RobustScaler is intended to alleviate the effect of outliers while MinMaxScaler is intended to preserve zero entries in sparse data - both of these are relevant properties for the dataset. Figure~\ref{fig:design:scaler} shows the receiver-operating characteristics of the different scaling functions. MinMaxScaler and RobustScaler actually under-perform the null condition while StandardScaler only performs on par with the null condition. This is unexpected but may be caused by the previously applied transformations.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/scaler}
-    \caption[Area under PR Curves by scaling function]{Area under \gls{roc} for different scaling functions. Scaling functions include: None, StandardScaler (mean: 0, variance: 1), RobustScaler (median: 0, IQR: 1) and MinMaxScaler (min: 0, max: 1). Results presented are aggregated from hyperparameter optimisation performed over entire classification pipeline (including all classifiers).Source: Features (Apr-12) and labels (Apr-14, 2 year forecast window) derived from Master dataset (c. Sep-16).}
+    \caption[Area under PR Curves by scaling function]{Area under \gls{roc} for different scaling functions. Scaling functions include: None, StandardScaler (mean: 0, variance: 1), RobustScaler (median: 0, IQR: 1) and MinMaxScaler (min: 0, max: 1). Results presented are aggregated from hyper-parameter optimisation performed over entire classification pipeline (including all classifiers).Source: Features (Apr-12) and labels (Apr-14, 2 year forecast window) derived from Master dataset (c. Sep-16).}
     \label{fig:design:scaler}
 \end{figure}
 
 \subsection{Extraction}
 
-Feature extraction reduces high-dimensional data into lower-dimensional data in such a way that maximises the variance of the data. The most common approach to dimensionality reduction is \gls{pca}, which constructs orthogonal eigenvectors (components). The magnitude of each eigenvector (its eigenvalue) is displayed in Figure~\ref{fig:design:scree_plot}. The majority of explained variance is captured in the first 10 components, and the Eigenvalues drop below 1 by 100 components - this suggests that these are reasonable values for further hyperparameter search. Figure~\ref{fig:design:extracter} shows the \gls{roc} for different numbers of extracted components. All curves produce similar classification results (within margin of error) which implies that we should extract between 1 -- 20 components because it will provide us with more efficient computation.
+Feature extraction reduces high-dimensional data into lower-dimensional data in such a way that maximises the variance of the data. The most common approach to dimensionality reduction is \gls{pca}. \Gls{pca} is a technique which takes a set of vectors and finds an uncorrelated coordinate system in which to represent these vectors \cite{jolliffe2002}. This new co-ordinate system optimally distributes the variance, so that the first basis vector (eigenvector) has the largest possible variance and all successive eigenvector have the largest possible variance given that they are strictly uncorrelated with the previous eigenvectors. The magnitude of each eigenvector (its eigenvalue) is displayed in Figure~\ref{fig:design:scree_plot}. The majority of explained variance is captured in the first 10 components, and the eigenvalues drop below 1 by 100 components - this suggests that these are reasonable values for further hyper-parameter search. Figure~\ref{fig:design:extracter} shows the \gls{roc} for different numbers of extracted components. All curves produce similar classification results (within margin of error) which implies that we should extract between 1 -- 20 components because it will provide us with more efficient computation.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/scree_plot}
-    \caption[PCA Scree Plot]{Eigenvalues extracted from \gls{pca} model. Horizontal line drawn at an Eigenvalue of 1 -- this theoretically represents the ‘contribution’ of one original feature and is commonly used as an approximate threshold for included components. Source: Master dataset (c. Sep-2016).}
+    \caption[PCA scree plot]{Eigenvalues extracted from \gls{pca} model. Horizontal line drawn at an Eigenvalue of 1 -- this theoretically represents the `contribution' of one original feature and is commonly used as an approximate threshold for included components. Source: Master dataset (c. Sep-2016).}
     \label{fig:design:scree_plot}
 \end{figure}
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/extracter}
-    \caption[Area under PR Curves by PCA techniques]{Area under \gls{roc} for different number of extracted components from \gls{pca}. Curves have been grouped by the quotient of the number of components divided by 20 to result in five ordered groups (e.g. Range [0, 19] --> 0). Results presented are aggregated from hyperparameter optimisation performed over entire classification pipeline (including all classifiers).Source: Features (Apr-12) and labels (Apr-14, 2 year forecast window) derived from Master dataset (c. Sep-16).}
+    \caption[Area under PR Curves by PCA techniques]{Area under \gls{roc} for different number of extracted components from \gls{pca}. Curves have been grouped by the quotient of the number of components divided by 20 to result in five ordered groups (e.g. Range [0, 19] --> 0). Results presented are aggregated from hyper-parameter optimisation performed over entire classification pipeline (including all classifiers).Source: Features (Apr-12) and labels (Apr-14, 2 year forecast window) derived from Master dataset (c. Sep-16).}
     \label{fig:design:extracter}
 \end{figure}
 
-While \gls{pca} is efficient at reducing features, the resultant components are not interpretable. Similarly, individual analysis of 400+ features is difficult to interpret. A compromise is to group the features using the conceptual framework we developed earlier from the literature review. The grouping approach applied weights to each individual feature that optimised the inter-correlations within each group. Given the highly skewed features, we use Spearman correlation which is robust to skewness because it is based on ranking. Figure~\ref{fig:design:grouped_heatmap} displays the inter-correlations between each factor from the proposed conceptual framework. As we would expect, `investors' and `funding' features are highly correlated. While `investors' attempts to capture the influence of previous investors, it also captures features like the size of an investor's past investments, which would likely correlate with the size of the investment they made in the target company. Interestingly, `founders' features are positively correlated with all other features except for `advisors' features which are negatively correlated with all other feature groups.
+While \gls{pca} is efficient at reducing features, the resultant components are not interpretable. Similarly, individual analysis of 400+ features is difficult to interpret. A compromise is to group the features using the conceptual framework we developed earlier from the literature review. The grouping approach applied weights to each individual feature that optimised the inter-correlations within each group. Given the highly skewed features, we use Spearman correlation which is robust to skewness because it is based on ranking. Figure~\ref{fig:design:grouped_heatmap} displays the inter-correlations between each factor from the conceptual framework. As we would expect, Investors and Funding features are highly correlated. While Investors captures the influence of previous investors, it also captures features like the size of an investor's past investments, which would likely correlate with the size of the investment they made in the target company. Interestingly, Founders features are positively correlated with all other features except for Advisors features which are negatively correlated with all other feature groups.
 
 \begin{figure}[!htb]
     \centering
@@ -241,34 +241,34 @@ While \gls{pca} is efficient at reducing features, the resultant components are 
 
 \subsection{Classification Algorithms}
 
-The literature review we performed in the previous chapter revealed seven common supervised classification algorithms potentially suitable for application to this problem area. Our review suggested that Random Forests were most likely to provide a successful trade-off between predictive power, interpretability and time taken. We empirically tested each of these classifiers and compared their performance against a range of metrics, as displayed in Table~\ref{fig:design:classification_metrics}. We report maximum as well as median recorded scores to ensure we didn't penalise algorithms that had unfavourable hyperparameter search spaces.
+The literature review we performed in the previous chapter revealed seven common supervised classification algorithms potentially suitable for application to this problem area. Our review suggested that Random Forests were most likely to provide a successful trade-off between predictive power, interpretability and time taken. We empirically tested each of these classifiers and compared their performance against a range of metrics, as displayed in Table~\ref{fig:design:classification_metrics}. We report maximum as well as median recorded scores to ensure we didn't penalise algorithms that had unfavourable hyper-parameter search spaces.
 
 \begin{table}[!htb]
     \centering
     \scalebox{0.8}{\input{../tables/design/classification_metrics}}
-    \caption[Overview of classification algorithm performance]{}
+    \caption[Overview of classification algorithm performance]{Overview of classification algorithm performance.}
     \label{fig:design:classification_metrics}
 \end{table}
 
-We take a closer look at the \gls{pr} curves for each classifier in Figure~\ref{fig:design:classifier}. While all classifiers perform better than chance, Logistic Regressions and Random Forests come out ahead, and Support Vector Machines and Artificial Neural Networks appear to underperform. Delving into the cross-validated learning curves for each classifier (Figure~\ref{fig:design:create_learning_curves}) we see that Naive Bayes, Logistic Regression, Artificial Neural Networks and Support Vector Machines quickly converge, whereas Decision Trees, Random Forests and K-Nearest Neighbors require more observations to converge. This suggests that we might expect Random Forests to do better in final testing (as testing will not be cross-validated), as well as in the future as the dataset naturally grows.
+We take a closer look at the \gls{pr} curves for each classifier in Figure~\ref{fig:design:classifier}. While all classifiers perform better than chance, Logistic Regressions and Random Forests come out ahead, and Support Vector Machines and Artificial Neural Networks appear to under-perform. Delving into the cross-validated learning curves for each classifier (Figure~\ref{fig:design:create_learning_curves}) we see that Naive Bayes, Logistic Regression, Artificial Neural Networks and Support Vector Machines quickly converge, whereas Decision Trees, Random Forests and K-Nearest Neighbours require more observations to converge. This suggests that we might expect Random Forests to do better in final testing (as testing will not be cross-validated), as well as in the future as the dataset naturally grows.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/classifier}
-    \caption[Area under PR Curves by classification algorithms]{Area under \gls{roc} for different classification algorithms. All algorithms are implementations from the Sci-kit learn library. Results presented are aggregated from hyperparameter optimisation performed over entire classification pipeline (including all classifiers).Source: Features (Apr-12) and labels (Apr-14, 2 year forecast window) derived from Master dataset (c. Sep-16).}
+    \caption[Area under PR Curves by classification algorithms]{Area under \gls{roc} for different classification algorithms. All algorithms are implementations from the Sci-kit learn library. Results presented are aggregated from hyper-parameter optimisation performed over entire classification pipeline (including all classifiers).Source: Features (Apr-12) and labels (Apr-14, 2 year forecast window) derived from Master dataset (c. Sep-16).}
     \label{fig:design:classifier}
 \end{figure}
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/learning_curves_classifier}
-    \caption[Learning curves by classification algorithms]{Learning curves.}
+    \caption[Learning curves by classification algorithms]{Learning curves by classification algorithms.}
     \label{fig:design:create_learning_curves}
 \end{figure}
 
 \section{Pipeline Selection}
 
-In the previous chapter, we developed a system that generated a cross-section of candidate pipelines with different hyperparameters. In this step, we rank these candidate pipelines and evaluate the best pipelines (finalist pipelines) over a number of different dataset slices. This process, depicted in Figure~\ref{fig:design:pipeline_selection}, ensures that our final pipeline is robust in their performance with respect to time. We aggregate the results for each finalist pipeline across these dataset slices and rank the finalist pipelines on their overall performance. Finally, we select the best pipeline.
+In the previous chapter, we developed a system that generated a cross-section of candidate pipelines with different hyper-parameters. In this step, we rank these candidate pipelines and evaluate the best pipelines (finalist pipelines) over a number of different dataset slices. This process, depicted in Figure~\ref{fig:design:pipeline_selection}, ensures that our final pipeline is robust in their performance with respect to time. We aggregate the results for each finalist pipeline across these dataset slices and rank the finalist pipelines on their overall performance. Finally, we select the best pipeline.
 
 \begin{figure}[!htb]
     \centering
@@ -286,7 +286,7 @@ We performed preliminary testing of our reverse-engineering technique by compari
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/2013_slice_comparison}
-    \caption[Dataset slice compared with original dataset]{}
+    \caption[Dataset slice compared with original database]{Dataset slice compared with original dataset.}
     \label{fig:design:2013_slice_comparison}
 \end{figure}
 
@@ -295,13 +295,13 @@ Figure~\ref{fig:design:slice_counts_over_time} shows company counts by startup d
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/slice_counts_over_time}
-    \caption[Dataset counts over time]{}
+    \caption[Dataset counts over time]{Dataset slice counts over time.}
     \label{fig:design:slice_counts_over_time}
 \end{figure}
 
 \subsection{Evaluation Metrics}
 
-Next, we decided how to narrow our candidate pipelines down to finalist pipelines that we can evaluate further. There are a number of different metrics used to evaluate binary classifiers in machine learning. The most simplistic metric is accuracy but this is rarely used in practice because it gives misleading results in the case of imbalanced classes. \Gls{roc} curves are perhaps the mostly commonly used evaluation tool in binary classification, and show how the number of correctly classified positive examples varies with the number of incorrectly classified negative examples. The area under these curves gives a standardised result across a spectrum of decision thresholds. \Gls{pr} curves are similar to \gls{roc} curves but instead map the trade-offs between precision and recall. They are less commonly used than \gls{roc} curves but have been shown to produce more accruate results for imbalanced classes than \gls{roc} curves \cite{davis2006}. Given our dataset is highly imbalanced (the positive class is approximately 10\%) we decided to proceed with \gls{pr} curves. We will also use this metric to determine which is ultimately the best of our finalist pipelines.
+Next, we decided how to narrow our candidate pipelines down to finalist pipelines that we can evaluate further. There are a number of different metrics used to evaluate binary classifiers in machine learning. The most simplistic metric is accuracy but this is rarely used in practice because it gives misleading results in the case of imbalanced classes. \Gls{roc} curves are perhaps the mostly commonly used evaluation tool in binary classification, and show how the number of correctly classified positive examples varies with the number of incorrectly classified negative examples. The area under these curves gives a standardised result across a spectrum of decision thresholds. \Gls{pr} curves are similar to \gls{roc} curves but instead map the trade-offs between precision and recall. They are less commonly used than \gls{roc} curves but have been shown to produce more accurate results for imbalanced classes than \gls{roc} curves \cite{davis2006}. Given our dataset is highly imbalanced (the positive class is approximately 10\%) we decided to proceed with \gls{pr} curves. We will also use this metric to determine which is ultimately the best of our finalist pipelines.
 
 \subsection{Finalist Pipeline Evaluation}
 
@@ -310,7 +310,7 @@ Our hypothesis is that the performance of our classification pipelines may vary 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/design/selection_agg_slice}
-    \caption[Pipeline performance by slice date]{}
+    \caption[Pipeline performance by slice date]{Pipeline performance by slice date.}
     \label{fig:design:selection_agg_slice}
 \end{figure}
 
@@ -328,7 +328,7 @@ The best candidate pipeline is depicted in Table~\ref{fig:design:best_hyperparam
 \begin{table}[!htb]
     \centering
     \scalebox{0.8}{\input{../tables/design/best_hyperparameters}}
-    \caption[Hyperparameters of best pipeline]{}
+    \caption[Hyper-parameters of selected pipeline]{Hyper-parameters of selected pipeline.}
     \label{fig:design:best_hyperparameters}
 \end{table}
 

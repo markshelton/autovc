@@ -47,7 +47,7 @@ master_log = pd.DataFrame()
 flag_log_scores = False
 
 features_stage_info = dict(
-    Age = 'confidence_context_broader_company_age_number',
+    Age = 'confidence_context_economy_company_age_number',
     FundingRounds = 'confidence_validation_funding_rounds_number',
     FundingRaised = 'confidence_validation_funding_raised_value_total_number',
     SeriesA = 'confidence_validation_funding_round_codes_list_a',
@@ -113,6 +113,11 @@ def generate_dates(time_slices, forecast_windows, start_date, end_date, load_pre
         with open(output_slices_path, "rb") as prev_slices:
             dataset_slices = pickle.load(prev_slices)
         return dataset_slices
+    elif type(time_slices) is list:
+        dataset_slices = time_slices
+        with open(output_slices_path, "wb+") as save_path:
+            pickle.dump(dataset_slices, save_path)
+        return dataset_slices
     else:
         forecast_windows = [timedelta(weeks=x*52) for x in forecast_windows]
         largest_window = max(forecast_windows)
@@ -154,8 +159,8 @@ def get_slice(input_path, output_path, slice_date):
 
 @logged
 def apply_constraints(df):
-    age_old_cutoff = df["confidence_context_broader_company_age_number"][df["keys_company_stage"] == "Series D+"].quantile(0.75)
-    df = df.loc[df['confidence_context_broader_company_age_number'] <= age_old_cutoff]
+    age_old_cutoff = df["confidence_context_economy_company_age_number"][df["keys_company_stage"] == "Series D+"].quantile(0.75)
+    df = df.loc[df['confidence_context_economy_company_age_number'] <= age_old_cutoff]
     df = df.loc[df['keys_company_stage_group'] == "Included"]
     return df
 

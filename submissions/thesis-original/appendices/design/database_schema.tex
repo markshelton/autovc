@@ -1,4 +1,34 @@
 \chapter{Database Schema}
 \label{appendix:database_schema}
 
-%TODO
+\begin{table}[!htb]
+    \tiny
+    \centering
+    \scalebox{1}{
+        \begin{tabular}{p{3cm}p{10cm}} \toprule
+Relation & Attributes \\ \midrule
+Acquisitions & Acquiree Name, Acquiree Country, Acquiree State, Acquiree Region, Acquiree City, Acquirer Name, Acquirer Country, Acquirer State, Acquirer Region, Acquirer City, Acquisition Date, Acquisition Price, Acquisition Price Currency, Acquisition Price (USD), Acquiree CB URL, Acquirer CB URL, Acquiree UUID, Acquirer UUID, Acquisition UUID, Created Timestamp, Updated Timestamp \\
+Category Groups & Category Group UUID, Category Name, Category Group List \\
+Competitors &  Entity UUID, Competitor UUID, Created Timestamp, Updated Timestamp \\
+Customers &  Entity UUID, Customer UUID, Created Timestamp, Updated Timestamp \\
+Event Relationships & Event UUID, Entity UUID, Event Type, Relationship to Event (Type), Relationship to Event (Detail), Created Timestamp, Updated Timestamp \\
+Events & Event UUID, Event Name, Short Description, Started Date, Ended Date, Registration Details, Registration URL, Start Time, End Time, Venue Name, Venue Address, Location UUID, Cost, Description, City, Region, Country, Continent, Permalink, CB URL, Logo URL, Profile Image URL, Event Roles, Created Timestamp, Updated Timestamp \\
+Funding Rounds & Company Name, Country, State, Region, City, Company Category List, Funding Round Type, Funding Round Code, Announced Date, Raised Amount, Raised Amount Currency, Raised Amount (USD), Target Money Raised, Target Money Raised Currency, Target Money Raised (USD), Post Money Valuation, Post Money Valuation Currency, Post Money Valuation (USD), Investor Count, Investor Names, CB URL, Company UUID, Funding Round UUID, Created Timestamp, Updated Timestamp \\
+Funds & Entity UUID, Fund UUID, Fund Name, Started Date, Announced Date, Raised Amount, Raised Amount Currency, Created Timestamp, Updated Timestamp \\
+Investment Partners & Funding Round UUID, Investor UUID, Partner UUID \\
+Investments & Funding Round UUID, Investor UUID, Is Lead Investor \\
+Investors & Investor Name, Primary Role, Website Domain, Country, State, Region, City, Investor Type, Investment Count, Total Funding (USD), Founded Date, Closed Date, CB URL, Logo URL, Profile Image URL, Twitter URL, Facebook URL, Investor UUID, Updated Timestamp\\
+IPOs & Company Name, Country, State, Region, City, Stock Exchange Symbol, Stock Symbol, IPO Date, Opening Share Price, Opening Share Price Currency, Opening Share Price (USD), CB URL, IPO UUID, Company UUID, IPO UUID, Created Timestamp, Updated Timestamp \\
+Jobs & Person UUID, Organization UUID, Started Date, Ended Date, Is Current, Job Title, Job Role, Is Executive Role, Is Advisory Role \\
+Organizational Parents & Organization UUID, Parent Organization UUID, Relationship to Parent, Created Timestamp, Updated Timestamp \\
+Organization Descriptions & Organization UUID, Description \\
+Organizations & Company Name, Primary Role, Website Domain, Website URL, Country, State, Region, City, Zipcode, Address, Operating Status, Short Description, Category List, Category Group List, Number of Funding Rounds, Funding Total (USD), Founded Date, First Funding Date, Last Funding Date, Closing Date, Employee Count, Company Email, Company Phone, Facebook URL, CB URL, Logo URL, Profile Image URL, Twitter URL, Organization UUID, Created Timestamp, Updated Timestamp \\
+Patents & Assignee UUID, Patent Date, Citations by Patents, Citations of Patents, Patent Type \\
+People & First Name, Last Name, Country, State, City, CB URL, Logo URL, Profile Image URL, Twitter URL, Facebook URL, Primary Affiliation Organization, Primay Affiliation Title, Primary Organization UUID, Gender, People UUID, Created Timestamp, Updated Timestamp \\
+People Descriptions & People UUID, Description \\
+\bottomrule \end{tabular}
+    }
+    \caption[Relational database schema]{Relational database schema.}
+    \label{tab:design:descriptive_statistics}
+\end{table}
+
