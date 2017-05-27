@@ -166,24 +166,29 @@ def apply_constraints(df):
 
 def create_stages(df, **features):
     df2 = df.copy()
-    df2["keys_company_stage"] = "Other"
-    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["Closed"]] >= 1), "Closed", df2["keys_company_stage"])
-    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["Acquired"]] >= 1), "Acquired", df2["keys_company_stage"])
-    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["IPO"]] >= 1), "IPO", df2["keys_company_stage"])
+    df2["keys_company_stage_pre"] = "Other"
     df2["keys_company_stage_series-d+"] = df2[[features["SeriesD"],features["SeriesE"],features["SeriesF"],features["SeriesG"],features["SeriesH"]]].sum(axis=1)
-    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2["keys_company_stage_series-d+"] >= 1), "Series D+", df2["keys_company_stage"])
-    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["SeriesC"]] >= 1), "Series C", df2["keys_company_stage"])
-    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["SeriesB"]] >= 1), "Series B", df2["keys_company_stage"])
-    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["SeriesA"]] >= 1), "Series A", df2["keys_company_stage"])
-    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["FundingRaised"]] >= 0), "Seed", df2["keys_company_stage"])
-    age_new_cutoff = df2[features["Age"]][df2["keys_company_stage"] == "Seed"].quantile(0.75)
-    df2["keys_company_stage"] = np.where((df2["keys_company_stage"] == "Other") & (df2[features["Age"]] <= age_new_cutoff), "Pre-Seed", df2["keys_company_stage"])
+    df2["keys_company_stage_pre"] = np.where((df2["keys_company_stage_pre"] == "Other") & (df2["keys_company_stage_series-d+"] >= 1), "Series D+", df2["keys_company_stage_pre"])
+    df2["keys_company_stage_pre"] = np.where((df2["keys_company_stage_pre"] == "Other") & (df2[features["SeriesC"]] >= 1), "Series C", df2["keys_company_stage_pre"])
+    df2["keys_company_stage_pre"] = np.where((df2["keys_company_stage_pre"] == "Other") & (df2[features["SeriesB"]] >= 1), "Series B", df2["keys_company_stage_pre"])
+    df2["keys_company_stage_pre"] = np.where((df2["keys_company_stage_pre"] == "Other") & (df2[features["SeriesA"]] >= 1), "Series A", df2["keys_company_stage_pre"])
+    df2["keys_company_stage_pre"] = np.where((df2["keys_company_stage_pre"] == "Other") & (df2[features["FundingRaised"]] >= 0), "Seed", df2["keys_company_stage_pre"])
+    age_new_cutoff = df2[features["Age"]][df2["keys_company_stage_pre"] == "Seed"].quantile(0.75)
+    df2["keys_company_stage_pre"] = np.where((df2["keys_company_stage_pre"] == "Other") & (df2[features["Age"]] <= age_new_cutoff), "Pre-Seed", df2["keys_company_stage_pre"])
+
+    df2["keys_company_stage"] = df2["keys_company_stage_pre"]
+    df2["keys_company_stage"] = np.where((df2[features["IPO"]] >= 1), "IPO", df2["keys_company_stage"])
+    df2["keys_company_stage"] = np.where((df2[features["Acquired"]] >= 1), "Acquired", df2["keys_company_stage"])
+    df2["keys_company_stage"] = np.where((df2[features["Closed"]] >= 1), "Closed", df2["keys_company_stage"])
+
     group_stages = {"Other" : "Excluded", "Closed" : "Excluded", "IPO" : "Excluded", "Acquired" : "Excluded", "Pre-Seed" : "Included",
         "Seed" : "Included", "Series A" : "Included", "Series B" : "Included", "Series C" : "Included", "Series D+" : "Included"}
     df2["keys_company_stage_group"] = df2["keys_company_stage"].map(group_stages)
+    df2["keys_company_stage_pre_group"] = df2["keys_company_stage_pre"].map(group_stages)
     ordinal_stages = {"Pre-Seed" : 1, "Seed" : 2, "Series A" : 3, "Series B" : 4, "Series C" : 5, "Series D+" : 6,"Other" : np.nan, "Closed" : -1, "IPO" : 7, "Acquired" : 8}
     df2["keys_company_stage_number"] = df2["keys_company_stage"].map(ordinal_stages)
-    return df2[["keys_company_stage_group", "keys_company_stage","keys_company_stage_number"]]
+    df2["keys_company_stage_pre_number"] = df2["keys_company_stage_pre"].map(ordinal_stages)
+    return df2[["keys_company_stage_group", "keys_company_stage","keys_company_stage_number", "keys_company_stage_pre_group", "keys_company_stage_pre","keys_company_stage_pre_number"]]
 
 @logged
 def add_stages(df, stage_info = features_stage_info, slice_type="feature"):
@@ -192,7 +197,10 @@ def add_stages(df, stage_info = features_stage_info, slice_type="feature"):
         stages = stages.rename(columns={
         "keys_company_stage_group": "outcome_stage_group",
         "keys_company_stage":"outcome_stage",
-        "keys_company_stage_number":"outcome_stage_number"})
+        "keys_company_stage_number":"outcome_stage_number",
+        "keys_company_stage_pre_group": "outcome_stage_pre_group",
+        "keys_company_stage_pre":"outcome_stage_pre",
+        "keys_company_stage_pre_number":"outcome_stage_pre_number"})
     df = pd.concat([stages, df], axis=1)
     return df
 
@@ -202,8 +210,8 @@ def make_label(df, label_type = "Extra_Stage"):
     elif label_type == "IPO": y = df["outcome_ipo_bool"]
     elif label_type == "Exit": y = df["outcome_exit_bool"]
     elif label_type == "Extra_Round":
-        df["outcome_extra_rounds_number"] = df["outcome_funding_rounds_number"] - df["confidence_validation_funding_rounds_number"]
-        df["outcome_extra_rounds_bool"] = np.where(df["outcome_extra_rounds_number"] > 0, 1, 0)
+        df["outcome_extra_stage_number"] = df["outcome_stage_pre_number"] - df["keys_company_stage_number"]
+        df["outcome_extra_rounds_bool"] = np.where(df["outcome_extra_stage_number"] > 0, 1, 0)
         y = df["outcome_extra_rounds_bool"]
     elif label_type == "Extra_Stage":
         df["outcome_extra_stage_number"] = df["outcome_stage_number"] - df["keys_company_stage_number"]
@@ -211,9 +219,9 @@ def make_label(df, label_type = "Extra_Stage"):
         y = df["outcome_extra_stage_bool"]
     else: raise ValueError('Unknown label type given.')
     y = y.replace(np.nan, 0)
-    #print("Feature:", df["keys_company_stage_number"].value_counts())
-    #print("Outcome:", df["outcome_stage_number"].value_counts())
-    #print("Label:", y.value_counts())
+    print("Feature:", df["keys_company_stage_number"].value_counts())
+    print("Outcome:", df["outcome_stage_number"].value_counts())
+    print("Label:", y.value_counts())
     y = y.rename(label_type)
     return y
 
@@ -227,7 +235,7 @@ def filter_features(df):
     return X
 
 @logged
-def finalise_dataset(df, feature_stage = None, label_type=None, dataset_frac =None):
+def finalise_dataset(df, feature_stage = None, label_type="Extra_Stage", dataset_frac =None):
     if dataset_frac: df = df.sample(frac=dataset_frac)
     if feature_stage: df = df.loc[df["keys_company_stage"] == feature_stage]
     y = make_label(df, label_type=label_type)
@@ -239,15 +247,26 @@ def finalise_dataset(df, feature_stage = None, label_type=None, dataset_frac =No
 @logged
 def prepare_dataset(input_path, slice_date, slice_config, slice_type, output_folder, max_observations = None, load_prev_files = True, alt=False):
     slice_path = "{0}/{1}.db".format(output_folder[:-1], slice_date)
-    get_slice(input_path, slice_path, slice_date)
     slice_raw_path = slice_path.replace(".db", "_{0}_raw.csv".format(slice_type))
-    if not load_prev_files or not os.path.isfile(slice_raw_path):
-        dp.flatten_file(slice_path, slice_config, slice_raw_path, slice_type)
     slice_clean_path = slice_path.replace(".db", "_{0}_clean.csv".format(slice_type))
-    if not load_prev_files or not os.path.isfile(slice_clean_path):
+    if load_prev_files and os.path.isfile(slice_clean_path):
+        if alt: return pd.read_csv(slice_clean_path, encoding="latin1")
+        else: return slice_clean_path
+    elif load_prev_files and os.path.isfile(slice_raw_path):
         dp.clean_file(slice_raw_path, slice_clean_path, nrows=max_observations)
-    if alt: return pd.read_csv(slice_clean_path, encoding="latin1")
-    else: return slice_clean_path
+        if alt: return pd.read_csv(slice_clean_path, encoding="latin1")
+        else: return slice_clean_path
+    elif load_prev_files and os.path.isfile(slice_path):
+        dp.flatten_file(slice_path, slice_config, slice_raw_path, slice_type) #delete after
+        dp.clean_file(slice_raw_path, slice_clean_path, nrows=max_observations)
+        if alt: return pd.read_csv(slice_clean_path, encoding="latin1")
+        else: return slice_clean_path
+    else:
+        get_slice(input_path, slice_path, slice_date) #delete after
+        dp.flatten_file(slice_path, slice_config, slice_raw_path, slice_type) #delete after
+        dp.clean_file(slice_raw_path, slice_clean_path, nrows=max_observations)
+        if alt: return pd.read_csv(slice_clean_path, encoding="latin1")
+        else: return slice_clean_path
 
 @logged
 def merge_datasets(feature_date, label_date, output_folder, feature_clean_path, label_clean_path, merge_config, load_prev_files=True):
@@ -458,17 +477,19 @@ def evaluate_pipeline(best_pipeline = None):
         for label_type in cm.label_types:
             for feature_stage in cm.feature_stages:
                 for dataset_frac in cm.max_observations_evaluate:
-                    X_train, y_train, keys = finalise_dataset(df_train, label_type=label_type, feature_stage=feature_stage, dataset_frac=dataset_frac)
-                    X_test, y_test, keys = finalise_dataset(df_test, label_type=label_type, feature_stage=feature_stage)
-                    if log_scores: logged_fit(pipe, X_train, y_train)
-                    else: pipe.fit(X_train, y_train)
-                    if dataset_frac:
-                        scorer(pipe, X_train, y_train, model_scorer=cm.model_criteria_evaluate)
-                        store_log(feature_date_train, label_date_train, X_train, y_train, keys, cm, cm.output_log_evaluate,
-                            dataset_type="train", stage = "select", pipeline=best_pipeline, label_type=label_type, dataset_size=len(y_train))
-                    scorer(pipe, X_test, y_test, model_scorer=cm.model_criteria_evaluate)
-                    store_log(feature_date_train, label_date_train, X_test, y_test, keys, cm, cm.output_log_evaluate,
-                        dataset_type="test", stage = "select", pipeline=best_pipeline, label_type=label_type, dataset_size=len(y_train))
+                    try:
+                        X_train, y_train, keys = finalise_dataset(df_train, label_type=label_type, feature_stage=feature_stage, dataset_frac=dataset_frac)
+                        X_test, y_test, keys = finalise_dataset(df_test, label_type=label_type, feature_stage=feature_stage)
+                        if log_scores: logged_fit(pipe, X_train, y_train)
+                        else: pipe.fit(X_train, y_train)
+                        if dataset_frac:
+                            scorer(pipe, X_train, y_train, model_scorer=cm.model_criteria_evaluate)
+                            store_log(feature_date_train, label_date_train, X_train, y_train, keys, cm, cm.output_log_evaluate,
+                                dataset_type="train", stage = "select", pipeline=best_pipeline, label_type=label_type, dataset_size=len(y_train))
+                        scorer(pipe, X_test, y_test, model_scorer=cm.model_criteria_evaluate)
+                        store_log(feature_date_train, label_date_train, X_test, y_test, keys, cm, cm.output_log_evaluate,
+                            dataset_type="test", stage = "select", pipeline=best_pipeline, label_type=label_type, dataset_size=len(y_train))
+                    except ValueError as e: log.error(e, exc_info=True)
     results = pd.read_pickle(cm.output_log_evaluate)
     return results
 

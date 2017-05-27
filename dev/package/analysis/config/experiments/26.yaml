@@ -131,13 +131,8 @@ top_pipelines_select: 10
 
 evaluate_pipeline_flag: True
 
-
-
 ##Custom
-time_slices_evaluate: #3
-  - !!python/tuple [!!python/object/new:datetime.date [2012, 9, 9], !!python/object/new:datetime.date [2016, 9, 9]]
-  - !!python/tuple [!!python/object/new:datetime.date [2013, 9, 9], !!python/object/new:datetime.date [2016, 9, 9]]
-  - !!python/tuple [!!python/object/new:datetime.date [2014, 9, 9], !!python/object/new:datetime.date [2016, 9, 9]]
+time_slices_evaluate: 3
 pipeline_criteria_evaluate: "PRC"
 model_criteria_evaluate: "F1"
 load_prev_files_evaluate: True
@@ -147,8 +142,8 @@ output_log_evaluate: !join [*output_evaluate, "log_results.pkl"]
 
 ##Specific
 no_extractor: True
-feature_stages: [!!null ] #["Pre-Seed", "Seed", "Series A", "Series B", "Series C", "Series D+"] #
-label_types: ["Extra_Stage"] #["Acquisition", "IPO", "Exit", "Extra_Round", "Extra_Stage"] #
+feature_stages: ["Pre-Seed", "Seed", "Series A", "Series B", "Series C", "Series D+"] #[!!null ] #
+label_types:  ["Extra_Stage"] #["Extra_Stage", "Extra_Round","Exit", "Acquisition", "IPO"] #
 max_observations_evaluate:  !!python/object/apply:numpy.logspace [-2, 0, 5] #[!!null ] #
 test_path: "analysis/input/test.db"
 test_date: !!python/object/new:datetime.date [2017, 4, 4]

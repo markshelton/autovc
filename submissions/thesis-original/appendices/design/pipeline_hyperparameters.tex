@@ -1,70 +1,32 @@
 \chapter{Pipeline Hyper-parameters}
 \label{appendix:pipeline_hyperparameters}
 
-%TODO
-\begin{comment}
+\newcommand{\one}[1]{\hspace{-2em}#1}
+\newcommand{\two}[1]{\hspace{-1em}#1}
 
-Pipeline Creation
-- CV Folds: 3
-- Search Iterations: 30
-- Pre-Processing:
-    - Imputer Strategy: [Mean, Median, Most Frequent]
-    - Transformer Function: [None, Log1P, SQRT]
-    - Scaler Function: [None, StandardScaler, RobustScaler, MinMaxScaler]
-    - Extractor: [None, PCA [1, 100]]
-- Classifiers:
-    - GaussianNB (Naive Bayes)
-    - KNeighborsClassifier (K-Nearest Neighbours):
-        - Neighbors: [5,20]
-        - Weights: [Uniform, Distance]
-    - LogisticRegression (Logistic Regression)
-        - C: [1e-3, 1e6]
-        - Penalty: [L1, L2]
-        - Classes: Balanced
-    - DecisionTreeClassifier (Decision Tree):
-        - Max Depth: [5, 20]
-        - Classes: Balanced
-        - Criterion: [Gini, Entropy]
-    - RandomForestClassifier (Random Forest):
-        - Estimators: [10,100]
-        - Max Depth: [5,20]
-        - Criterion: [Gini, Entropy]
-        - Classes: Balanced
-    - SVC (Support Vector Machine):
-        - Kernel: [Linear, Poly, RBF]
-        - C: [1e-5, 1e6]
-        - Probability: True
-        - Classes: Balanced
-    - MLPClassifier (Artificial Neural Networks):
-        - Activation: [Identity, Logistic, Tanh, Relu]
-        - Alpha: [1e-3, 1e6]
-
-Pipeline Selection:
-- Finalist Pipelines: 10
-- Finalist Criterion: Area under the Precision-Recall Curve
-- Best Criterion: Area under the Precision-Recall Curve
-- Training Set Dates (Feature --> Outcome):
-    - (2012, 11, 04) --> (2014, 11, 04)
-    - (2013, 01, 19) --> (2015, 01, 17)
-    - (2013, 04, 15) --> (2015, 04, 15)
-    - (2013, 06, 07) --> (2015, 06, 06)
-    - (2014, 01, 22) --> (2016, 01, 21)
-    - (2014, 03, 08) --> (2016, 03, 06)
-    - (2014, 07, 20) --> (2016, 07, 18)
-- CV Folds: 3
-
-Model Evaluation:
-- Training Set Dates (Feature --> Outcome):
-    - (2012, 09, 09) --> (2016, 09, 09)
-    - (2013, 09, 09) --> (2016, 09, 09)
-    - (2014, 09, 09) --> (2016, 09, 09)
-- Testing Set Dates (Feature --> Outcome):
-    - (2013, 04, 04) --> (2017, 04, 04)
-    - (2014, 04, 04) --> (2017, 04, 04)
-    - (2015, 04, 04) --> (2017, 04, 04)
-- Criterion: F1 Score (positive class only)
-- Extractor: [None, PCA]
-- Feature Stages: [None, [Pre-Seed, Seed, Series A, Series B, Series C, Series D+]]
-- Label Types: [Extra Stage, Extra Round, Exit, Acquisition, IPO]
-
-\end{comment}
+\begin{table}[!htb]
+    \scriptsize
+    \centering
+    \scalebox{1}{
+\begin{tabular}{>{\hspace{2em}}p{3cm}p{10cm}} \toprule
+\one{Imputer} & [Mean, Median, Most Frequent] \\ \midrule
+\one{Transformer} & [None, numpy.log1p, numpy.sqrt] \\ \midrule
+\multicolumn{2}{l}{Scaler} \\ \midrule
+\one{None} &  \\
+\one{StandardScaler} & {With Mean: True, With STD: True} \\
+\one{RobustScaler} & {With Centering: True, With Scaling: True, Quantile Range: (25, 75)} \\
+\one{MinMaxScaler} & {Feature Range: (0, 1)} \\ \midrule
+\one{Extractor} & {Function: PCA, Components: In Range (1, 100), Whiten: False, SVD Solver: Auto} \\ \midrule
+\multicolumn{2}{l}{Classifier} \\ \midrule
+\one{Naive Bayes} & \\
+\one{K-Nearest Neighbours} & {Neighbors: In Range (5,20), Weights: [Uniform, Distance], Algorithm: Auto, Leaf Size: 30, Metric: Minkowski, Distance: Euclidean} \\
+\one{Logistic Regression} & {C: In Range (1e-3, 1e6), Penalty: [L1, L2], Solver: Liblinear, Fit Intercept: True, Intercept Scaling: True, Class Weight: Balanced, Tolerance: 1e-4} \\
+\one{DecisionTree} & {Max Depth: In Range (5, 20), Criterion: [Gini, Entropy], Class Weight: Balanced, Splitter: Best, Max Features: None, Min Samples Split: 2, Min Samples Leaf: 1, Min Impurity Split: 1e-7} \\
+\one{RandomForest} & {Estimators: In Range (10, 100), Max Depth: In Range (5, 20), Criterion: [Gini, Entropy], Class Weight: Balanced, Max Features: SQRT(Features), Min Samples Split: 2,Min Samples Leaf: 1,Min Impurity Split: 1e-7, Bootstrap: True} \\
+\one{Support Vector Machine} & {C: [1e-5, 1e6], Probability: True, Class Weight: Balanced, Tolerance: 1e-3, Kernel: {Linear, Poly: {Degree: 3, Gamma: 1/Features, Coef0: 0}, RBF: {Gamma: 1/Features}, Sigmoid: {Gamma: 1/Features, Coef0: 0}}} \\
+\one{Artificial Neural Network} & {Hidden Layers: 1, Hidden Layer Size: 100, Activation Function: [Identity, Logistic, Tanh, Relu], Alpha: [1e-3, 1e6], Solver: Adam {Beta1: 0.9, Beta2: 0.999, Epsilon: 1e-8}, Batch Size: min(200, Samples), Max Iterations: 200, Tolerance: 1e-4, Initial Learning Rate: 1e-3} \\
+\bottomrule \end{tabular}
+}
+    \caption[Pipeline hyper-parameter search space]{Pipeline hyper-parameter search space.}
+    \label{tab:design:pipeline_hyperparameters}
+\end{table}

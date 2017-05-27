@@ -105,10 +105,10 @@ def auto_label(ax, fmt='{:,.0f}', adjust=0, size=10):
             ha="center", fontsize=size)
     ax.yaxis.set_ticks([])
 
-def add_vertical_line(ax, value, label, color, linestyle="dashed"):
+def add_vertical_line(ax, value, label, color, linestyle="dashed", adj=0):
     ax.axvline(value, linestyle=linestyle, color=color)
     x_bounds = ax.get_xlim()
-    xy_pos = (((value-x_bounds[0])/(x_bounds[1]-x_bounds[0])),1.01)
+    xy_pos = (((value-x_bounds[0])/(x_bounds[1]-x_bounds[0]) - adj),1.01)
     ax.annotate(s=label, xy =xy_pos, xycoords='axes fraction', verticalalignment='right', horizontalalignment='right bottom', color=color)
 
 def add_horizontal_line(ax, value, label, color, linestyle="dashed"):
@@ -123,7 +123,8 @@ def add_line(ax, value, label, color, linestyle="dashed", orient="v"):
     else: raise ValueError("Valid Orientation not provided. Please provide 'v' or 'h'.")
 
 def format_axis_ticks(f, axis="x", fmt="{:,}"):
-    if type(f.axes[0]) is list: axes = f.axes[0]
+    if type(f.axes) is np.ndarray: axes = f.axes
+    elif type(f.axes[0]) is np.ndarray: axes = f.axes[0]
     else: axes = [f.axes[0]]
     for ax in axes:
         if axis == "x": ax.xaxis.set_major_formatter(tkr.FuncFormatter(lambda x, p: fmt.format(int(x))))
@@ -138,3 +139,13 @@ def add_auc_to_legend(auc, ax, title):
     auc = dict((str(k),v)for k,v in auc.items())
     labels = ["{} ({:,.3f})".format(label, auc[label]) for i, label in enumerate(labels)]
     plt.legend(loc="best", handles=handles, labels=labels, title=title)
+
+def add_boxplot_labels(ax, labels, color="black", size=12):
+    y_bounds = ax.get_ylim()
+    for value, label in enumerate(labels):
+        xy_pos = (1.01,((value-y_bounds[0] + 0.5)/(y_bounds[1]-y_bounds[0])))
+        ax.annotate(s=label, xy =xy_pos, size=size, xycoords='axes fraction', verticalalignment='right', horizontalalignment='right bottom', color=color)
+
+def get_mode(x):
+    try: return stats.mode(x.dropna())[0][0]
+    except: return np.nan

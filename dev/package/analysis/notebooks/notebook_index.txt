@@ -1,55 +1,58 @@
-Descriptives
-    Company counts by developmental stage
-    Company counts by industry sector
-    Company age distribution by developmental stage
-    Summary statistics by developmental stage
-
-Distributions
-    Distribution of missing values by company
-    Distribution of missing values by feature
-    Distribution of skew by feature
-    Distribution of kurtosis by feature
-    Distribution of interquartile ranges
-    Distribution of intercorrelations
-    Distribution of central tendency
-
-AU-PRC Scores
-    AU-PRC by imputation strategy
-    AU-PRC by transformation function
-    AU-PRC by scaling function
-    AU-PRC by PCA techniques
-    AU-PRC by classification algorithms
-
-Learning Curves
-    Learning curves by forecast window
-    Learning curves by developmental stage
-    Learning curves by target outcome
-    Learning curves by classification algorithms
-
-F1 Scores
-    F1 Scores by slice date
-    F1 Scores by forecast window
-    F1 Scores by developmental stage
-    F1 Scores by target outcome
-    F1 Scores by developmental stage and forecast window
-    F1 Scores by developmental stage and target outcome
-    F1 Scores by forecast window and target outcome
-    Example company profiles and their predictions
-
-Feature Weights
-    Grouped feature weights by slice date
-    Grouped feature weights by forecast window
-    Grouped feature weights by developmental stage
-    Grouped feature weights by target outcome
-
-Pipeline Evaluation
-    PCA scree plot
-    Inter-correlations of factors from framework
-    Overview of classification algorithm performance
-    Pipeline performance by slice date
-    Overview of finalist pipeline performance
+Descriptives - DONE
+    Company counts by developmental stage - DONE
+    Company counts by industry sector - DONE
+    Company age distribution by developmental stage - DONE
+    Statistics by developmental stage - DONE
 
 Baselines
-    Investment success by forecast window
-    Investment success by developmental stage
-    Dataset counts over time
+    Investment success by forecast window - DONE
+    Investment success by developmental stage - DONE
+    Dataset counts by stage over time - DONE
+    Dataset slice compared to original database @ 2013 - DONE
+
+Distributions
+    Distribution of available features by company - DONE
+    Distribution of observations by feature - DONE
+    Distribution of skewness by feature - DONE
+    Distribution of kurtosis by feature - DONE
+    Distribution of interquartile ranges - DONE
+    Distribution of intercorrelations - DONE
+    Distribution of central tendency - DONE
+    Distribution of funding raised transformed - DONE
+    Distribution of eigenvalues from PCA - DONE
+    Inter-correlations of factors from framework - DONE
+
+Performance (Initial)
+    AU-PRC by imputation strategy - DONE
+    AU-PRC by transformation function - DONE
+    AU-PRC by scaling function - DONE
+    AU-PRC by PCA techniques - DONE
+    AU-PRC by classification algorithms - DONE
+    Statistics by classification algorithm - DONE
+    Pipeline performance by slice date - DONE
+    Overview of finalist pipeline performance - DONE
+
+Performance (Final)
+    Performance by slice date @ 2 Years - DONE
+    Performance by forecast window - DONE
+    Performance by developmental stage @ 4 Years - DONE
+    Performance by target outcome - DONE
+    Classification report by slice date - DONE
+    Classification report by forecast window - DONE
+    Classification report by developmental stage @ 4 Years - DONE
+    Classification report by target outcome @ 4 Years - DONE
+    Example company profiles and their predictions - DONE
+
+Feature Weights
+    Feature weights by slice date @ 2 Years - DONE
+    Feature weights by forecast window - DONE
+    Feature weights by developmental stage - DONE
+    Feature weights by target outcome - DONE
+
+Learning Curves
+    Learning curves by forecast window - DONE
+    Learning curves by target outcome - DONE
+    Learning curves by developmental stage @ Individual - DONE
+    Learning curves by classifier - DONE
+
+

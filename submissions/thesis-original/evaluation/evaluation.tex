@@ -18,12 +18,12 @@ We believe it is possible to produce a \gls{vc} investment screening system that
 
 \section{Experimental Design}
 
-In the previous chapter, we produced a classification pipeline optimised with respect to its robustness over time. In our experimentation, we evaluated models produced by this pipeline against a held-out test dataset while varying a number of other factors. This evaluation process is depicted in Figure~\ref{fig:evaluation:pipeline_evaluation}. The pipeline is fit to a training dataset. The model is applied to a test feature vector to produce predictions. We score these predictions against truth values derived from the held-out test database (collected in April 2017). This process is performed multiple times to evaluate the three primary criteria derived from our literature review: efficiency, robustness and predictive power. The configuration of our system we used during our experiments is detailed in Appendix\ref{appendix:base_config}.
+In the previous chapter, we produced a classification pipeline optimised with respect to its robustness over time. In our experimentation, we evaluated models produced by this pipeline against a held-out test dataset while varying a number of other factors. This evaluation process is depicted in Figure~\ref{fig:evaluation:pipeline_evaluation}. The pipeline is fit to a training dataset. The model is applied to a test feature vector to produce predictions. We score these predictions against truth values derived from the held-out test database (collected in April 2017). This process is performed multiple times to evaluate the three primary criteria derived from our literature review: efficiency, robustness and predictive power. The configuration of the system during our experiments is detailed in Appendix~\ref{appendix:experimental_config}.
 
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=\textwidth]{../figures/evaluation/flowchart_evaluation}
-    \caption[Pipeline evaluation flowchart]{Pipeline evaluation overview.}
+    \caption[Pipeline evaluation flowchart]{Pipeline evaluation overview. Legend: dark blue square = input, orange circle = system component, yellow circle = process, light blue rounded square = intermediate, red square = output, green hexagon: iterative process / search space.}
     \label{fig:evaluation:pipeline_evaluation}
 \end{figure}
 
@@ -70,6 +70,15 @@ Figure~\ref{fig:evaluation:learning_window} shows the learning curves for foreca
     \includegraphics[width=\textwidth]{../figures/evaluation/learning_curves_window}
     \caption[Learning curves by forecast window]{Learning curves by forecast window.}
     \label{fig:evaluation:learning_window}
+\end{figure}
+
+%TODO - Learning curve by stage
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/evaluation/learning_curves_stage}
+    \caption[Learning curves by developmental stage]{Learning curves by developmental stage.}
+    \label{fig:evaluation:learning_stage}
 \end{figure}
 
 The plots in Figure~\ref{fig:evaluation:learning_window} are evaluated against our base target outcome, which we term ``Extra Stage'' (i.e. whether a company raises an additional funding round, is aquired or has an \gls{ipo}). When our learning curves are split by components of this target outcome, we see that the efficiency of our system varies, as shown in Figure~\ref{fig:evaluation:learning_outcome_window}. We observe that predicting whether a company raises an extra round is the least data-intensive outcome, as it converges even over a forecast window of 2 years. In comparison, predicting company exits does not converge, even over a forecast window of 4 years. Our model has most difficulty predicting \gls{ipo} exits, which are rare events in our dataset.

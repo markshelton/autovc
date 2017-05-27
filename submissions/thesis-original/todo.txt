@@ -3,49 +3,43 @@ Writing:
 
 Abstract - DONE
 Introduction - DONE
-Literature Review - DONE
-Design - DONE
+Literature Review - WIP
+    - Features > Rewrite
+    - + Cashflow / financial data and how it's unlikely to be available
+Design - WIP
+    - Features > Rewrite
 Evaluation - DONE
-Discussion - DONE
+Discussion -
+    - Scope - US companies
+    - Trade-off in usefulness of predictions
 Conclusions - DONE
 
-Appendix A (Feature Selection) - WIP
+Appendix A (Data Sources) - DONE
+Appendix B (Classification Algorithms) - DONE
+Appendix C (Feature Selection) - REVISE
     - Events - added
-Appendix B (Database Schema) - DONE
-Appendix C (Pipeline Hyperparameters) - TODO
-Appendix D (Experimental Configuration) - TODO
-Appendix E (Classification Reports) - DONE
-Appendix F (Case Studies) - DONE
+Appendix D (Database Schema) - DONE
+Appendix E (Pipeline Hyperparameters) - DONE
+Appendix F (Experimental Configuration) - DONE
+Appendix G (Classification Reports) - DONE
+Appendix H (Case Studies) - DONE
 
 Other:
 
-Table of Contents
-    - Appendices > Chapter-level
-    - Appendix X > Section-level
 Figures & Tables
-    - Re-run all with patent data include (ouch!)
     - Add legends where necessary
     - Add decent captions
 References
     - Add relevant citations
     - Check bibliography style
 
-
-Abstract - 228
-Body - 18,503
-    Introduction - 1,224
-    Literature Review - 5,682
-    Design - 3,616
-    Evaluation - 2,485
-    Discussion - 4,435
-    Conclusions - 1,061
-Appendices - 1,959
-Total - 20,690
-
-Appendix A (Feature Selection) - WIP
-    - Events - added
-Appendix B (Database Schema) - DONE
-Appendix C (Pipeline Hyperparameters) - TODO
-Appendix D (Experimental Configuration) - TODO
-Appendix E (Classification Reports) - DONE
-Appendix F (Case Studies) - DONE
+Abstract - 227
+Body - 16,524
+    Introduction - 791
+    Literature Review - 3,739
+    Design - 3,858
+    Evaluation - 2,452
+    Discussion - 4,462
+    Conclusions - 1,055
+Appendices -
+Total -

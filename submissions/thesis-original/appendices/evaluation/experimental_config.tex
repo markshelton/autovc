@@ -1,0 +1,41 @@
+\chapter{Experimental Configuration}
+\label{appendix:experimental_config}
+
+\newcommand{\one}[1]{\hspace{-2em}#1}
+\newcommand{\two}[1]{\hspace{-1em}#1}
+
+\begin{table}[!htb]
+    \scriptsize
+    \centering
+    \scalebox{1}{
+\begin{tabular}{>{\hspace{2em}}p{4cm}p{9cm}} \toprule
+\multicolumn{2}{l}{Base Configuration} \\ \midrule
+\one{Dataset Slices} & 9 (3 x Forecast Window) \\
+\one{Forecast Window} & 3 [2, 3, 4] \\
+\one{Classification Pipeline} & \\
+\two{Imputer} & Most Frequent \\
+\two{Transformer} & SQRT \\
+\two{Scaler} & MinMaxScaler \\
+\two{Extractor} & None, PCA \\
+\two{Classifier} & {Algorithm: Random Forest, Classes: Balanced, Criterion: Entropy, Bootstrap: True, Estimators: 34, Max Depth: 8, Max Features: SQRT(Features)} \\ \midrule
+\multicolumn{2}{l}{Experiment 1: Time Frame} \\ \midrule
+\one{Developmental Stage} & All (Combined) \\
+\one{Target Outcome} & Extra Stage \\
+\one{Training Set Size} & 100\% \\ \midrule
+\multicolumn{2}{l}{Experiment 2: Developmental Stage} \\ \midrule
+\one{Developmental Stage} & All (Combined), All (Individual) \\
+\one{Target Outcome} & Extra Stage \\
+\one{Training Set Size} & 100\% \\ \midrule
+\multicolumn{2}{l}{Experiment 3: Target Outcome} \\ \midrule
+\one{Developmental Stage} & All (Combined) \\
+\one{Target Outcome} & Extra Stage, Extra Round, Exit, Acquisition, IPO \\
+\one{Training Set Size} & 100\% \\ \midrule
+\multicolumn{2}{l}{Experiment 4: Training Set Size} \\ \midrule
+\one{Developmental Stage} & All (Combined) \\
+\one{Target Outcome} & Extra Stage \\
+\one{Training Set Size} & 1.0\%, 3.2\%, 10.0\%, 31.7\%, 100\% \\
+\bottomrule \end{tabular}
+}
+    \caption[Experimental configuration]{Experimental configuration.}
+    \label{tab:evaluation:experimental_config}
+\end{table}
