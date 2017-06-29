@@ -1,45 +1,41 @@
+DONE ---------------------------------------------------
 
-Writing:
+FOR REVIEW ---------------------------------------------
 
-Abstract - DONE
-Introduction - DONE
-Literature Review - WIP
-    - Features > Rewrite
-    - + Cashflow / financial data and how it's unlikely to be available
-Design - WIP
-    - Features > Rewrite
-Evaluation - DONE
-Discussion -
-    - Scope - US companies
-    - Trade-off in usefulness of predictions
-Conclusions - DONE
+Abstract - 208
+Acknowledgements
+Table of Contents
+List of Tables
+List of Figures
 
-Appendix A (Data Sources) - DONE
-Appendix B (Classification Algorithms) - DONE
-Appendix C (Feature Selection) - REVISE
-    - Events - added
-Appendix D (Database Schema) - DONE
-Appendix E (Pipeline Hyperparameters) - DONE
-Appendix F (Experimental Configuration) - DONE
-Appendix G (Classification Reports) - DONE
-Appendix H (Case Studies) - DONE
+Introduction - 752
+Literature Review - 3,925
+Design - 3,336
+Evaluation - 2,775
+Discussion - 4,622
+Conclusions - 803
 
-Other:
+A Data Sources - 821
+B Classification Algorithms - 1317
+C Database Schema - 35
+D Pipeline Hyperparameters - 45
+E Experimental Configuration - 61
+F Classification Reports - 10
+G Case Studies - 407
 
-Figures & Tables
-    - Add legends where necessary
-    - Add decent captions
-References
-    - Add relevant citations
-    - Check bibliography style
 
-Abstract - 227
-Body - 16,524
-    Introduction - 791
-    Literature Review - 3,739
-    Design - 3,858
-    Evaluation - 2,452
-    Discussion - 4,462
-    Conclusions - 1,055
+TODO ---------------------------------------------------
+
+
+COUNT ---------------------------------------------------
+
+Abstract - 208
+Body - 15,824 > 15,000
+    Introduction - 752
+    Literature Review - 3,925 > 3,500
+    Design - 3,336
+    Evaluation - 2,775 > 2,500
+    Discussion - 4,234 > 4,000
+    Conclusions - 803
 Appendices -
 Total -

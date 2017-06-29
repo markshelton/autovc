@@ -1,6 +1,8 @@
 \chapter{Experimental Configuration}
 \label{appendix:experimental_config}
 
+This appendix outlines the configuration of our system for the experiments outlined in Chapter~\ref{chap:evaluation}. The base configuration is tested across nine database slices: three variations for each of three forecast windows. For the purposes of our experimentation, our optimised pipeline is held stable but in practice it is likely that the pipeline optimisation would be re-run for different configurations.
+
 \newcommand{\one}[1]{\hspace{-2em}#1}
 \newcommand{\two}[1]{\hspace{-1em}#1}
 
@@ -10,7 +12,7 @@
     \scalebox{1}{
 \begin{tabular}{>{\hspace{2em}}p{4cm}p{9cm}} \toprule
 \multicolumn{2}{l}{Base Configuration} \\ \midrule
-\one{Dataset Slices} & 9 (3 x Forecast Window) \\
+\one{Database Slices} & 9 (3 x Forecast Window) \\
 \one{Forecast Window} & 3 [2, 3, 4] \\
 \one{Classification Pipeline} & \\
 \two{Imputer} & Most Frequent \\

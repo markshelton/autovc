@@ -1,0 +1,35 @@
+baum2004
+graham2013
+gompers1995
+ahlers2015
+gimmon2010
+hoenen2014
+yu2015
+an2015
+werth2013
+croce2016
+beckwith2016
+cheng2016
+yuan2016 - USE MORE
+stone2014
+fried2006
+bhat2011
+patil2015
+shan2014
+conti2013 - USE MORE
+hsu2008
+caruana2008
+mitchell1997
+kotsiantis2007
+strobl2009
+kuhn2013
+chok2010
+pedregosa2011
+davis2006
+fried1994 - USE MORE
+ahn2008
+friedman2001
+caruana2006
+liang2016
+breiman2001
+shin2005
